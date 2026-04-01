@@ -294,7 +294,7 @@ export default function App() {
 
         {/* Filters */}
         <div className="absolute bottom-0 translate-y-1/2 left-0 right-0 z-30 px-4 md:px-[32px] py-[0px]">
-          <div className="max-w-[1568px] mx-auto">
+          <div className="max-w-[1718px] mx-auto">
             <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] w-full p-3 md:p-[24px]">
               <div
                 className={`grid w-full grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,1fr))] gap-3 md:gap-[16px] xl:gap-[24px] ${
