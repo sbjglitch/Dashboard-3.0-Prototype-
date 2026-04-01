@@ -25,7 +25,7 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div 
-      className="bg-white border border-[#e8eff4] rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:shadow-md transition-shadow h-[156px] flex flex-col p-[16px] justify-between" 
+      className="bg-white border border-[#e8eff4] rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:shadow-md transition-shadow min-h-[140px] sm:h-[156px] flex flex-col p-[16px] justify-between" 
       onClick={onClick}
     >
       <div className="flex items-center justify-between w-full">

@@ -30,7 +30,7 @@ export function FilterDropdown({ label, value, options, onSelect, disabled, mute
   );
 
   return (
-    <div className="relative w-full h-[56px]" ref={dropdownRef}>
+    <div className="relative w-full min-w-0 h-[56px]" ref={dropdownRef}>
       {/* Trigger */}
       <div 
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -40,7 +40,7 @@ export function FilterDropdown({ label, value, options, onSelect, disabled, mute
           className={`absolute border border-[#e8eff4] border-solid inset-0 pointer-events-none rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] bg-white ${!disabled && 'group-hover:border-[#09327b]'} ${isOpen ? 'border-[#09327b]' : ''} transition-colors`} 
         />
         
-        <div className="flex items-center justify-between relative w-full h-full px-[18px]">
+        <div className="flex min-w-0 items-center justify-between relative w-full h-full px-[18px]">
           <p className={`font-sans font-medium leading-[24px] relative text-[#232f50] text-[16px] whitespace-nowrap overflow-hidden text-ellipsis mr-2 ${muted ? 'opacity-50' : ''}`}>
             {value}
           </p>

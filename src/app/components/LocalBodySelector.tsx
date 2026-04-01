@@ -106,7 +106,7 @@ export function LocalBodySelector({ onClose, onApply }: { onClose?: () => void, 
   };
 
   return (
-    <div className="bg-white relative rounded-[12px] w-[448px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]" ref={dropdownRef}>
+    <div className="bg-white relative rounded-[12px] w-[calc(100vw-2rem)] sm:w-[448px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]" ref={dropdownRef}>
       <div className="flex flex-col gap-[16px] p-[16px]">
         {/* Header */}
         <div className="flex items-center justify-between w-full h-[32px]">

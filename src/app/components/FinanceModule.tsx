@@ -13,7 +13,7 @@ interface FinanceCardProps {
 
 function FinanceCard({ label, value, rate, rateLabel, color, icon, diagonalTranslate = "left-[calc(50%+68.64px)] top-[-18.34px]" }: FinanceCardProps) {
   return (
-    <div className={`flex-[1_0_0] min-h-[160px] min-w-[300px] relative rounded-[12px] overflow-hidden ${color} shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]`}>
+    <div className={`flex-[1_0_0] min-h-[160px] min-w-0 sm:min-w-[300px] relative rounded-[12px] overflow-hidden ${color} shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]`}>
       <div className="-translate-x-1/2 absolute flex h-[476.999px] items-center justify-center left-[calc(50%+68.64px)] top-[-18.34px] w-[554.721px] pointer-events-none">
         <div className="flex-none rotate-[-32.81deg]">
           <div className="bg-white h-[243.037px] opacity-5 w-[503.326px]" />

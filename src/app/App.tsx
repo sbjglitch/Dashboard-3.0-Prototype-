@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { DetailsModal } from "./components/DetailsModal";
 import { LocalBodySelector } from "./components/LocalBodySelector";
 import { TimePeriodSelector } from "./components/TimePeriodSelector";
@@ -7,6 +7,7 @@ import { GrievanceModule } from "./components/GrievanceModule";
 import { FinanceModule } from "./components/FinanceModule";
 import { BuildingFinanceOverview } from "./components/BuildingFinanceOverview";
 import { BuildingPermissionGraphs } from "./components/BuildingPermissionGraphs";
+import { PropertyTaxGraphs } from "./components/PropertyTaxGraphs";
 import { StatCard } from "./components/StatCard";
 import { MODULE_DATA } from "./data/serviceData";
 import imgGovernmentOfKeralaLogo from "../assets/828f18076f30eadbc8ffd05a9253419bb04f21ef.png";
@@ -19,11 +20,122 @@ import { ExportButton } from "./components/ExportButton";
 
 function FilterSelect({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-[2px] items-start justify-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors w-full">
-      <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px]">{label}</p>
-      <div className="flex items-center justify-between w-full gap-2">
-        <p className="font-sans font-bold leading-[24px] text-[#232f50] text-[16px] truncate">{value}</p>
-        <ChevronDown className="w-4 h-4 text-[#5c6e93] shrink-0" />
+    <div className="relative w-full min-w-0 h-[56px] group cursor-pointer">
+      <div className="absolute border border-[#e8eff4] border-solid inset-0 pointer-events-none rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] bg-white group-hover:border-[#09327b] transition-colors" />
+      <div className="flex min-w-0 items-center justify-between relative w-full h-full px-[18px]">
+        <p className="font-sans font-medium leading-[24px] relative text-[#232f50] text-[16px] whitespace-nowrap overflow-hidden text-ellipsis mr-2">
+          {value}
+        </p>
+        <div className="shrink-0">
+          <ChevronDown className="w-4 h-4 text-[#D5D7DA]" />
+        </div>
+      </div>
+      <div className="absolute bg-white flex font-sans font-normal gap-[4px] h-[19px] items-center leading-[normal] left-[18px] px-[5px] text-[#153171] text-[14px] top-0 -translate-y-1/2 whitespace-nowrap z-10">
+        <p className="relative shrink-0">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+const PT_DIGITAL_HEALTH_KPI_MAP: Record<string, { label: string; value: number; color: string }[]> = {
+  "Tax Payments": [
+    { label: "Own Profile",    value: 18450, color: "bg-[#1ebe72]" },
+    { label: "Quick Pay",      value: 14200, color: "bg-[#009fd2]" },
+    { label: "Others Profile", value: 8750,  color: "bg-[#7b61ff]" },
+    { label: "Front Office",   value: 11300, color: "bg-[#df3a7a]" },
+    { label: "E-POS Machine",  value: 6200,  color: "bg-[#f59e0b]" },
+  ],
+  "Services": [
+    { label: "Citizen Profile", value: 32400, color: "bg-[#1ebe72]" },
+    { label: "Office Counter",  value: 18900, color: "bg-[#009fd2]" },
+  ],
+  "Link Building": [
+    { label: "Buildings Linked",   value: 42600, color: "bg-[#1ebe72]" },
+    { label: "Buildings Unlinked", value: 18700, color: "bg-[#df3a7a]" },
+  ],
+  "Building Certificate Download": [
+    { label: "Citizen Profile", value: 21300, color: "bg-[#1ebe72]" },
+    { label: "Others Profile",  value: 9800,  color: "bg-[#7b61ff]" },
+    { label: "Office Counter",  value: 14500, color: "bg-[#009fd2]" },
+  ],
+};
+
+const PT_DIGITAL_HEALTH_SUBMODULES = Object.keys(PT_DIGITAL_HEALTH_KPI_MAP);
+
+function PtDigitalHealthCard({ label, value, color, total }: { label: string; value: number; color: string; total: number }) {
+  const pct = ((value / total) * 100).toFixed(1) + "%";
+  return (
+    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-[8px]">
+          <div className={`${color} w-[10px] h-[10px] rounded-sm shrink-0`} />
+          <span className="font-sans font-semibold text-[14px] text-[#5c6e93]">{label}</span>
+        </div>
+        <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">{pct}</span>
+      </div>
+      <span className="font-sans font-bold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
+    </div>
+  );
+}
+
+interface PropertyTaxKpiCardProps {
+  title: string;
+  value: string;
+  arrearDemand: string;
+  currentDemand: string;
+  bgClass: string;
+  onClick?: () => void;
+}
+
+function PropertyTaxKpiCard({
+  title,
+  value,
+  arrearDemand,
+  currentDemand,
+  bgClass,
+  onClick,
+}: PropertyTaxKpiCardProps) {
+  return (
+    <div
+      className="bg-white border border-[#e1e1e1] rounded-[12px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] min-h-[180px] sm:min-h-[207px] flex flex-col cursor-pointer"
+      onClick={() => onClick?.()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      <div className={`${bgClass} px-[16px] py-[14px] relative flex-1 min-h-0`}>
+        <div className="pointer-events-none absolute top-[-20px] left-[54%] w-[505px] h-[243px] rotate-[-32.81deg] bg-white opacity-5" />
+        <div className="relative z-10 flex flex-col gap-[14px]">
+          <div className="flex items-center gap-[8px]">
+            <div className="w-[32px] h-[32px] rounded-[62px] bg-[rgba(255,255,255,0.32)] flex items-center justify-center">
+              <div className="w-[8px] h-[8px] bg-white rounded-full" />
+            </div>
+            <span className="font-sans font-bold text-[16px] text-white">{title}</span>
+          </div>
+          <div className="flex items-center gap-[8px] text-white py-[2px]">
+            <span className="font-sans font-bold text-[20px] sm:text-[24px] leading-[normal]">₹</span>
+            <span className="font-sans font-bold text-[26px] sm:text-[34px] leading-[normal] tracking-[1.2px]">{value}</span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch gap-[8px]">
+            <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
+              <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Arrear Demand</span>
+              <span className="font-sans font-bold text-[13px] sm:text-[14px] text-white">₹ {arrearDemand}</span>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
+              <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Current Demand</span>
+              <span className="font-sans font-bold text-[13px] sm:text-[14px] text-white">₹ {currentDemand}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="w-full h-[31px] shrink-0 text-[14px] font-sans font-semibold text-[#5c6e93] hover:bg-[#f6f9fb] transition-colors border-t border-[#e8eff4] flex items-center justify-center gap-[8px]">
+        View More Details
+        <span className="text-[14px] leading-none">›</span>
       </div>
     </div>
   );
@@ -40,11 +152,27 @@ export default function App() {
   const [selectedModule, setSelectedModule] = useState<string>("All Module");
   const [selectedSubModule, setSelectedSubModule] = useState<string>("Overview");
   const [selectedService, setSelectedService] = useState<string>("Summary Dashboard");
-  const [activeMainTab, setActiveMainTab] = useState<"fileStatus" | "finance">("fileStatus");
+  const [selectedBuildingType, setSelectedBuildingType] = useState<string>("Select");
+  const [activeMainTab, setActiveMainTab] = useState<"fileStatus" | "finance" | "digitalHealth">("fileStatus");
   const [hoveredChartItem, setHoveredChartItem] = useState<any>(null);
   const [chartMousePos, setChartMousePos] = useState({ x: 0, y: 0 });
 
   const moduleOptions = Object.keys(MODULE_DATA);
+  const buildingTypeOptions = ["All", "Residential", "Commercial"];
+  const normalizedSelectedModule = selectedModule.toLowerCase().replace(/[^a-z]/g, "");
+  const normalizedSelectedSubModule = selectedSubModule.toLowerCase().replace(/[^a-z]/g, "");
+  const normalizedSelectedService = selectedService.toLowerCase().replace(/[^a-z]/g, "");
+  const isPropertyTaxModule =
+    normalizedSelectedModule.includes("propertytax") ||
+    normalizedSelectedModule.includes("property") ||
+    normalizedSelectedSubModule.includes("tax") ||
+    normalizedSelectedService.includes("propertytax");
+
+  const showDigitalHealthTab =
+    isPropertyTaxModule && PT_DIGITAL_HEALTH_SUBMODULES.includes(selectedSubModule);
+
+  const digitalHealthKpis = PT_DIGITAL_HEALTH_KPI_MAP[selectedSubModule] ?? [];
+  const digitalHealthTotal = digitalHealthKpis.reduce((a, b) => a + b.value, 0);
   
   const subModuleOptions = useMemo(() => {
     if (selectedModule === "Select") return [];
@@ -58,6 +186,7 @@ export default function App() {
 
   const handleModuleChange = (module: string) => {
     setSelectedModule(module);
+    setSelectedBuildingType("Select");
     if (module === "All Module") {
       setSelectedSubModule("Overview");
       setSelectedService("Summary Dashboard");
@@ -76,6 +205,9 @@ export default function App() {
   const handleSubModuleChange = (subModule: string) => {
     setSelectedSubModule(subModule);
     setSelectedService("Select");
+    if (!PT_DIGITAL_HEALTH_SUBMODULES.includes(subModule)) {
+      setActiveMainTab((prev) => (prev === "digitalHealth" ? "fileStatus" : prev));
+    }
   };
 
   const displayModule = useMemo(() => {
@@ -91,10 +223,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#f2f6ff]">
       {/* Header */}
-      <header className="bg-white h-[80px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] sticky top-0 z-40">
-        <div className="flex items-center justify-between px-[32px] h-full">
-          <div className="flex items-center gap-6">
-            <div className="h-[36.871px] w-[84.634px]">
+      <header className="bg-white h-auto md:h-[80px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] sticky top-0 z-40">
+        <div className="flex flex-wrap items-center justify-between px-4 md:px-[32px] py-3 md:py-0 h-full gap-3 md:gap-0">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="h-[28px] w-[64px] md:h-[36.871px] md:w-[84.634px]">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 84.6339 36.871">
                 <g id="Logo">
                   <path clipRule="evenodd" d={svgPaths.p13e027c0} fill="#09327B" fillRule="evenodd" />
@@ -104,31 +236,31 @@ export default function App() {
                 </g>
               </svg>
             </div>
-            <div className="h-[44px] w-px bg-[#D6E1F3]" />
-            <img alt="" className="h-[34.973px] w-[54.557px] object-cover" src={imgGovernmentOfKeralaLogo} />
-            <img alt="" className="h-[31.475px] w-[53.159px] object-cover" src={imgLsgdLogo2} />
-            <div className="flex flex-col gap-2">
+            <div className="h-[44px] w-px bg-[#D6E1F3] hidden md:block" />
+            <img alt="" className="h-[28px] w-[44px] md:h-[34.973px] md:w-[54.557px] object-cover hidden sm:block" src={imgGovernmentOfKeralaLogo} />
+            <img alt="" className="h-[26px] w-[44px] md:h-[31.475px] md:w-[53.159px] object-cover hidden sm:block" src={imgLsgdLogo2} />
+            <div className="flex flex-col gap-0.5 md:gap-2 hidden lg:flex">
               <p className="font-sans text-[12px] text-[#5c6e93]">Government of Kerala</p>
               <p className="font-sans font-semibold text-[14px] text-[#232f50]">
                 Local Self Government Department
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-12">
-            <div className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-3 md:gap-12">
+            <div className="flex items-center gap-2 cursor-pointer hidden md:flex">
               <p className="font-sans font-medium text-[14px] text-[#09327b]">
                 മലയാളം
               </p>
               <ChevronDown className="w-4 h-4 text-[#09327b]" />
             </div>
-            <p className="font-sans font-semibold text-[14px] text-[#09327b] cursor-pointer">
+            <p className="font-sans font-semibold text-[14px] text-[#09327b] cursor-pointer hidden lg:block">
               About K-smart
             </p>
             <div className="flex items-center gap-2">
-              <button className="px-8 py-2 border border-[#e83a7a] rounded-full font-sans font-semibold text-[14px] text-[#e83a7a] hover:bg-[#e83a7a] hover:text-white transition-colors">
+              <button className="px-4 md:px-8 py-1.5 md:py-2 border border-[#e83a7a] rounded-full font-sans font-semibold text-[12px] md:text-[14px] text-[#e83a7a] hover:bg-[#e83a7a] hover:text-white transition-colors">
                 Register
               </button>
-              <button className="px-8 py-2 bg-[#e83a7a] rounded-full font-sans font-semibold text-[14px] text-white hover:bg-[#d62d69] transition-colors">
+              <button className="px-4 md:px-8 py-1.5 md:py-2 bg-[#e83a7a] rounded-full font-sans font-semibold text-[12px] md:text-[14px] text-white hover:bg-[#d62d69] transition-colors">
                 Login
               </button>
             </div>
@@ -139,19 +271,19 @@ export default function App() {
       {/* Hero Section & Filters Container */}
       <div className="relative">
         {/* Hero Section */}
-        <div className="bg-[#09327b] px-[32px] pt-[56px] pb-[100px] relative overflow-hidden h-[280px]">
+        <div className="bg-[#09327b] px-4 md:px-[32px] pt-8 md:pt-[56px] pb-[80px] md:pb-[100px] relative overflow-hidden min-h-[200px] md:h-[280px]">
           <ImageWithFallback src="https://images.unsplash.com/photo-1704365159668-d6567db52f33?auto=format&fit=crop&q=80&w=1920" alt="Hero Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none brightness-[0.4]" />
-          <div className="relative flex items-start justify-between w-full max-w-[1568px] mx-auto">
-            <div className="flex flex-col gap-[24px]">
+          <div className="relative flex flex-col sm:flex-row items-start justify-between w-full max-w-[1568px] mx-auto gap-4">
+            <div className="flex flex-col gap-4 md:gap-[24px]">
               <button className="flex items-center gap-[4px] w-fit hover:opacity-80 transition-opacity">
                 <ArrowLeft className="w-4 h-4 text-white" />
                 <span className="font-sans font-semibold text-[14px] text-white">Back</span>
               </button>
-              <div className="flex flex-col gap-2">
-                <h1 className="font-sans font-bold text-[32px] text-white leading-[normal]">
+              <div className="flex flex-col gap-1 md:gap-2">
+                <h1 className="font-sans font-bold text-[24px] md:text-[32px] text-white leading-[normal]">
                   KSMART Dashboard
                 </h1>
-                <p className="font-sans font-medium text-[16px] text-white opacity-70 leading-[normal]">
+                <p className="font-sans font-medium text-[14px] md:text-[16px] text-white opacity-70 leading-[normal]">
                   All the info you need about KSMART Services is right at your fingertips!
                 </p>
               </div>
@@ -161,26 +293,32 @@ export default function App() {
         </div>
 
         {/* Filters */}
-        <div className="absolute bottom-0 translate-y-1/2 left-0 right-0 z-30 px-[32px] py-[0px]">
+        <div className="absolute bottom-0 translate-y-1/2 left-0 right-0 z-30 px-4 md:px-[32px] py-[0px]">
           <div className="max-w-[1568px] mx-auto">
-            <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] w-full p-[24px]">
-              <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-[16px] xl:gap-[24px]">
-                <div className="relative flex-[1_0_0]">
-                  <div id="local-body-toggle" onClick={() => setIsSelectorOpen(!isSelectorOpen)}>
+            <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] w-full p-3 md:p-[24px]">
+              <div
+                className={`grid w-full grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,1fr))] gap-3 md:gap-[16px] xl:gap-[24px] ${
+                  isPropertyTaxModule
+                    ? "xl:grid-cols-[repeat(6,minmax(0,1fr))]"
+                    : "xl:grid-cols-[repeat(5,minmax(0,1fr))]"
+                }`}
+              >
+                <div className="relative w-full min-w-0">
+                  <div id="local-body-toggle" className="w-full min-w-0" onClick={() => setIsSelectorOpen(!isSelectorOpen)}>
                     <FilterSelect label="Local Body/state" value={selectedLocalBody} />
                   </div>
                   {isSelectorOpen && (
-                    <div className="absolute top-full left-0 mt-2 transition-all z-50">
+                    <div className="absolute top-full left-0 right-0 sm:right-auto mt-2 transition-all z-50">
                        <LocalBodySelector onClose={() => setIsSelectorOpen(false)} onApply={setSelectedLocalBody} />
                     </div>
                   )}
                 </div>
-                <div className="flex-[1_0_0] relative">
-                  <div onClick={() => setIsTimePeriodOpen(!isTimePeriodOpen)}>
+                <div className="relative w-full min-w-0">
+                  <div className="w-full min-w-0" onClick={() => setIsTimePeriodOpen(!isTimePeriodOpen)}>
                     <FilterSelect label="Time Period " value={selectedTimePeriod} />
                   </div>
                   {isTimePeriodOpen && (
-                    <div className="absolute top-full left-0 mt-2 z-50">
+                    <div className="absolute top-full left-0 right-0 sm:right-auto mt-2 z-50">
                       <TimePeriodSelector 
                         onClose={() => setIsTimePeriodOpen(false)} 
                         onSelect={setSelectedTimePeriod}
@@ -188,7 +326,7 @@ export default function App() {
                     </div>
                   )}
                 </div>
-                <div className="flex-[1_0_0]">
+                <div className="w-full min-w-0">
                   <FilterDropdown 
                     label="Module" 
                     value={selectedModule} 
@@ -196,7 +334,7 @@ export default function App() {
                     onSelect={handleModuleChange}
                   />
                 </div>
-                <div className="flex-[1_0_0]">
+                <div className="w-full min-w-0">
                   <FilterDropdown 
                     label="Sub-Module" 
                     value={selectedSubModule} 
@@ -206,7 +344,13 @@ export default function App() {
                     muted={selectedSubModule === "Select"}
                   />
                 </div>
-                <div className="flex-[1_0_0]">
+                <div
+                  className={
+                    isPropertyTaxModule
+                      ? "w-full min-w-0"
+                      : "w-full min-w-0 sm:col-span-2 xl:col-span-1"
+                  }
+                >
                   <FilterDropdown 
                     label="Service" 
                     value={selectedService} 
@@ -216,6 +360,17 @@ export default function App() {
                     muted={selectedService === "Select"}
                   />
                 </div>
+                {isPropertyTaxModule && (
+                  <div className="w-full min-w-0">
+                    <FilterDropdown
+                      label="Building Type"
+                      value={selectedBuildingType}
+                      options={buildingTypeOptions}
+                      onSelect={setSelectedBuildingType}
+                      muted={selectedBuildingType === "Select"}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -223,22 +378,22 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1718px] mx-auto px-[32px] pt-[88px] pb-[32px]">
-        <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4] overflow-hidden">
+      <div className="max-w-[1718px] mx-auto px-4 md:px-[32px] pt-[72px] md:pt-[88px] pb-[24px] md:pb-[32px]">
+        <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4] overflow-hidden">
           {/* Heading strip — always visible */}
-          <div className="p-[24px]">
-            <div className="flex gap-[32px] items-center w-full">
+          <div className="p-4 md:p-[24px]">
+            <div className="flex flex-wrap gap-4 md:gap-[32px] items-center w-full">
               <div className="flex flex-col gap-[2px] items-start justify-center">
-                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[14px]">Time Period</p>
-                <p className="font-sans font-bold leading-[28px] text-[#0c3080] text-[20px]">{selectedTimePeriod}</p>
+                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Time Period</p>
+                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedTimePeriod}</p>
+              </div>
+              <div className="flex flex-col gap-[2px] items-start justify-center min-w-0 flex-1">
+                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Module</p>
+                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px] max-w-full truncate" title={displayModule}>{displayModule}</p>
               </div>
               <div className="flex flex-col gap-[2px] items-start justify-center">
-                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[14px]">Module</p>
-                <p className="font-sans font-bold leading-[28px] text-[#0c3080] text-[20px] max-w-[400px] truncate" title={displayModule}>{displayModule}</p>
-              </div>
-              <div className="flex flex-col gap-[2px] items-start justify-center">
-                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[14px]">Local body/state</p>
-                <p className="font-sans font-bold leading-[28px] text-[#0c3080] text-[20px]">{selectedLocalBody}</p>
+                <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Local body/state</p>
+                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedLocalBody}</p>
               </div>
             </div>
           </div>
@@ -247,7 +402,7 @@ export default function App() {
           <div className="h-px bg-[#e8eff4] w-full" />
 
           {/* Content Area */}
-          <div className="flex flex-col gap-[24px] p-[16px]">
+          <div className="flex flex-col gap-4 md:gap-[24px] p-3 md:p-[16px]">
             {/* Finance Management: Show E-Payment/E-POS tabs directly */}
             {selectedModule === "Finance Management" && (
               <FinanceModule onViewMore={() => {
@@ -260,11 +415,11 @@ export default function App() {
             {selectedModule !== "Public Grievance and complaints" && selectedModule !== "Finance Management" && (
               <div className="w-full">
                 {/* Tabs */}
-                <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-fit mb-[24px] h-[44px]">
+                <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit mb-4 md:mb-[24px] h-[40px] md:h-[44px]">
                   {/* File Status */}
                   <div 
                     onClick={() => setActiveMainTab("fileStatus")}
-                    className={`h-full px-[24px] rounded-[8px] flex items-center gap-[16px] cursor-pointer transition-all relative z-10 ${
+                    className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all relative z-10 ${
                       activeMainTab === "fileStatus" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
                     }`}
                   >
@@ -282,7 +437,7 @@ export default function App() {
                   {/* Finance */}
                   <div 
                     onClick={() => setActiveMainTab("finance")}
-                    className={`h-full px-[24px] rounded-[8px] flex items-center gap-[16px] cursor-pointer transition-all ${
+                    className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all ${
                       activeMainTab === "finance" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
                     }`}
                   >
@@ -296,11 +451,28 @@ export default function App() {
                     <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "finance" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>Finance</span>
                   </div>
 
+                  {/* Digital Health — only for qualifying Property Tax sub-modules */}
+                  {showDigitalHealthTab && (
+                    <div
+                      onClick={() => setActiveMainTab("digitalHealth")}
+                      className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all ${
+                        activeMainTab === "digitalHealth" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
+                      }`}
+                    >
+                      <div className="w-[16px] h-[16px] relative">
+                        <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
+                          <path d="M8 14S2.5 10 2.5 5.5C2.5 3.5 4 2.5 5.5 2.5C6.5 2.5 7.5 3 8 4C8.5 3 9.5 2.5 10.5 2.5C12 2.5 13.5 3.5 13.5 5.5C13.5 10 8 14 8 14Z" stroke={activeMainTab === "digitalHealth" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                      <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "digitalHealth" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>Digital Health</span>
+                    </div>
+                  )}
+
                 </div>
 
                 {/* Main Tab Content */}
                 {activeMainTab === "fileStatus" && (
-                  <div className="grid grid-cols-4 gap-[24px] w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-[24px] w-full">
                     <StatCard
                       label="Total Received"
                       value="51,251"
@@ -359,8 +531,52 @@ export default function App() {
                   </div>
                 )}
 
+                {activeMainTab === "digitalHealth" && showDigitalHealthTab && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-[16px] w-full">
+                    {digitalHealthKpis.map((kpi) => (
+                      <PtDigitalHealthCard key={kpi.label} {...kpi} total={digitalHealthTotal} />
+                    ))}
+                  </div>
+                )}
+
                 {activeMainTab === "finance" && (
-                  selectedModule === "Building Permissions" ? (
+                  isPropertyTaxModule ? (
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-[16px] w-full">
+                      <PropertyTaxKpiCard
+                        title="Collection Total"
+                        value="51,251"
+                        arrearDemand="25,251"
+                        currentDemand="25,251"
+                        bgClass="bg-[#00a78e]"
+                        onClick={() => {
+                          setModalKpiType("total");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                      <PropertyTaxKpiCard
+                        title="Arrear Demand"
+                        value="25,251"
+                        arrearDemand="15,251"
+                        currentDemand="10,000"
+                        bgClass="bg-[#00b2eb]"
+                        onClick={() => {
+                          setModalKpiType("disposed");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                      <PropertyTaxKpiCard
+                        title="Current Demand"
+                        value="26,000"
+                        arrearDemand="12,000"
+                        currentDemand="14,000"
+                        bgClass="bg-[#7b61ff]"
+                        onClick={() => {
+                          setModalKpiType("inProcess");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                    </div>
+                  ) : selectedModule === "Building Permissions" ? (
                     <BuildingFinanceOverview onViewMore={() => {
                       setModalKpiType("all");
                       setIsModalOpen(true);
@@ -386,13 +602,17 @@ export default function App() {
 
             {/* Graph Section — shown only for non-grievance and non-all modules */}
             {selectedModule === "Building Permissions" && (
-              <BuildingPermissionGraphs />
+              <BuildingPermissionGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
-            {selectedModule !== "Building Permissions" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && (
-              <div className="flex gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] h-[606px] w-full shrink-0 p-[0px]">
+            {isPropertyTaxModule && (
+              <PropertyTaxGraphs selectedLocalBody={selectedLocalBody} />
+            )}
+
+            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && (
+              <div className="flex flex-col lg:flex-row gap-4 lg:gap-[16px] bg-[#f6f9fb] rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-0">
                 {/* Left Sidebar */}
-                <div className="w-[270px] shrink-0 flex flex-col gap-[16px] p-[16px]">
+                <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-4 lg:p-[16px]">
                   <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
                     <div className="relative shrink-0 size-[32px]">
                       <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
@@ -429,25 +649,25 @@ export default function App() {
                 </div>
 
                 {/* Graph Content Area */}
-                <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-[32px]">
-                  <div className="flex items-start justify-between mb-[32px]">
+                <div className="bg-white flex-[1_0_0] min-h-[400px] lg:h-full relative rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px]">
+                  <div className="flex flex-col sm:flex-row items-start justify-between mb-4 md:mb-[32px] gap-3">
                     <div className="flex flex-col gap-[8px]">
-                      <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+                      <h3 className="font-sans font-bold text-[14px] md:text-[16px] text-[#232f50] leading-[24px]">
                         No. of files that exceed SLI Period
                       </h3>
-                      <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
+                      <p className="font-sans font-semibold text-[12px] md:text-[14px] text-[#5c6e93] leading-[20px]">
                         Graphical representation of the least performing districts and local bodies
                       </p>
                     </div>
-                    <div className="flex items-center gap-[16px]">
-                      <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
-                        <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
-                        <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">Decending</span>
+                    <div className="flex items-center gap-2 md:gap-[16px] flex-wrap">
+                      <div className="flex items-center gap-2 md:gap-[16px] border border-[#e8eff4] rounded-[8px] px-3 md:px-[16px] py-[6px] md:py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <span className="font-sans font-medium text-[12px] md:text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
+                        <span className="font-sans font-semibold text-[12px] md:text-[14px] text-[#232f50] leading-[20px]">Decending</span>
                         <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
                       </div>
-                      <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
-                        <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Show:</span>
-                        <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">Top 20</span>
+                      <div className="flex items-center gap-2 md:gap-[16px] border border-[#e8eff4] rounded-[8px] px-3 md:px-[16px] py-[6px] md:py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <span className="font-sans font-medium text-[12px] md:text-[14px] text-[#5c6e93] leading-[20px]">Show:</span>
+                        <span className="font-sans font-semibold text-[12px] md:text-[14px] text-[#232f50] leading-[20px]">Top 20</span>
                         <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
                       </div>
                     </div>
@@ -527,7 +747,7 @@ export default function App() {
                       </div>
 
                       {/* Bars Container */}
-                      <div className="absolute inset-0 z-10 flex items-end gap-[32px] px-[12px]">
+                      <div className="absolute inset-0 z-10 flex items-end gap-2 sm:gap-[16px] md:gap-[32px] px-[6px] md:px-[12px]">
                         {[
                           { label: "TVM", fullLabel: "Thiruvananthapuram", total: 28000, disposed: 18000 },
                           { label: "KLM", fullLabel: "Kollam", total: 22000, disposed: 14000 },

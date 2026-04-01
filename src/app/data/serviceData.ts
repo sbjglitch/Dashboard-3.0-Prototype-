@@ -62,6 +62,27 @@ export const MODULE_DATA: ServiceData = {
     ]
   },
   "Property Tax": {
+    "Services": [
+      "Tax Appeal",
+      "New Tax Assessment (Form 2)",
+      "Tax Re-assessment",
+      "Tax Re-Assessment by Split",
+      "Unauthorized to Authorized Application",
+      "Tax Re-Assessment without Occupancy",
+      "Pay Building Tax",
+      "Property Tax Related Other Activities",
+      "Property tax legacy receipt collection"
+    ],
+    "Link Building": [
+      "Link My Buildings",
+      "Link My Buildings - Employee",
+      "Report Data Missing Building"
+    ],
+    "Building Certificate Download": [
+      "Building Certificates",
+      "Residence Certificate",
+      "Occupancy Certificate"
+    ],
     "Assessment services": [
       "Tax Appeal",
       "New Tax Assessment (Form 2)",

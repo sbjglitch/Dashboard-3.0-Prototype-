@@ -41,7 +41,7 @@ export function SeatDetailModal({
       <div className="bg-white rounded-2xl shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] w-full max-w-[1100px] flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-4 md:px-8 py-5 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
@@ -86,7 +86,7 @@ export function SeatDetailModal({
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-5 gap-4 px-8 py-6 border-b border-gray-50 shrink-0 bg-white">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-8 py-6 border-b border-gray-50 shrink-0 bg-white">
           {[
             { label: "Total Files", value: selectedSeat.totalFiles.toLocaleString(), color: "text-[#232f50]", bgColor: "bg-gray-50/50" },
             { label: "Disposed", value: selectedSeat.disposed.toLocaleString(), color: "text-[#00a63e]", bgColor: "bg-green-50/30" },
@@ -105,7 +105,7 @@ export function SeatDetailModal({
         </div>
 
         {/* Sub-header */}
-        <div className="flex items-center justify-between px-8 py-4 shrink-0 bg-[#fefefe] border-b border-gray-50">
+        <div className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0 bg-[#fefefe] border-b border-gray-50">
           <div className="flex items-center gap-3">
             {selectedSeat.designation && (
               <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-[#232f50] text-white shadow-sm">
@@ -163,7 +163,7 @@ export function SeatDetailModal({
 
         {/* File Pagination */}
         {totalFilePages > 1 && (
-          <div className="flex items-center justify-between px-8 py-4 border-t border-gray-50 shrink-0 bg-white">
+          <div className="flex items-center justify-between px-4 md:px-8 py-4 border-t border-gray-50 shrink-0 bg-white">
             <span className="text-sm font-bold text-gray-400">
               Page <span className="text-gray-700">{filePage}</span> of <span className="text-gray-700">{totalFilePages}</span>
             </span>

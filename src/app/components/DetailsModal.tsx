@@ -34,6 +34,9 @@ export function DetailsModal({
   serviceName?: string;
   isFinanceModule?: boolean;
 }) {
+  const normalizedModuleName = moduleName.toLowerCase().replace(/[^a-z]/g, "");
+  const isPropertyTaxModule =
+    normalizedModuleName.includes("propertytax") || normalizedModuleName.includes("property");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set([
     "thiruvananthapuram",
     "thiruvananthapuram-corp",
@@ -170,11 +173,17 @@ export function DetailsModal({
     return visible;
   };
 
-  const visibleRows = getVisibleRows();
+  const visibleRows = getVisibleRows().filter(row => {
+    if (!isPropertyTaxModule) return true;
+    if ("isPagination" in row) return true;
+    return !row.isSeat;
+  });
   const indentPx = (level: number) => (level - 1) * 24;
   const hasChildren = (id: string) => {
     const sourceData = viewMode === "district" ? mockData : officeTypeRows;
-    return sourceData.some((r) => r.parentId === id);
+    const children = sourceData.filter((r) => r.parentId === id);
+    if (isPropertyTaxModule && children.every(r => r.isSeat)) return false;
+    return children.length > 0;
   };
 
   const expandedDistricts = Array.from(expandedRows).filter((id) =>
@@ -187,6 +196,7 @@ export function DetailsModal({
   const disposed = level1.reduce((a, c) => a + c.disposed, 0);
   const inProcess = level1.reduce((a, c) => a + c.inProcess, 0);
   const returned = level1.reduce((a, c) => a + c.returned, 0);
+  const formatRupee = (value: number) => `₹ ${value.toLocaleString()}`;
 
   // Seat detail data
   const seatAncestors = useMemo(
@@ -201,7 +211,14 @@ export function DetailsModal({
   const totalFilePages = Math.ceil(allFiles.length / FILES_PER_PAGE);
   const pagedFiles = allFiles.slice((filePage - 1) * FILES_PER_PAGE, filePage * FILES_PER_PAGE);
 
-  const kpiLabel = kpiType === "all" ? "Total Files" : kpiType === "disposed" ? "Disposed Files" : kpiType === "inProcess" ? "Under Process" : kpiType === "delayed" ? "Delayed Files" : "Total Files";
+  const kpiLabel =
+    kpiType === "disposed"
+      ? "Arrear Demand"
+      : kpiType === "inProcess"
+        ? "Current Demand"
+        : kpiType === "all"
+          ? "All Metrics"
+          : "Collection Total";
 
   if (!isOpen) return null;
 
@@ -248,11 +265,11 @@ export function DetailsModal({
     ];
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[95vh] overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
+        <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 shrink-0">
+          <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
             <div className="flex flex-col gap-0.5">
               <h2 className="text-base font-semibold text-gray-900 leading-6">Finance Management Details</h2>
               <p className="text-sm font-medium text-gray-500 leading-5">Bank-wise transaction details</p>
@@ -266,7 +283,7 @@ export function DetailsModal({
           </div>
 
           {/* Tabs - All 4 in one row */}
-          <div className="px-8 py-4 border-b border-gray-100 shrink-0 bg-white">
+          <div className="px-4 md:px-8 py-4 border-b border-gray-100 shrink-0 bg-white">
             <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
               <button
                 onClick={() => setFinanceTab("ePayment")}
@@ -328,7 +345,7 @@ export function DetailsModal({
                       {bank.name}
                     </h3>
                     
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="flex flex-col gap-2">
                         <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-tight">
                           Total Amount
@@ -374,14 +391,14 @@ export function DetailsModal({
             // District/Office Type Table View
             <>
               {/* Filter Bar */}
-              <div className="flex items-center justify-between px-8 py-4 shrink-0 bg-white border-b border-gray-100">
+              <div className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0 bg-white border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="relative flex items-center">
                     <input
                       type="text"
                       placeholder="Search..."
                       value={searchQuery}
-                      className="pl-4 pr-10 py-2 rounded-lg border border-gray-200 bg-white text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#232f50]/20 w-[320px] h-10 shadow-sm"
+                      className="pl-4 pr-10 py-2 rounded-lg border border-gray-200 bg-white text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#232f50]/20 w-full sm:w-[320px] h-10 shadow-sm"
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <Search size={20} className="text-[#323232] shrink-0 absolute right-3" />
@@ -391,7 +408,7 @@ export function DetailsModal({
               </div>
 
               {/* Table */}
-              <div className="overflow-auto flex-1 bg-white px-8 py-8">
+              <div className="overflow-auto flex-1 bg-white px-4 md:px-8 py-8">
                 <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
                   <table className="w-full text-sm border-collapse">
                     <thead className="border-y border-gray-200 sticky top-0 z-10">
@@ -528,11 +545,11 @@ export function DetailsModal({
 
   // ── Main hierarchy table view ─────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[95vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
+      <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 shrink-0">
+        <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
           <div className="flex flex-col gap-0.5">
             <h2 className="text-base font-semibold text-gray-900 leading-6">{moduleName} {kpiLabel}</h2>
             <p className="text-sm font-medium text-gray-500 leading-5">
@@ -549,19 +566,15 @@ export function DetailsModal({
         </div>
 
         {/* KPIs */}
-        <div className="flex gap-4 px-8 py-6 border-b border-gray-100 shrink-0 bg-white overflow-x-auto">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 px-4 md:px-8 py-6 border-b border-gray-100 shrink-0 bg-white">
           {[
-            { label: "Total Files", value: totalFiles.toLocaleString() },
-            { label: "Files Disposed", value: disposed.toLocaleString() },
-            { label: "Files In Process", value: inProcess.toLocaleString() },
-            { label: "Files Parked", value: "12,345" },
-            { label: "Files Returned", value: returned.toLocaleString() },
-            { label: "Files Delayed", value: "4,567" },
-            { label: "Rate of Disposal", value: totalFiles ? ((disposed / totalFiles) * 100).toFixed(1) + "%" : "0%" },
+            { label: "Collection Total", value: formatRupee(totalFiles) },
+            { label: "Arrear Demand", value: formatRupee(disposed) },
+            { label: "Current Demand", value: formatRupee(inProcess) },
           ].map((kpi, idx) => (
             <div
               key={idx}
-              className="flex-1 min-w-[160px] border border-[#e8eff4] rounded-lg p-4 flex flex-col gap-2 bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]"
+              className="min-w-0 border border-[#e8eff4] rounded-lg p-4 flex flex-col gap-2 bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]"
             >
               <p className="text-sm font-medium text-[#5c6e93] leading-tight">{kpi.label}</p>
               <p className="text-[20px] font-semibold text-[#232f50] leading-tight">{kpi.value}</p>
@@ -571,7 +584,7 @@ export function DetailsModal({
 
         {/* Filter Bar */}
         <div className="flex items-center justify-between shrink-0 bg-white px-[24px] py-[8px]">
-          <div className="flex items-center gap-1 bg-[#e8eff4] rounded-lg h-9 w-[300px] p-[1px]">
+          <div className="flex items-center gap-1 bg-[#e8eff4] rounded-lg h-9 w-full sm:w-[300px] p-[1px]">
             <button 
               onClick={() => setViewMode("district")}
               className={`flex-1 h-full rounded flex items-center justify-center text-sm font-semibold transition-all ${viewMode === "district" ? "bg-white text-[#232f50] shadow-sm border border-[#e8eff4]" : "text-[#232f50] opacity-70 hover:opacity-100"}`}
@@ -590,7 +603,7 @@ export function DetailsModal({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative h-10 w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">
+            <div className="relative h-10 w-full sm:w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">
               <input
                 type="text"
                 placeholder="Search"
@@ -614,48 +627,9 @@ export function DetailsModal({
                   <th className="text-left pl-8 pr-4 py-3 text-xs bg-[#f9fafb] sticky left-0 z-20 border-r border-gray-200 min-w-[200px] align-middle text-[#6a7282f7]">
                     Name
                   </th>
-                {/* Group 1 */}
-                {(kpiType === "all" || kpiType === "total") && (
-                  <>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] border-l border-gray-200 min-w-[100px] whitespace-nowrap">Total Files</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] min-w-[90px] whitespace-nowrap">Disposed</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] min-w-[90px] whitespace-nowrap">In Process</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] min-w-[80px] whitespace-nowrap">Rejected</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] min-w-[80px] whitespace-nowrap">Returned</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] min-w-[80px] whitespace-nowrap">Delayed</th>
-                  </>
-                )}
-                {/* Group 2 */}
-                {(kpiType === "all" || kpiType === "disposed") && (
-                  <>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] border-l border-gray-200 min-w-[110px] whitespace-nowrap">Total Disposed</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[100px] whitespace-nowrap">Parked Files</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[140px] whitespace-nowrap">Permanent Disposed</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[140px] whitespace-nowrap">Disposed within SLI</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[130px] whitespace-nowrap">Disposed 1–30 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[140px] whitespace-nowrap">Disposed 30–100 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] min-w-[170px] whitespace-nowrap">Disposed after 100 Days of SLI</th>
-                  </>
-                )}
-                {/* Group 3 */}
-                {(kpiType === "all" || kpiType === "inProcess") && (
-                  <>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] border-l border-gray-200 min-w-[150px] whitespace-nowrap">Total Files in Process</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] min-w-[90px] whitespace-nowrap">Within SLI</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] min-w-[80px] whitespace-nowrap">Delayed</th>
-                  </>
-                )}
-                {/* Group 4 */}
-                {(kpiType === "all" || kpiType === "delayed") && (
-                  <>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] border-l border-gray-200 min-w-[110px] whitespace-nowrap">Total Delayed</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] min-w-[130px] whitespace-nowrap">Delayed by ≤10 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] min-w-[130px] whitespace-nowrap">Delayed 11–30 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] min-w-[130px] whitespace-nowrap">Delayed 31–100 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] min-w-[140px] whitespace-nowrap">Delayed 101–365 Days</th>
-                    <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] min-w-[120px] whitespace-nowrap">Delayed &gt;365 Days</th>
-                  </>
-                )}
+                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Collection Total</th>
+                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Arrear Demand</th>
+                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Current Demand</th>
                 
               </tr>
             </thead>
@@ -710,8 +684,8 @@ export function DetailsModal({
                 return (
                   <tr
                     key={row.id}
-                    onClick={() => row.isSeat && setSelectedSeat(row)}
-                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} ${row.isSeat ? "cursor-pointer hover:bg-blue-50/50" : "hover:bg-gray-50/80"}`}
+                    onClick={() => !isPropertyTaxModule && row.isSeat && setSelectedSeat(row)}
+                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} ${!isPropertyTaxModule && row.isSeat ? "cursor-pointer hover:bg-blue-50/50" : "hover:bg-gray-50/80"}`}
                   >
                     {/* Name — sticky left column */}
                     <td className={`pl-8 pr-4 py-2 sticky left-0 z-10 ${rowBg} border-r border-gray-100`}>
@@ -744,53 +718,12 @@ export function DetailsModal({
                       </div>
                     </td>
 
-                    {/* ── Group 1: Total Files ── */}
-                    {(kpiType === "all" || kpiType === "total") && (
-                      <>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153] border-l border-gray-100">{row.totalFiles.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{row.disposed.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{row.inProcess.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{row.rejected.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{row.returned.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayed ?? 0).toLocaleString()}</td>
-                      </>
-                    )}
-
-                    {/* ── Group 2: Disposed Files ── */}
-                    {(kpiType === "all" || kpiType === "disposed") && (
-                      <>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#00a63e] border-l border-gray-100">{row.disposed.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.parkedFiles ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.permanentDisposed ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.disposedWithinSLI ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.disposed1to30 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.disposed30to100 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.disposedAfter100 ?? 0).toLocaleString()}</td>
-                      </>
-                    )}
-
-                    {/* ── Group 3: Under Process ── */}
-                    {(kpiType === "all" || kpiType === "inProcess") && (
-                      <>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#d08700] border-l border-gray-100">{row.inProcess.toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.withinSLI ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedInProcess ?? 0).toLocaleString()}</td>
-                      </>
-                    )}
-
-                    {/* ── Group 4: Delayed ── */}
-                    {(kpiType === "all" || kpiType === "delayed") && (
-                      <>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#e7000b] border-l border-gray-100">{(row.delayed ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedBy10 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedBy11to30 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedBy31to100 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedBy101to365 ?? 0).toLocaleString()}</td>
-                        <td className="text-right px-6 py-2 text-sm font-normal text-[#364153]">{(row.delayedAfter365 ?? 0).toLocaleString()}</td>
-                      </>
-                    )}
-
-                    {/* Eye button */}
+                    {/* Collection Total */}
+                    <td className="text-right px-6 py-2 text-sm font-normal text-[#364153] border-l border-gray-100">{formatRupee(row.totalFiles)}</td>
+                    {/* Arrear Demand */}
+                    <td className="text-right px-6 py-2 text-sm font-normal text-[#00a63e] border-l border-gray-100">{formatRupee(row.disposed)}</td>
+                    {/* Current Demand */}
+                    <td className="text-right px-6 py-2 text-sm font-normal text-[#d08700] border-l border-gray-100">{formatRupee(row.inProcess)}</td>
                     
                   </tr>
                 );
@@ -807,13 +740,15 @@ export function DetailsModal({
           </div>
         </div>
       </div>
-      <SeatDetailModal 
-        isOpen={!!selectedSeat} 
-        onClose={() => setSelectedSeat(null)}
-        selectedSeat={selectedSeat}
-        moduleName={moduleName}
-        kpiLabel={kpiLabel}
-      />
+      {!isPropertyTaxModule && (
+        <SeatDetailModal 
+          isOpen={!!selectedSeat} 
+          onClose={() => setSelectedSeat(null)}
+          selectedSeat={selectedSeat}
+          moduleName={moduleName}
+          kpiLabel={kpiLabel}
+        />
+      )}
     </div>
   );
 }

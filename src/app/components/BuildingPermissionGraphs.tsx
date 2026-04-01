@@ -39,7 +39,12 @@ const PIE_DATA_OCCUPANCY = [
 ];
 
 
-export function BuildingPermissionGraphs() {
+function toSentenceCase(text: string) {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalBody: string }) {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [activeSubTab, setActiveSubTab] = useState<"District" | "Local Bodies">("District");
   const [sortBy, setSortBy] = useState("Descending");
@@ -61,10 +66,10 @@ export function BuildingPermissionGraphs() {
     return (
       <div className="flex flex-col h-full w-full">
         {/* Header */}
-        <div className="flex items-start justify-between mb-[32px]">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
           <div className="flex flex-col gap-[8px]">
-            <h3 className="font-sans font-bold text-[16px] text-[#232f50] uppercase leading-[24px]">
-              {title}
+            <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+              {toSentenceCase(title)}
             </h3>
             <div className="flex items-center gap-4">
               <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
@@ -72,7 +77,7 @@ export function BuildingPermissionGraphs() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-[16px]">
+          <div className="flex flex-wrap flex-col sm:flex-row items-center gap-[16px]">
              {/* Sub Tabs */}
              <div className="bg-[#f2f6ff] rounded-[8px] flex items-center p-[4px]">
                <button 
@@ -89,13 +94,13 @@ export function BuildingPermissionGraphs() {
                </button>
              </div>
              {/* Filters */}
-             <div className="flex gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
+             <div className="flex flex-wrap gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
                <span className="font-semibold text-[14px] text-[#232f50]">Sort By:</span>
                <span className="font-semibold text-[14px] opacity-70 text-[#232f50]">{sortBy}</span>
                <ChevronDown className="w-4 h-4 text-[#232f50] opacity-70" />
              </div>
              {hasShowFilter && activeSubTab === "Local Bodies" && (
-                <div className="flex gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
+                <div className="flex flex-wrap gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
                  <span className="font-semibold text-[14px] text-[#232f50]">Show:</span>
                  <span className="font-semibold text-[14px] opacity-70 text-[#232f50]">{showTop}</span>
                  <ChevronDown className="w-4 h-4 text-[#232f50] opacity-70" />
@@ -143,14 +148,14 @@ export function BuildingPermissionGraphs() {
     return (
       <div className="flex flex-col h-full w-full">
          {/* Header */}
-         <div className="flex items-start justify-between mb-[32px]">
+         <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
           <div className="flex flex-col gap-[8px]">
             <div className="flex items-center gap-[16px]">
-              <h3 className="font-sans font-bold text-[16px] text-[#232f50] uppercase leading-[24px]">
-                {title}
+              <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+                {toSentenceCase(title)}
               </h3>
               <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
-                Adoor, Pathanamthitta
+                {selectedLocalBody}
               </div>
             </div>
             <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
@@ -228,9 +233,9 @@ export function BuildingPermissionGraphs() {
   };
 
   return (
-    <div className="flex gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] h-[606px] w-[100%] shrink-0 p-[0px] mt-[16px]">
+    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-[100%] shrink-0 p-[0px] mt-[16px]">
       {/* Left Sidebar */}
-      <div className="w-[270px] shrink-0 flex flex-col gap-[16px] p-[16px]">
+      <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-[16px]">
         <div className="flex gap-[16px] items-center">
           <div className="w-[32px] h-[32px] relative">
              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
@@ -262,7 +267,7 @@ export function BuildingPermissionGraphs() {
       </div>
 
       {/* Right Content */}
-      <div className="bg-white flex-[1_0_0] h-full relative rounded-r-[16px] border-l border-[#e8eff4] flex flex-col p-[32px]">
+      <div className="bg-white flex-[1_0_0] min-h-[350px] lg:h-full relative rounded-r-[16px] border-l border-[#e8eff4] flex flex-col p-4 md:p-[32px]">
          {renderContent()}
       </div>
     </div>

@@ -130,7 +130,7 @@ function DigitalHealthCard({ label, value, color }: { label: string; value: numb
   const total = DIGITAL_HEALTH_KPIS[0].value;
   const pct = label === "Total" ? null : ((value / total) * 100).toFixed(1) + "%";
   return (
-    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between h-[130px]">
+    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-[8px]">
           <div className={`${color} w-[10px] h-[10px] rounded-sm`} />
@@ -167,7 +167,7 @@ function CustomChart({ data }: { data: any[] }) {
   };
 
   return (
-    <div className="flex-[1_0_0] w-full relative pl-[45px] pb-[30px] h-[320px]">
+    <div className="flex-[1_0_0] w-full relative pl-[45px] pb-[30px] h-[250px] sm:h-[320px]">
       {/* Tooltip */}
       {hoveredItem && (
         <div 
@@ -317,7 +317,7 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
         {/* File Status Tab */}
         {activeTab === "fileStatus" && (
           <div>
-            <div className="grid grid-cols-4 gap-[8px] w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[8px] w-full">
               {(Object.entries(FILE_STATUS_KPIS) as [string, typeof FILE_STATUS_KPIS.totalFiles][]).map(([key, kpi]) => (
                 <StatCard
                   key={key}
@@ -355,10 +355,10 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
       </div>
 
       {/* ── Graph Panel ── */}
-      <div className="flex gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] h-[606px] w-full shrink-0 p-[16px]">
+      <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-[16px]">
 
         {/* Left sidebar */}
-        <div className="w-[270px] shrink-0 flex flex-col gap-[16px]">
+        <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
           <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
             <div className="relative shrink-0 size-[32px]">
               <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
@@ -392,9 +392,9 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
         </div>
 
         {/* Graph content */}
-        <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-[32px]">
+        <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px]">
           {/* Header row */}
-          <div className="flex items-start justify-between mb-[32px]">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
             <div className="flex flex-col gap-[8px]">
               <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
                 {activeGraph === "disposal"
@@ -407,7 +407,7 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
                   : "Grievance submission channels breakdown"}
               </p>
             </div>
-            <div className="flex items-center gap-[16px]">
+            <div className="flex flex-wrap items-center gap-[16px]">
               <div 
                 onClick={() => setSortOrder((s) => (s === "desc" ? "asc" : "desc"))}
                 className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors"

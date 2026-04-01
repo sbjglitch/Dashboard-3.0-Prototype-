@@ -67,7 +67,7 @@ export function TimePeriodSelector({ onClose, onSelect }: { onClose: () => void,
   return (
     <div 
       ref={dropdownRef}
-      className="bg-white rounded-[8px] w-[320px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] overflow-hidden"
+      className="bg-white rounded-[8px] w-[calc(100vw-2rem)] sm:w-[320px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] overflow-hidden"
     >
       {view === 'list' ? (
         <div className="flex flex-col py-2">
