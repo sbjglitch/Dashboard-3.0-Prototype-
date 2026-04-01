@@ -343,7 +343,7 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
 
         {/* Finance Tab */}
         {activeTab === "finance" && (
-          <FinanceModule onViewMore={() => onViewMore("all")} />
+          <FinanceModule onViewMore={() => onViewMore("all")} hideTabs />
         )}
 
         {/* Digital Health Tab */}

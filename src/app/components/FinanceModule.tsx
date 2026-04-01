@@ -47,53 +47,56 @@ function FinanceCard({ label, value, rate, rateLabel, color, icon, diagonalTrans
   );
 }
 
-export function FinanceModule({ onViewMore }: { onViewMore: () => void }) {
+export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void; hideTabs?: boolean }) {
   const [activeSubTab, setActiveSubTab] = useState<"ePayment" | "ePos">("ePayment");
 
   return (
     <div className="flex flex-col gap-[24px]">
       {/* Sub Tab Header */}
       <div className="flex items-center justify-between w-full">
-        <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
-          <button
-            onClick={() => setActiveSubTab("ePayment")}
-            className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-              activeSubTab === "ePayment"
-                ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                : "text-[#232f50] opacity-50"
-            }`}
-          >
-            <div className="relative size-[20px]">
-              <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
-                <path clipRule="evenodd" d={svgPaths.p181de000} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d="M15.8399 14.1726V10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d={svgPaths.pe79fe00} stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path clipRule="evenodd" d={svgPaths.pa3e1680} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d="M17.5073 4.1684H10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              </svg>
-            </div>
-            <span className="font-sans font-semibold text-[14px]">E-Payment</span>
-          </button>
-          
-          <button
-            onClick={() => setActiveSubTab("ePos")}
-            className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-              activeSubTab === "ePos"
-                ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                : "text-[#232f50] opacity-50"
-            }`}
-          >
-            <div className="relative size-[20px]">
-              <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
-                <path d={svgPaths.p8703000} stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d="M5.25 15.4167H8.91667" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path clipRule="evenodd" d={svgPaths.p16eab600} fillRule="evenodd" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d="M7.5 8.33333H17.5" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              </svg>
-            </div>
-            <span className="font-sans font-semibold text-[14px]">E-POS</span>
-          </button>
-        </div>
+        {!hideTabs && (
+          <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
+            <button
+              onClick={() => setActiveSubTab("ePayment")}
+              className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
+                activeSubTab === "ePayment"
+                  ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
+                  : "text-[#232f50] opacity-50"
+              }`}
+            >
+              <div className="relative size-[20px]">
+                <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
+                  <path clipRule="evenodd" d={svgPaths.p181de000} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path d="M15.8399 14.1726V10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path d={svgPaths.pe79fe00} stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path clipRule="evenodd" d={svgPaths.pa3e1680} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path d="M17.5073 4.1684H10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <span className="font-sans font-semibold text-[14px]">E-Payment</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveSubTab("ePos")}
+              className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
+                activeSubTab === "ePos"
+                  ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
+                  : "text-[#232f50] opacity-50"
+              }`}
+            >
+              <div className="relative size-[20px]">
+                <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
+                  <path d={svgPaths.p8703000} stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path d="M5.25 15.4167H8.91667" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path clipRule="evenodd" d={svgPaths.p16eab600} fillRule="evenodd" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  <path d="M7.5 8.33333H17.5" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <span className="font-sans font-semibold text-[14px]">E-POS</span>
+            </button>
+          </div>
+        )}
+        {hideTabs && <div />}
 
         <button 
           onClick={onViewMore}

@@ -174,7 +174,6 @@ export function DetailsModal({
   };
 
   const visibleRows = getVisibleRows().filter(row => {
-    if (!isPropertyTaxModule) return true;
     if ("isPagination" in row) return true;
     return !row.isSeat;
   });
@@ -182,7 +181,7 @@ export function DetailsModal({
   const hasChildren = (id: string) => {
     const sourceData = viewMode === "district" ? mockData : officeTypeRows;
     const children = sourceData.filter((r) => r.parentId === id);
-    if (isPropertyTaxModule && children.every(r => r.isSeat)) return false;
+    if (children.every(r => r.isSeat)) return false;
     return children.length > 0;
   };
 
@@ -684,8 +683,7 @@ export function DetailsModal({
                 return (
                   <tr
                     key={row.id}
-                    onClick={() => !isPropertyTaxModule && row.isSeat && setSelectedSeat(row)}
-                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} ${!isPropertyTaxModule && row.isSeat ? "cursor-pointer hover:bg-blue-50/50" : "hover:bg-gray-50/80"}`}
+                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} hover:bg-gray-50/80`}
                   >
                     {/* Name — sticky left column */}
                     <td className={`pl-8 pr-4 py-2 sticky left-0 z-10 ${rowBg} border-r border-gray-100`}>
@@ -740,15 +738,6 @@ export function DetailsModal({
           </div>
         </div>
       </div>
-      {!isPropertyTaxModule && (
-        <SeatDetailModal 
-          isOpen={!!selectedSeat} 
-          onClose={() => setSelectedSeat(null)}
-          selectedSeat={selectedSeat}
-          moduleName={moduleName}
-          kpiLabel={kpiLabel}
-        />
-      )}
     </div>
   );
 }
