@@ -1,5 +1,18 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import svgPaths from "../../imports/svg-4i5smnjigf";
+
+const SUCCESS_COLOR = "#00B1EB";
+const FAILURE_COLOR = "#E5548E";
+
+const FINANCE_METRICS = {
+  ePayment: { totalAmount: "51,251", success: 21251, failure: 15000 },
+  ePos: { totalAmount: "32,840", success: 18420, failure: 8200 },
+} as const;
+
+function formatCount(n: number) {
+  return n.toLocaleString("en-IN");
+}
 
 interface FinanceCardProps {
   label: string;
@@ -8,10 +21,9 @@ interface FinanceCardProps {
   rateLabel?: string;
   color: string;
   icon: React.ReactNode;
-  diagonalTranslate?: string;
 }
 
-function FinanceCard({ label, value, rate, rateLabel, color, icon, diagonalTranslate = "left-[calc(50%+68.64px)] top-[-18.34px]" }: FinanceCardProps) {
+function FinanceCard({ label, value, rate, rateLabel, color, icon }: FinanceCardProps) {
   return (
     <div className={`flex-[1_0_0] min-h-[160px] min-w-0 sm:min-w-[300px] relative rounded-[12px] overflow-hidden ${color} shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]`}>
       <div className="-translate-x-1/2 absolute flex h-[476.999px] items-center justify-center left-[calc(50%+68.64px)] top-[-18.34px] w-[554.721px] pointer-events-none">
@@ -19,26 +31,20 @@ function FinanceCard({ label, value, rate, rateLabel, color, icon, diagonalTrans
           <div className="bg-white h-[243.037px] opacity-5 w-[503.326px]" />
         </div>
       </div>
-      
+
       <div className="relative flex flex-col h-full p-[24px] justify-between z-10">
         <div className="flex items-center gap-[8px]">
-          <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center">
-            {icon}
-          </div>
+          <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center">{icon}</div>
           <span className="font-sans font-bold text-[16px] text-white leading-tight">{label}</span>
         </div>
-        
+
         <div className="flex items-end justify-between mt-[16px]">
-          <span className="font-sans font-bold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">
-            {value}
-          </span>
-          
+          <span className="font-sans font-bold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">{value}</span>
+
           {rate && (
             <div className="bg-white flex gap-[8px] items-center p-[8px] rounded-[8px] shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
               <span className="font-sans text-[12px] text-[#5c6e93] leading-none">{rateLabel}</span>
-              <span className={`font-sans font-extrabold text-[16px] leading-none ${color.replace('bg-', 'text-')}`}>
-                {rate}
-              </span>
+              <span className={`font-sans font-extrabold text-[16px] leading-none ${color.replace("bg-", "text-")}`}>{rate}</span>
             </div>
           )}
         </div>
@@ -47,16 +53,37 @@ function FinanceCard({ label, value, rate, rateLabel, color, icon, diagonalTrans
   );
 }
 
-export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void; hideTabs?: boolean }) {
+export function FinanceModule({
+  onViewMore,
+  hideTabs,
+  selectedLocalBody,
+}: {
+  onViewMore: () => void;
+  hideTabs?: boolean;
+  selectedLocalBody?: string;
+}) {
   const [activeSubTab, setActiveSubTab] = useState<"ePayment" | "ePos">("ePayment");
+  const { totalAmount, success, failure } = FINANCE_METRICS[activeSubTab];
+  const total = success + failure;
+
+  const pieData = useMemo(
+    () => [
+      { name: "Success", value: success, fill: SUCCESS_COLOR },
+      { name: "Failure", value: failure, fill: FAILURE_COLOR },
+    ],
+    [success, failure]
+  );
+
+  const successPct = total > 0 ? Math.round((success / total) * 100) : 0;
+  const failurePct = total > 0 ? Math.round((failure / total) * 100) : 0;
 
   return (
     <div className="flex flex-col gap-[24px]">
-      {/* Sub Tab Header */}
       <div className="flex items-center justify-between w-full">
         {!hideTabs && (
           <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
             <button
+              type="button"
               onClick={() => setActiveSubTab("ePayment")}
               className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
                 activeSubTab === "ePayment"
@@ -75,8 +102,9 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
               </div>
               <span className="font-sans font-semibold text-[14px]">E-Payment</span>
             </button>
-            
+
             <button
+              type="button"
               onClick={() => setActiveSubTab("ePos")}
               className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
                 activeSubTab === "ePos"
@@ -98,7 +126,8 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
         )}
         {hideTabs && <div />}
 
-        <button 
+        <button
+          type="button"
           onClick={onViewMore}
           className="bg-white border border-[#dedede] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#dedede,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
         >
@@ -113,11 +142,10 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
         </button>
       </div>
 
-      {/* KPI Cards */}
       <div className="flex flex-col lg:flex-row gap-[24px]">
         <FinanceCard
           label="Total Amount"
-          value={activeSubTab === "ePayment" ? "51,251" : "32,840"}
+          value={totalAmount}
           color="bg-[#009fd2]"
           icon={
             <div className="size-[16px]">
@@ -132,11 +160,11 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
             </div>
           }
         />
-        
+
         <FinanceCard
           label="Success Count"
-          value={activeSubTab === "ePayment" ? "21,251" : "18,420"}
-          rate={activeSubTab === "ePayment" ? "54%" : "56%"}
+          value={formatCount(success)}
+          rate={`${successPct}%`}
           rateLabel="Success Rate"
           color="bg-[#00a78e]"
           icon={
@@ -149,11 +177,11 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
             </div>
           }
         />
-        
+
         <FinanceCard
           label="Failure Count"
-          value={activeSubTab === "ePayment" ? "15,000" : "8,200"}
-          rate={activeSubTab === "ePayment" ? "54%" : "25%"}
+          value={formatCount(failure)}
+          rate={`${failurePct}%`}
           rateLabel="Failure Rate"
           color="bg-[#df3a7a]"
           icon={
@@ -167,6 +195,64 @@ export function FinanceModule({ onViewMore, hideTabs }: { onViewMore: () => void
             </div>
           }
         />
+      </div>
+
+      <div className="bg-white rounded-[12px] border border-[#e8eff4] p-6 md:p-8 w-full">
+        <div className="flex flex-col gap-2 mb-8">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4">
+            <h2 className="font-sans font-semibold text-[18px] md:text-[20px] text-[#232f50] capitalize">Success vs failure</h2>
+            {selectedLocalBody ? (
+              <div className="bg-[#f2f6ff] border border-[#c0c7cd] px-3 py-2 rounded-[4px]">
+                <span className="font-sans font-semibold text-[14px] md:text-[16px] text-[#323232]">{selectedLocalBody}</span>
+              </div>
+            ) : null}
+          </div>
+          <p className="font-sans font-semibold text-[14px] text-[#5c6e93] capitalize">
+            Graphical representation of the service wise percentage.
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 w-full min-h-[280px] md:min-h-[320px]">
+          <div className="w-full max-w-[360px] h-[280px] md:h-[320px] shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="52%"
+                  outerRadius="88%"
+                  paddingAngle={2}
+                  stroke="#fff"
+                  strokeWidth={3}
+                >
+                  {pieData.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-2 px-4 py-2">
+              <div className="size-6 rounded-[4px] shrink-0" style={{ backgroundColor: SUCCESS_COLOR }} />
+              <p className="font-sans font-medium text-[14px] text-[#383c51]">
+                Success count {formatCount(success)}
+                <span className="text-[#5c6e93]"> ({successPct}%)</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2">
+              <div className="size-6 rounded-[4px] shrink-0" style={{ backgroundColor: FAILURE_COLOR }} />
+              <p className="font-sans font-medium text-[14px] text-[#383c51]">
+                Failure count {formatCount(failure)}
+                <span className="text-[#5c6e93]"> ({failurePct}%)</span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

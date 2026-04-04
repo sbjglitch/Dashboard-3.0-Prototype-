@@ -7,9 +7,13 @@ interface KPICardProps {
 
 function KPICard({ label, value }: KPICardProps) {
   return (
-    <div className="bg-white rounded-[8px] border border-[#E5E7EB] p-[16px] flex flex-col gap-1 shadow-sm">
-      <span className="text-sm text-[#6B7280] font-sans font-medium">{label}</span>
-      <span className="text-2xl font-bold text-[#111827] font-sans">{value}</span>
+    <div className="flex min-w-[152px] flex-1 basis-0 flex-col gap-1 overflow-hidden rounded-xl border border-[#e8eff4] bg-white p-3 shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] sm:p-4">
+      <span className="break-words font-sans text-[10px] font-semibold uppercase leading-snug tracking-wide text-[#6a7282] sm:text-xs">
+        {label}
+      </span>
+      <span className="mt-auto font-sans text-lg font-semibold tabular-nums leading-tight tracking-tight text-[#232f50] sm:text-[22px]">
+        {value}
+      </span>
     </div>
   );
 }
@@ -36,10 +40,10 @@ export function BuildingFinanceOverview({ onViewMore }: { onViewMore: () => void
         </button>
       </div>
 
-      {/* KPI Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
-        {kpis.map((kpi, index) => (
-          <KPICard key={index} label={kpi.label} value={kpi.value} />
+      {/* KPIs — single horizontal row, equal-width cards, same height; scroll on narrow viewports */}
+      <div className="flex flex-nowrap items-stretch gap-3 md:gap-4 overflow-x-auto pb-1">
+        {kpis.map((kpi) => (
+          <KPICard key={kpi.label} label={kpi.label} value={kpi.value} />
         ))}
       </div>
     </div>

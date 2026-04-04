@@ -249,7 +249,13 @@ function CustomChart({ data }: { data: any[] }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | "disposed" | "inProcess" | "delayed" | "all") => void }) {
+export function GrievanceModule({
+  onViewMore,
+  selectedLocalBody,
+}: {
+  onViewMore: (type?: "total" | "disposed" | "inProcess" | "delayed" | "all") => void;
+  selectedLocalBody?: string;
+}) {
   const [activeTab, setActiveTab] = useState<TabId>("fileStatus");
   const [activeGraph, setActiveGraph] = useState<GraphId>("disposal");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
@@ -343,7 +349,7 @@ export function GrievanceModule({ onViewMore }: { onViewMore: (type?: "total" | 
 
         {/* Finance Tab */}
         {activeTab === "finance" && (
-          <FinanceModule onViewMore={() => onViewMore("all")} hideTabs />
+          <FinanceModule selectedLocalBody={selectedLocalBody} onViewMore={() => onViewMore("all")} hideTabs />
         )}
 
         {/* Digital Health Tab */}

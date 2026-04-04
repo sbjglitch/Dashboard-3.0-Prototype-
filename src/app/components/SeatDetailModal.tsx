@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ChevronRight, X, ArrowLeft } from "lucide-react";
 import { ExportButton } from "./ExportButton";
 import { TableRow, getAncestors, generateFiles } from "../data/tableData";
@@ -34,6 +34,10 @@ export function SeatDetailModal({
   const totalFilePages = Math.ceil(allFiles.length / FILES_PER_PAGE);
   const pagedFiles = allFiles.slice((filePage - 1) * FILES_PER_PAGE, filePage * FILES_PER_PAGE);
 
+  useEffect(() => {
+    setFilePage(1);
+  }, [selectedSeat?.id, isOpen]);
+
   if (!isOpen || !selectedSeat) return null;
 
   return (
@@ -50,7 +54,7 @@ export function SeatDetailModal({
               <ArrowLeft size={18} strokeWidth={2.5} />
             </button>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">
+              <h2 className="font-sans text-[14px] font-bold text-gray-900 leading-tight">
                 {moduleName} {kpiLabel}
               </h2>
               {/* Breadcrumb */}
@@ -62,8 +66,8 @@ export function SeatDetailModal({
                       <span
                         className={
                           isLast
-                            ? "text-xs font-bold text-[#232f50] bg-[#e8eff4] px-2 py-0.5 rounded-md"
-                            : "text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                            ? "font-sans text-[14px] font-semibold text-[#232f50] bg-[#e8eff4] px-2 py-0.5 rounded-md"
+                            : "font-sans text-[14px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
                         }
                       >
                         {ancestor.name}
@@ -89,17 +93,17 @@ export function SeatDetailModal({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-8 py-6 border-b border-gray-50 shrink-0 bg-white">
           {[
             { label: "Total Files", value: selectedSeat.totalFiles.toLocaleString(), color: "text-[#232f50]", bgColor: "bg-gray-50/50" },
-            { label: "Disposed", value: selectedSeat.disposed.toLocaleString(), color: "text-[#00a63e]", bgColor: "bg-green-50/30" },
-            { label: "In Process", value: selectedSeat.inProcess.toLocaleString(), color: "text-[#d08700]", bgColor: "bg-amber-50/30" },
-            { label: "Rejected", value: selectedSeat.rejected.toLocaleString(), color: "text-[#e7000b]", bgColor: "bg-red-50/30" },
-            { label: "Returned", value: selectedSeat.returned.toLocaleString(), color: "text-[#f54900]", bgColor: "bg-orange-50/30" },
+            { label: "Disposed",    value: selectedSeat.disposed.toLocaleString(),   color: "text-[#00a63e]", bgColor: "bg-green-50/30" },
+            { label: "In Process",  value: selectedSeat.inProcess.toLocaleString(),  color: "text-[#d08700]", bgColor: "bg-amber-50/30" },
+            { label: "Rejected",    value: selectedSeat.rejected.toLocaleString(),   color: "text-[#e7000b]", bgColor: "bg-red-50/30" },
+            { label: "Returned",    value: selectedSeat.returned.toLocaleString(),   color: "text-[#f54900]", bgColor: "bg-orange-50/30" },
           ].map((stat) => (
             <div
               key={stat.label}
               className={`flex-1 border border-gray-100 rounded-2xl p-4 flex flex-col gap-1.5 ${stat.bgColor} transition-all hover:shadow-sm`}
             >
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</p>
-              <p className={`text-2xl font-black leading-tight ${stat.color}`}>{stat.value}</p>
+              <p className="font-sans text-[14px] font-medium text-gray-500">{stat.label}</p>
+              <p className={`font-sans text-[14px] font-bold leading-tight ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
         </div>
@@ -108,81 +112,100 @@ export function SeatDetailModal({
         <div className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0 bg-[#fefefe] border-b border-gray-50">
           <div className="flex items-center gap-3">
             {selectedSeat.designation && (
-              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-[#232f50] text-white shadow-sm">
+              <span className="inline-flex items-center px-3 py-1 rounded-lg font-sans text-[14px] font-semibold bg-[#232f50] text-white shadow-sm">
                 {selectedSeat.designation}
               </span>
             )}
-            <span className="text-sm font-semibold text-gray-400">
+            <span className="font-sans text-[14px] font-medium text-gray-400">
               Showing <span className="text-gray-700">{pagedFiles.length}</span> of <span className="text-gray-700">{allFiles.length}</span> files
             </span>
           </div>
           <ExportButton variant="dark" onClick={() => console.log("Exporting...")} className="!h-10 shadow-sm" />
         </div>
 
-        {/* File Table */}
-        <div className="overflow-auto flex-1 custom-scrollbar">
-          <table className="w-full text-sm border-separate border-spacing-0">
-            <thead className="bg-gray-50/80 backdrop-blur-md sticky top-0 z-10">
-              <tr>
-                <th className="text-left pl-8 pr-4 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Sl No.</th>
-                <th className="text-left px-4 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">File No.</th>
-                <th className="text-left px-4 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">File Date</th>
-                <th className="text-left pl-4 pr-8 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Inward No.</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {pagedFiles.map((file, index) => (
-                <tr
-                  key={file.slNo}
-                  className="group hover:bg-gray-50/50 transition-colors h-14"
-                >
-                  <td className="pl-8 pr-4 py-3 text-sm font-semibold text-gray-400 group-hover:text-gray-600 transition-colors">
-                    {file.slNo + (filePage - 1) * FILES_PER_PAGE}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-bold text-[#232f50] font-mono tracking-tight">
-                    {file.fileNo}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-600">
-                    {file.fileDate}
-                  </td>
-                  <td className="pl-4 pr-8 py-3 text-sm font-medium text-gray-500 font-mono">
-                    {file.inwardNo}
-                  </td>
+        {/* File table */}
+        <div className="custom-scrollbar flex-1 overflow-auto px-4 pb-2 md:px-8">
+          <div className="overflow-hidden rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
+            <table className="w-full border-collapse">
+              <thead className="sticky top-0 z-10 border-y border-gray-200">
+                <tr className="border-b border-gray-200">
+                  <th className="min-w-[64px] border-r border-gray-200 bg-[#f9fafb] py-3 pl-8 pr-4 text-left font-sans text-[14px] font-semibold text-[#5c6e93]">
+                    Sl No.
+                  </th>
+                  <th className="min-w-[160px] border-l border-gray-200 bg-[#f1f5f9] px-4 py-3 text-left font-sans text-[14px] font-semibold text-[#5c6e93]">
+                    File number
+                  </th>
+                  <th className="min-w-[120px] border-l border-gray-200 bg-[#f0fdf4] px-4 py-3 text-left font-sans text-[14px] font-semibold text-[#5c6e93] whitespace-nowrap">
+                    File date
+                  </th>
+                  <th className="min-w-[180px] border-l border-gray-200 bg-[#fffbeb] px-4 py-3 text-left font-sans text-[14px] font-semibold text-[#5c6e93]">
+                    Applicant
+                  </th>
+                  <th className="min-w-[140px] border-l border-gray-200 bg-[#fef2f2] py-3 pl-4 pr-8 text-left font-sans text-[14px] font-semibold text-[#5c6e93]">
+                    Inward No.
+                  </th>
                 </tr>
-              ))}
-              {pagedFiles.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="text-center py-20 text-gray-400 font-semibold italic">
-                    No files found for this seat.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {pagedFiles.map((file, index) => {
+                  const stripe = index % 2 === 0 ? "bg-white" : "bg-[#F6F9FB]";
+                  return (
+                    <tr
+                      key={file.slNo}
+                      className={`h-12 border-b border-gray-100 ${stripe} hover:bg-gray-50/80`}
+                    >
+                      <td className="border-r border-gray-100 py-2 pl-8 pr-4 font-sans text-[14px] font-medium text-[#5c6e93]">
+                        {file.slNo + (filePage - 1) * FILES_PER_PAGE}
+                      </td>
+                      <td className="border-l border-gray-100 px-4 py-2 font-sans text-[14px] font-medium text-[#232f50]">
+                        {file.fileNo}
+                      </td>
+                      <td className="border-l border-gray-100 px-4 py-2 font-sans text-[14px] font-medium text-[#232f50]">
+                        {file.fileDate}
+                      </td>
+                      <td className="border-l border-gray-100 px-4 py-2 font-sans text-[14px] font-medium text-[#232f50]">
+                        {file.applicant}
+                      </td>
+                      <td className="border-l border-gray-100 py-2 pl-4 pr-8 font-sans text-[14px] font-medium text-[#232f50]">
+                        {file.inwardNo}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {pagedFiles.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center font-sans text-[14px] font-medium text-gray-400">
+                      No files found for this seat.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* File Pagination */}
         {totalFilePages > 1 && (
           <div className="flex items-center justify-between px-4 md:px-8 py-4 border-t border-gray-50 shrink-0 bg-white">
-            <span className="text-sm font-bold text-gray-400">
-              Page <span className="text-gray-700">{filePage}</span> of <span className="text-gray-700">{totalFilePages}</span>
+            <span className="font-sans text-[14px] font-medium text-gray-400">
+              Page <span className="text-gray-700 font-semibold">{filePage}</span> of <span className="text-gray-700 font-semibold">{totalFilePages}</span>
             </span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setFilePage((p) => Math.max(1, p - 1))}
                 disabled={filePage === 1}
-                className="px-4 py-2 text-xs rounded-xl border border-gray-200 bg-white disabled:opacity-30 hover:bg-gray-50 font-bold text-gray-700 transition-all shadow-sm active:scale-95"
+                className="px-4 py-2 font-sans text-[14px] font-medium rounded-xl border border-gray-200 bg-white disabled:opacity-30 hover:bg-gray-50 text-gray-700 transition-all shadow-sm active:scale-95"
               >
                 Previous
               </button>
               <div className="flex items-center gap-1.5">
                 {Array.from({ length: Math.min(totalFilePages, 5) }, (_, i) => {
-                  const page = i + 1; // Simplified for brevity in prototype
+                  const page = i + 1;
                   return (
                     <button
                       key={page}
                       onClick={() => setFilePage(page)}
-                      className={`w-9 h-9 rounded-xl text-xs font-black transition-all ${
+                      className={`w-9 h-9 rounded-xl font-sans text-[14px] font-semibold transition-all ${
                         filePage === page
                           ? "bg-[#232f50] text-white shadow-md shadow-[#232f50]/20"
                           : "border border-gray-100 bg-white text-gray-500 hover:bg-gray-50"
@@ -196,7 +219,7 @@ export function SeatDetailModal({
               <button
                 onClick={() => setFilePage((p) => Math.min(totalFilePages, p + 1))}
                 disabled={filePage === totalFilePages}
-                className="px-4 py-2 text-xs rounded-xl border border-gray-200 bg-white disabled:opacity-30 hover:bg-gray-50 font-bold text-gray-700 transition-all shadow-sm active:scale-95"
+                className="px-4 py-2 font-sans text-[14px] font-medium rounded-xl border border-gray-200 bg-white disabled:opacity-30 hover:bg-gray-50 text-gray-700 transition-all shadow-sm active:scale-95"
               >
                 Next
               </button>

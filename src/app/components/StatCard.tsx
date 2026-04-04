@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 export interface StatCardProps {
   label: string;
@@ -23,6 +23,8 @@ export function StatCard({
   color,
   onClick,
 }: StatCardProps) {
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
   return (
     <div 
       className="bg-white border border-[#e8eff4] rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:shadow-md transition-shadow min-h-[140px] sm:h-[156px] flex flex-col p-[16px] justify-between" 
@@ -43,8 +45,26 @@ export function StatCard({
       <div className="flex items-center gap-[16px] py-[4px]">
         <span className="font-sans font-bold text-[30px] text-[#232f50] leading-[38px]">{value}</span>
         {percentage && (
-          <div className="bg-[#f0f4fb] flex items-center gap-[6px] px-[8px] py-[4px] rounded-[16px]">
-            <span className="font-sans font-semibold text-[14px] text-[#09327b] leading-[20px]">{percentage}</span>
+          <div className="relative flex items-center">
+            <div
+              className="bg-[#f0f4fb] flex items-center gap-[6px] px-[8px] py-[4px] rounded-[16px] cursor-default"
+              onMouseEnter={() => setTooltipVisible(true)}
+              onMouseLeave={() => setTooltipVisible(false)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="font-sans font-semibold text-[14px] text-[#09327b] leading-[20px]">{percentage}</span>
+              <div className="w-[14px] h-[14px] rounded-full bg-[#09327b] flex items-center justify-center shrink-0">
+                <span className="font-sans font-bold text-[9px] text-white leading-none">!</span>
+              </div>
+            </div>
+            {tooltipVisible && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
+                <div className="bg-[#232f50] text-white text-[12px] font-sans font-medium rounded-[8px] px-[10px] py-[8px] whitespace-nowrap shadow-lg">
+                  {percentage} {label} over the total files
+                </div>
+                <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#232f50] mx-auto" />
+              </div>
+            )}
           </div>
         )}
       </div>

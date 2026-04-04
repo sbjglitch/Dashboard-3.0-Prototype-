@@ -39,9 +39,51 @@ const PIE_DATA_OCCUPANCY = [
 ];
 
 
-function toSentenceCase(text: string) {
+function toSentenceCase(text: string) { 
   if (!text) return text;
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+// ─── Shared tooltip ──────────────────────────────────────────────────────────
+
+interface TooltipState {
+  label: string;
+  rows: { color: string; name: string; value: string }[];
+}
+
+function GraphTooltip({
+  tip,
+  mouse,
+}: {
+  tip: TooltipState;
+  mouse: { x: number; y: number };
+}) {
+  return (
+    <div
+      className="fixed z-50 pointer-events-none"
+      style={{ left: mouse.x, top: mouse.y, transform: "translate(-50%, -100%) translateY(-12px)" }}
+    >
+      <div className="relative">
+        <div className="bg-white border border-[#e8eff4] rounded-[8px] p-[12px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)] whitespace-nowrap flex flex-col gap-[6px] min-w-[130px] relative z-10">
+          <span className="font-sans font-semibold text-[13px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">
+            {tip.label}
+          </span>
+          <div className="flex flex-col gap-[4px]">
+            {tip.rows.map((r) => (
+              <div key={r.name} className="flex items-center justify-between gap-[16px]">
+                <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">
+                  <div className="w-[6px] h-[6px] rounded-full shrink-0" style={{ backgroundColor: r.color }} />
+                  {r.name}
+                </span>
+                <span className="font-sans font-semibold text-[12px] text-[#232f50]">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-[10px] h-[10px] bg-white border-b border-r border-[#e8eff4] rotate-45 z-0" />
+      </div>
+    </div>
+  );
 }
 
 export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalBody: string }) {
@@ -49,6 +91,10 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
   const [activeSubTab, setActiveSubTab] = useState<"District" | "Local Bodies">("District");
   const [sortBy, setSortBy] = useState("Descending");
   const [showTop, setShowTop] = useState("Top 20");
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => setMouse({ x: e.clientX, y: e.clientY });
   
   const tabs = [
     "No. of files that exceed SLI Period",
@@ -60,7 +106,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
 
   const renderBarChart = (title: string, desc: string, yAxisMax: number = 30000, yAxisName: string = "Files", yAxisIncrement: number = 5000, hasShowFilter: boolean = false) => {
     // Generate Y Axis segments
-    const ySegments = [];
+    const ySegments: number[] = [];
     for (let i = yAxisMax; i >= 0; i -= yAxisIncrement) ySegments.push(i);
 
     return (
@@ -79,31 +125,33 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
           </div>
           <div className="flex flex-wrap flex-col sm:flex-row items-center gap-[16px]">
              {/* Sub Tabs */}
-             <div className="bg-[#f2f6ff] rounded-[8px] flex items-center p-[4px]">
+             <div className="inline-flex rounded-[8px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] p-[4px] gap-[4px]">
                <button 
+                 type="button"
                  onClick={() => setActiveSubTab("District")}
-                 className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans font-semibold transition-colors ${activeSubTab === "District" ? "bg-white shadow border border-gray-100 text-[#232f50]" : "text-[#5c6e93]"}`}
+                 className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "District" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
                >
                  District
                </button>
                <button 
+                 type="button"
                  onClick={() => setActiveSubTab("Local Bodies")}
-                 className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans font-semibold transition-colors ${activeSubTab === "Local Bodies" ? "bg-white shadow border border-gray-100 text-[#232f50]" : "text-[#5c6e93]"}`}
+                 className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "Local Bodies" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
                >
                  Local Bodies
                </button>
              </div>
              {/* Filters */}
-             <div className="flex flex-wrap gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
-               <span className="font-semibold text-[14px] text-[#232f50]">Sort By:</span>
-               <span className="font-semibold text-[14px] opacity-70 text-[#232f50]">{sortBy}</span>
-               <ChevronDown className="w-4 h-4 text-[#232f50] opacity-70" />
+             <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
+               <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
+               <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortBy}</span>
+               <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
              </div>
              {hasShowFilter && activeSubTab === "Local Bodies" && (
-                <div className="flex flex-wrap gap-[12px] bg-[#f2f6ff] rounded-[8px] px-[16px] py-[6px]">
-                 <span className="font-semibold text-[14px] text-[#232f50]">Show:</span>
-                 <span className="font-semibold text-[14px] opacity-70 text-[#232f50]">{showTop}</span>
-                 <ChevronDown className="w-4 h-4 text-[#232f50] opacity-70" />
+                <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
+                 <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Show:</span>
+                 <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{showTop}</span>
+                 <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
                </div>
              )}
           </div>
@@ -127,17 +175,23 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
             </div>
 
             {/* Bars */}
-            <div className="absolute inset-0 flex items-end justify-between px-[16px] z-10 bottom-[1px]">
+            <div className="absolute inset-0 flex items-end justify-between px-[16px] z-10 bottom-[1px]" onMouseMove={handleMouseMove}>
                {BAR_DATA_DISTRICT_ExceedSLI.map((item, idx) => (
-                 <div key={idx} className="flex flex-col items-center justify-end h-full group" style={{ width: `${100/BAR_DATA_DISTRICT_ExceedSLI.length}%`, maxWidth: '40px' }}>
-                    <div className={`w-full ${item.isAvg ? 'bg-[#5cd7ff]' : 'bg-[#00b2eb]'} rounded-t-[4px] hover:opacity-80 transition-opacity relative`} style={{ height: `${(item.value / yAxisMax) * 100}%` }}>
-                    </div>
+                 <div
+                   key={idx}
+                   className="flex flex-col items-center justify-end h-full group"
+                   style={{ width: `${100/BAR_DATA_DISTRICT_ExceedSLI.length}%`, maxWidth: '40px' }}
+                   onMouseEnter={() => setTooltip({ label: item.label, rows: [{ color: item.isAvg ? '#5cd7ff' : '#00b2eb', name: item.isAvg ? 'State Avg' : 'Files', value: item.value.toLocaleString() }] })}
+                   onMouseLeave={() => setTooltip(null)}
+                 >
+                    <div className={`w-full ${item.isAvg ? 'bg-[#5cd7ff]' : 'bg-[#00b2eb]'} rounded-t-[4px] hover:opacity-80 transition-opacity relative`} style={{ height: `${(item.value / yAxisMax) * 100}%` }} />
                     <span className="absolute -bottom-[24px] text-[12px] text-[#5c6e93] font-sans font-medium truncate w-[50px] text-center">
                       {item.label}
                     </span>
                  </div>
                ))}
             </div>
+            {tooltip && <GraphTooltip tip={tooltip} mouse={mouse} />}
           </div>
         </div>
       </div>
@@ -182,14 +236,24 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
 
            {/* Legends */}
            <div className="flex flex-col gap-[16px]">
-             {data.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-[12px]">
-                  <div className={`w-[20px] h-[20px] rounded-full ${item.color}`}></div>
-                  <span className="font-sans font-semibold text-[16px] text-[#232f50] w-[200px] truncate">{item.label}</span>
-                  <span className="font-sans font-bold text-[16px] font-bold text-[#232f50]">{item.value}%</span>
-                </div>
-             ))}
+             {data.map((item, idx) => {
+               const hex = item.color.replace("bg-[", "").replace("]", "");
+               return (
+                 <div
+                   key={idx}
+                   className="flex items-center gap-[12px] rounded-[6px] px-[8px] py-[4px] cursor-default transition-colors hover:bg-[#f6f9fb]"
+                   onMouseEnter={() => setTooltip({ label: item.label, rows: [{ color: hex, name: item.label, value: `${item.value}%` }] })}
+                   onMouseLeave={() => setTooltip(null)}
+                   onMouseMove={handleMouseMove}
+                 >
+                   <div className={`w-[20px] h-[20px] rounded-full shrink-0 ${item.color}`} />
+                   <span className="font-sans font-semibold text-[16px] text-[#232f50] w-[200px] truncate">{item.label}</span>
+                   <span className="font-sans font-bold text-[16px] text-[#232f50]">{item.value}%</span>
+                 </div>
+               );
+             })}
            </div>
+           {tooltip && <GraphTooltip tip={tooltip} mouse={mouse} />}
         </div>
       </div>
     );
@@ -233,11 +297,11 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-[100%] shrink-0 p-[0px] mt-[16px]">
-      {/* Left Sidebar */}
-      <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-[16px]">
-        <div className="flex gap-[16px] items-center">
-          <div className="w-[32px] h-[32px] relative">
+    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-[16px]">
+      {/* Left sidebar — matches GrievanceModule graph panel */}
+      <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
+        <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
+          <div className="relative shrink-0 size-[32px]">
              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
                 <path d="M28 16.8678C28 19.9915 24.5796 21.9098 21.9142 20.2809L21.1235 19.7977C19.8234 19.0032 18.1848 19.0163 16.8975 19.8316L10.1402 24.1112C7.47694 25.7979 4 23.8844 4 20.7319V19.5V8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8L28 16.8678Z" fill="#83DAF6" />
                 <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
@@ -245,29 +309,36 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
           </div>
           <span className="font-sans font-bold text-[16px] text-[#232f50]">Graphs</span>
         </div>
-        
-        <div className="flex flex-col gap-[8px] w-full mt-[8px]">
-          <p className="font-sans font-semibold text-[14px] text-[#5c6e93] opacity-70 px-[12px] mb-[4px]">
-            Select Graph
-          </p>
+
+        <div className="flex flex-col gap-[8px] w-full">
+          <div className="flex flex-col font-sans font-medium justify-center leading-[0] opacity-70 relative shrink-0 text-[#5c6e93] text-[14px] whitespace-nowrap px-[4px] py-[8px]">
+            <p className="leading-[20px]">Select Graph</p>
+          </div>
           {tabs.map((tab, idx) => (
              <button
+               type="button"
                key={idx}
                onClick={() => setActiveTab(idx)}
-               className={`w-full text-left px-[12px] py-[16px] rounded-[4px] font-sans font-medium text-[14px] transition-colors leading-[20px] ${
-                 activeTab === idx 
-                   ? "bg-[#e5f7fd] border border-[#ccf0fa] text-[#09327b] font-semibold" 
-                   : "text-[#232f50] opacity-70 hover:bg-[#e8eff4]/50"
+               className={`content-stretch flex items-start p-[16px] relative w-full text-left rounded-[8px] transition-colors cursor-pointer ${
+                 activeTab === idx
+                   ? "bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]"
+                   : "hover:bg-[#e8eff4]/50 border border-transparent"
                }`}
              >
-               {tab}
+               <span
+                 className={`flex-[1_0_0] font-sans leading-[20px] min-h-px min-w-px relative text-[14px] ${
+                   activeTab === idx ? "font-semibold text-[#232f50]" : "font-medium text-[#232f50]"
+                 }`}
+               >
+                 {tab}
+               </span>
              </button>
           ))}
         </div>
       </div>
 
-      {/* Right Content */}
-      <div className="bg-white flex-[1_0_0] min-h-[350px] lg:h-full relative rounded-r-[16px] border-l border-[#e8eff4] flex flex-col p-4 md:p-[32px]">
+      {/* Graph content */}
+      <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[350px]">
          {renderContent()}
       </div>
     </div>

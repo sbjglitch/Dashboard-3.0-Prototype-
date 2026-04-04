@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { DetailsModal } from "./components/DetailsModal";
+import { DetailsModal, type DetailsModalContentMode } from "./components/DetailsModal";
 import { LocalBodySelector } from "./components/LocalBodySelector";
 import { TimePeriodSelector } from "./components/TimePeriodSelector";
 import { FilterDropdown } from "./components/FilterDropdown";
 import { GrievanceModule } from "./components/GrievanceModule";
 import { FinanceModule } from "./components/FinanceModule";
+import { CivilRegistrationModule } from "./components/CivilRegistrationModule";
+import { CivilRegistrationGraphs } from "./components/CivilRegistrationGraphs";
 import { BuildingFinanceOverview } from "./components/BuildingFinanceOverview";
 import { BuildingPermissionGraphs } from "./components/BuildingPermissionGraphs";
 import { PropertyTaxGraphs } from "./components/PropertyTaxGraphs";
@@ -144,6 +146,8 @@ function PropertyTaxKpiCard({
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalKpiType, setModalKpiType] = useState<"total" | "disposed" | "inProcess" | "delayed" | "all">("all");
+  const [detailsModalContentMode, setDetailsModalContentMode] =
+    useState<DetailsModalContentMode>("fileKpi");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [isTimePeriodOpen, setIsTimePeriodOpen] = useState(false);
   const [selectedTimePeriod, setSelectedTimePeriod] = useState("Upto today");
@@ -405,14 +409,32 @@ export default function App() {
           <div className="flex flex-col gap-4 md:gap-[24px] p-3 md:p-[16px]">
             {/* Finance Management: Show E-Payment/E-POS tabs directly */}
             {selectedModule === "Finance Management" && (
-              <FinanceModule onViewMore={() => {
-                setModalKpiType("all");
-                setIsModalOpen(true);
-              }} />
+              <FinanceModule
+                selectedLocalBody={selectedLocalBody}
+                onViewMore={() => {
+                  setDetailsModalContentMode("fileKpi");
+                  setModalKpiType("all");
+                  setIsModalOpen(true);
+                }}
+              />
             )}
 
-            {/* Dashboard Content Area: Tabs + Cards (shown for All Module and other non-grievance/non-finance modules) */}
-            {selectedModule !== "Public Grievance and complaints" && selectedModule !== "Finance Management" && (
+            {/* Civil Registration module — own tabs + graphs */}
+            {selectedModule === "Civil Registration" && (
+              <>
+                <CivilRegistrationModule
+                  onViewMore={(type) => {
+                    setDetailsModalContentMode("fileKpi");
+                    setModalKpiType(type || "all");
+                    setIsModalOpen(true);
+                  }}
+                />
+                <CivilRegistrationGraphs selectedSubModule={selectedSubModule} />
+              </>
+            )}
+
+            {/* Dashboard Content Area: Tabs + Cards (shown for All Module and other non-grievance/non-finance/non-civil-reg modules) */}
+            {selectedModule !== "Public Grievance and complaints" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="w-full">
                 {/* Tabs */}
                 <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit mb-4 md:mb-[24px] h-[40px] md:h-[44px]">
@@ -482,6 +504,7 @@ export default function App() {
                       otherLabel="Other Files"
                       color="bg-[#1ebe72]"
                       onClick={() => {
+                        setDetailsModalContentMode("fileKpi");
                         setModalKpiType("total");
                         setIsModalOpen(true);
                       }}
@@ -496,6 +519,7 @@ export default function App() {
                       percentage="41.5%"
                       color="bg-[#009fd2]"
                       onClick={() => {
+                        setDetailsModalContentMode("fileKpi");
                         setModalKpiType("disposed");
                         setIsModalOpen(true);
                       }}
@@ -510,6 +534,7 @@ export default function App() {
                       percentage="25%"
                       color="bg-[#7b61ff]"
                       onClick={() => {
+                        setDetailsModalContentMode("fileKpi");
                         setModalKpiType("inProcess");
                         setIsModalOpen(true);
                       }}
@@ -524,6 +549,7 @@ export default function App() {
                       percentage="25%"
                       color="bg-[#df3a7a]"
                       onClick={() => {
+                        setDetailsModalContentMode("fileKpi");
                         setModalKpiType("delayed");
                         setIsModalOpen(true);
                       }}
@@ -549,6 +575,7 @@ export default function App() {
                         currentDemand="25,251"
                         bgClass="bg-[#00a78e]"
                         onClick={() => {
+                          setDetailsModalContentMode("propertyTaxFinance");
                           setModalKpiType("total");
                           setIsModalOpen(true);
                         }}
@@ -560,6 +587,7 @@ export default function App() {
                         currentDemand="10,000"
                         bgClass="bg-[#00b2eb]"
                         onClick={() => {
+                          setDetailsModalContentMode("propertyTaxFinance");
                           setModalKpiType("disposed");
                           setIsModalOpen(true);
                         }}
@@ -571,6 +599,7 @@ export default function App() {
                         currentDemand="14,000"
                         bgClass="bg-[#7b61ff]"
                         onClick={() => {
+                          setDetailsModalContentMode("propertyTaxFinance");
                           setModalKpiType("inProcess");
                           setIsModalOpen(true);
                         }}
@@ -578,14 +607,19 @@ export default function App() {
                     </div>
                   ) : selectedModule === "Building Permissions" ? (
                     <BuildingFinanceOverview onViewMore={() => {
+                      setDetailsModalContentMode("buildingFinance");
                       setModalKpiType("all");
                       setIsModalOpen(true);
                     }} />
                   ) : (
-                    <FinanceModule onViewMore={() => {
-                      setModalKpiType("all");
-                      setIsModalOpen(true);
-                    }} />
+                    <FinanceModule
+                      selectedLocalBody={selectedLocalBody}
+                      onViewMore={() => {
+                        setDetailsModalContentMode("fileKpi");
+                        setModalKpiType("all");
+                        setIsModalOpen(true);
+                      }}
+                    />
                   )
                 )}
 
@@ -594,14 +628,18 @@ export default function App() {
 
             {/* Public Grievance & Redressal module content */}
             {selectedModule === "Public Grievance and complaints" && (
-              <GrievanceModule onViewMore={(type) => {
-                setModalKpiType(type || "all");
-                setIsModalOpen(true);
-              }} />
+              <GrievanceModule
+                selectedLocalBody={selectedLocalBody}
+                onViewMore={(type) => {
+                  setDetailsModalContentMode("fileKpi");
+                  setModalKpiType(type || "all");
+                  setIsModalOpen(true);
+                }}
+              />
             )}
 
-            {/* Graph Section — shown only for non-grievance and non-all modules */}
-            {selectedModule === "Building Permissions" && (
+            {/* Building permission charts: dedicated module + All Module overview (otherwise this file never mounts on the default screen) */}
+            {(selectedModule === "Building Permissions" || selectedModule === "All Module") && (
               <BuildingPermissionGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
@@ -609,7 +647,7 @@ export default function App() {
               <PropertyTaxGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
-            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && (
+            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-[16px] bg-[#f6f9fb] rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-0">
                 {/* Left Sidebar */}
                 <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-4 lg:p-[16px]">
@@ -788,11 +826,16 @@ export default function App() {
         </div>
       </div>
 
-      <DetailsModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <DetailsModal
+        key={`${detailsModalContentMode}-${modalKpiType}`}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setDetailsModalContentMode("fileKpi");
+        }}
         kpiType={modalKpiType}
         isFinanceModule={selectedModule === "Finance Management"}
+        contentMode={detailsModalContentMode}
         moduleName={selectedModule}
         subModuleName={selectedSubModule}
         serviceName={selectedService}

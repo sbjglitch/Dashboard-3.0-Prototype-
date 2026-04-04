@@ -46,6 +46,7 @@ export interface FileRecord {
   fileNo: string;
   fileDate: string;
   inwardNo: string;
+  applicant: string;
 }
 
 // Standard correct order for Kerala Districts
@@ -494,6 +495,12 @@ export const getAncestors = (id: string): TableRow[] => {
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const APPLICANT_SAMPLE_NAMES = [
+  "Rajesh Kumar", "Priya Nair", "Anil Menon", "Deepa Krishnan", "Suresh Babu",
+  "Lakshmi Devi", "Mohammed Irfan", "Sunita Pillai", "Varghese Thomas", "Meera Joshi",
+  "Arun Balakrishnan", "Kavitha Rajan", "Joseph Mathew", "Aswathy Sreekumar", "Harish Varma",
+];
+
 /** Generate dummy file records for a seat */
 export const generateFiles = (seatId: string, count: number, moduleName: string): FileRecord[] => {
   // root district segment → code
@@ -508,11 +515,14 @@ export const generateFiles = (seatId: string, count: number, moduleName: string)
     const day = 1 + (hashNum(seed + "d") % 28);
     const serial = String(hashNum(seed + "s") % 90000 + 10000);
     const inwardSerial = String(hashNum(seed + "iw") % 900000 + 100000);
+    const applicant =
+      APPLICANT_SAMPLE_NAMES[hashNum(seed + "a") % APPLICANT_SAMPLE_NAMES.length] ?? "Applicant";
     files.push({
       slNo: i,
       fileNo: `${prefix}/${code}/${year}/${serial}`,
       fileDate: `${String(day).padStart(2, "0")} ${MONTHS[month - 1]} ${year}`,
       inwardNo: `INW/${year}/${code}/${inwardSerial}`,
+      applicant,
     });
   }
   return files;

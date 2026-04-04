@@ -1,21 +1,120 @@
-import { useState, useMemo } from "react";
-import { ChevronRight, ChevronDown, X, Download, Search, Eye, ArrowLeft } from "lucide-react";
+import { useState, useMemo, useEffect, Fragment } from "react";
+import { ChevronRight, ChevronDown, X, Search } from "lucide-react";
 import { ExportButton } from "./ExportButton";
 import { SeatDetailModal } from "./SeatDetailModal";
-import { 
-  TableRow, 
-  TableItem, 
-  FileRecord, 
-  DISTRICTS, 
-  mockData, 
-  getAncestors, 
-  generateFiles,
-  mockNum
-} from "../data/tableData";
+import { TableRow, TableItem, DISTRICTS, mockData, mockNum } from "../data/tableData";
 
 // ── Component ─────────────��───────────────────────────────────────────────────
 
 export type KpiType = "total" | "disposed" | "inProcess" | "delayed" | "all";
+
+type FileStatusColumn = {
+  key: keyof TableRow;
+  label: string;
+  headerClass: string;
+};
+
+const FILE_STATUS_TABLE_COLUMNS: Record<
+  Exclude<KpiType, "all">,
+  FileStatusColumn[]
+> = {
+  total: [
+    { key: "totalFiles", label: "Total Files", headerClass: "bg-[#f1f5f9]" },
+    { key: "disposed", label: "Disposed", headerClass: "bg-[#f0fdf4]" },
+    { key: "inProcess", label: "In Process", headerClass: "bg-[#fffbeb]" },
+    { key: "rejected", label: "Rejected", headerClass: "bg-[#fef2f2]" },
+    { key: "returned", label: "Returned", headerClass: "bg-[#f5f3ff]" },
+    { key: "delayed", label: "Delayed", headerClass: "bg-[#ecfeff]" },
+  ],
+  disposed: [
+    { key: "disposed", label: "Total disposed", headerClass: "bg-[#f1f5f9]" },
+    { key: "parkedFiles", label: "parked files", headerClass: "bg-[#f0fdf4]" },
+    { key: "permanentDisposed", label: "permanent disposed", headerClass: "bg-[#fffbeb]" },
+    { key: "disposedWithinSLI", label: "disposed within SLI", headerClass: "bg-[#fef2f2]" },
+    { key: "disposed1to30", label: "Disposed 1-30 days", headerClass: "bg-[#f5f3ff]" },
+    { key: "disposed30to100", label: "Disposed 30-100 days", headerClass: "bg-[#ecfeff]" },
+    { key: "disposedAfter100", label: "Disposed after 100 days of SLI", headerClass: "bg-[#f8fafc]" },
+  ],
+  inProcess: [
+    { key: "inProcess", label: "Total files in process", headerClass: "bg-[#f1f5f9]" },
+    { key: "withinSLI", label: "Within SLI", headerClass: "bg-[#f0fdf4]" },
+    { key: "delayedInProcess", label: "Delayed", headerClass: "bg-[#fffbeb]" },
+  ],
+  delayed: [
+    { key: "delayed", label: "Total delayed", headerClass: "bg-[#f1f5f9]" },
+    { key: "delayedBy10", label: "delayed by 10 days", headerClass: "bg-[#f0fdf4]" },
+    { key: "delayedBy11to30", label: "delayed by 11-30 days", headerClass: "bg-[#fffbeb]" },
+    { key: "delayedBy31to100", label: "delayed by 31-100 days", headerClass: "bg-[#fef2f2]" },
+    { key: "delayedBy101to365", label: "delayed by 101-365 days", headerClass: "bg-[#f5f3ff]" },
+    { key: "delayedAfter365", label: "delayed by >365 days", headerClass: "bg-[#ecfeff]" },
+  ],
+};
+
+function getRowMetric(row: TableRow, key: keyof TableRow): number {
+  const v = row[key];
+  return typeof v === "number" ? v : 0;
+}
+
+function formatFileCount(n: number) {
+  return n.toLocaleString();
+}
+
+function formatINR(n: number) {
+  return n.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+}
+
+export type DetailsModalContentMode = "fileKpi" | "propertyTaxFinance" | "buildingFinance";
+
+/** State-level targets (₹) — aligned with BuildingFinanceOverview KPI strip */
+const BUILDING_FINANCE_TARGETS = [125_000, 840_000, 215_000, 450_000, 95_000] as const;
+
+const BUILDING_FINANCE_COLS = [
+  { id: "applicationFees", label: "Application Fees", headerClass: "bg-[#f1f5f9]" },
+  { id: "permitFees", label: "Permit Fees", headerClass: "bg-[#f0fdf4]" },
+  { id: "regularisationFees", label: "Regularisation Fees", headerClass: "bg-[#fffbeb]" },
+  { id: "additionalFsi", label: "Additional FSI", headerClass: "bg-[#fef2f2]" },
+  { id: "renewalFees", label: "Renewal Fees", headerClass: "bg-[#f5f3ff]" },
+] as const;
+
+function hashSeed(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function buildingFinanceFactor(rowId: string, colIdx: number): number {
+  return 0.5 + ((hashSeed(`${rowId}:${colIdx}`) % 1000) / 1000);
+}
+
+type PtFinanceSlice = "total" | "disposed" | "inProcess";
+
+const PT_FINANCE_MODAL_META: Record<
+  PtFinanceSlice,
+  { headline: string; kpiLabels: [string, string, string] }
+> = {
+  total: {
+    headline: "Collection overview",
+    kpiLabels: ["Total demand", "Total collected", "Outstanding balance"],
+  },
+  disposed: {
+    headline: "Arrear demand breakdown",
+    kpiLabels: ["Arrear outstanding", "Arrear collected", "Net arrear balance"],
+  },
+  inProcess: {
+    headline: "Current demand breakdown",
+    kpiLabels: ["Current demand", "Current collected", "Net current balance"],
+  },
+};
+
+function getPtFinanceAmounts(row: TableRow, slice: PtFinanceSlice) {
+  const base = row.totalFiles * 920 + row.disposed * 180 + (row.delayed || 0) * 40;
+  const sliceMult = slice === "total" ? 1 : slice === "disposed" ? 0.48 : 0.38;
+  const demand = Math.round(base * sliceMult);
+  const rate = 0.58 + (row.name.length % 7) * 0.03;
+  const collected = Math.min(demand, Math.round(demand * rate));
+  const balance = demand - collected;
+  return { demand, collected, balance };
+}
 
 export function DetailsModal({ 
   isOpen, 
@@ -24,7 +123,8 @@ export function DetailsModal({
   moduleName = "Building Permissions",
   subModuleName = "Select",
   serviceName = "Select",
-  isFinanceModule = false
+  isFinanceModule = false,
+  contentMode = "fileKpi",
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
@@ -33,10 +133,8 @@ export function DetailsModal({
   subModuleName?: string;
   serviceName?: string;
   isFinanceModule?: boolean;
+  contentMode?: DetailsModalContentMode;
 }) {
-  const normalizedModuleName = moduleName.toLowerCase().replace(/[^a-z]/g, "");
-  const isPropertyTaxModule =
-    normalizedModuleName.includes("propertytax") || normalizedModuleName.includes("property");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set([
     "thiruvananthapuram",
     "thiruvananthapuram-corp",
@@ -45,8 +143,7 @@ export function DetailsModal({
   ]));
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSeat, setSelectedSeat] = useState<TableRow | null>(null);
-  const [filePage, setFilePage] = useState(1);
-  const FILES_PER_PAGE = 10;
+  const [seatFileModalOpen, setSeatFileModalOpen] = useState(false);
 
   // Per-parentId pagination state
   const [pageState, setPageState] = useState<Record<string, number>>({});
@@ -106,6 +203,8 @@ export function DetailsModal({
 
     return [...categories, ...allCatBodies, ...seats];
   }, []);
+
+  const isBuildingFinanceModal = contentMode === "buildingFinance";
 
   const toggleRow = (rowId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -173,16 +272,17 @@ export function DetailsModal({
     return visible;
   };
 
-  const visibleRows = getVisibleRows().filter(row => {
-    if ("isPagination" in row) return true;
-    return !row.isSeat;
-  });
+  const allVisibleRows = getVisibleRows();
+  const visibleRows = isBuildingFinanceModal
+    ? allVisibleRows.filter((row) => "isPagination" in row || !row.isSeat)
+    : allVisibleRows;
   const indentPx = (level: number) => (level - 1) * 24;
   const hasChildren = (id: string) => {
     const sourceData = viewMode === "district" ? mockData : officeTypeRows;
     const children = sourceData.filter((r) => r.parentId === id);
-    if (children.every(r => r.isSeat)) return false;
-    return children.length > 0;
+    if (children.length === 0) return false;
+    if (isBuildingFinanceModal && children.every((r) => r.isSeat)) return false;
+    return true;
   };
 
   const expandedDistricts = Array.from(expandedRows).filter((id) =>
@@ -191,33 +291,67 @@ export function DetailsModal({
   const isAnyDistrictExpanded = viewMode === "district" && expandedDistricts.length > 0;
 
   const level1 = mockData.filter((d) => d.level === 1);
-  const totalFiles = level1.reduce((a, c) => a + c.totalFiles, 0);
-  const disposed = level1.reduce((a, c) => a + c.disposed, 0);
-  const inProcess = level1.reduce((a, c) => a + c.inProcess, 0);
-  const returned = level1.reduce((a, c) => a + c.returned, 0);
-  const formatRupee = (value: number) => `₹ ${value.toLocaleString()}`;
 
-  // Seat detail data
-  const seatAncestors = useMemo(
-    () => (selectedSeat ? getAncestors(selectedSeat.id) : []),
-    [selectedSeat]
-  );
+  function getBuildingFinanceFee(row: TableRow, colIdx: number): number {
+    const target = BUILDING_FINANCE_TARGETS[colIdx];
+    if (target === undefined) return 0;
+    const norm =
+      level1.reduce((s, r) => s + r.totalFiles * buildingFinanceFactor(r.id, colIdx), 0) || 1;
+    return Math.round(
+      (target * row.totalFiles * buildingFinanceFactor(row.id, colIdx)) / norm
+    );
+  }
 
-  const allFiles = useMemo(
-    () => (selectedSeat ? generateFiles(selectedSeat.id, selectedSeat.totalFiles, moduleName) : []),
-    [selectedSeat, moduleName]
-  );
-  const totalFilePages = Math.ceil(allFiles.length / FILES_PER_PAGE);
-  const pagedFiles = allFiles.slice((filePage - 1) * FILES_PER_PAGE, filePage * FILES_PER_PAGE);
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedSeat(null);
+      setSeatFileModalOpen(false);
+    }
+  }, [isOpen]);
 
-  const kpiLabel =
-    kpiType === "disposed"
-      ? "Arrear Demand"
-      : kpiType === "inProcess"
-        ? "Current Demand"
-        : kpiType === "all"
-          ? "All Metrics"
-          : "Collection Total";
+  useEffect(() => {
+    if (isBuildingFinanceModal) {
+      setSelectedSeat(null);
+      setSeatFileModalOpen(false);
+    }
+  }, [isBuildingFinanceModal]);
+
+  const fileStatusModalTitle =
+    kpiType === "all"
+      ? "All Metrics"
+      : kpiType === "total"
+        ? "Total Files"
+        : kpiType === "disposed"
+          ? "Disposed Files"
+          : kpiType === "inProcess"
+            ? "Under Process"
+            : "Delayed";
+
+  const resolvedFileStatusKey: Exclude<KpiType, "all"> =
+    kpiType === "all" ? "total" : kpiType;
+  const fileStatusColumns = FILE_STATUS_TABLE_COLUMNS[resolvedFileStatusKey];
+
+  const fileModalStripKpis = fileStatusColumns.map((col) => ({
+    columnKey: String(col.key),
+    label: col.label,
+    headerClass: col.headerClass,
+    value: formatFileCount(
+      level1.reduce((sum, row) => sum + getRowMetric(row, col.key), 0)
+    ),
+  }));
+
+  const buildingFinanceStripKpis = BUILDING_FINANCE_COLS.map((col, idx) => ({
+    columnKey: col.id,
+    label: col.label,
+    headerClass: col.headerClass,
+    value: formatINR(level1.reduce((sum, row) => sum + getBuildingFinanceFee(row, idx), 0)),
+  }));
+
+  const modalStripKpis = isBuildingFinanceModal ? buildingFinanceStripKpis : fileModalStripKpis;
+  const tableMetricColumnCount = isBuildingFinanceModal
+    ? BUILDING_FINANCE_COLS.length
+    : fileStatusColumns.length;
+  const modalDetailTitle = isBuildingFinanceModal ? "Financial overview" : fileStatusModalTitle;
 
   if (!isOpen) return null;
 
@@ -332,60 +466,76 @@ export function DetailsModal({
 
           {/* Content based on selected tab */}
           {(financeTab === "ePayment" || financeTab === "ePos") ? (
-            // Bank Cards View
-            <div className="flex-1 overflow-auto p-8 bg-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {banks.map((bank) => (
-                  <div
-                    key={bank.id}
-                    className="bg-white border border-[#e8eff4] rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] p-6 flex flex-col gap-4 hover:shadow-md transition-shadow"
-                  >
-                    <h3 className="font-sans font-bold text-[18px] text-[#232f50] leading-tight">
-                      {bank.name}
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-tight">
-                          Total Amount
-                        </span>
-                        <span className="font-sans font-bold text-[24px] text-[#009fd2] leading-tight">
-                          {bank.totalAmount}
-                        </span>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-tight">
-                          Success Count
-                        </span>
-                        <span className="font-sans font-bold text-[24px] text-[#00a78e] leading-tight">
-                          {bank.successCount}
-                        </span>
-                        <div className="bg-[#00a78e] bg-opacity-10 px-2 py-1 rounded-[6px] w-fit">
-                          <span className="font-sans font-semibold text-[12px] text-[#00a78e]">
-                            {bank.successRate}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-tight">
-                          Failure Count
-                        </span>
-                        <span className="font-sans font-bold text-[24px] text-[#df3a7a] leading-tight">
-                          {bank.failureCount}
-                        </span>
-                        <div className="bg-[#df3a7a] bg-opacity-10 px-2 py-1 rounded-[6px] w-fit">
-                          <span className="font-sans font-semibold text-[12px] text-[#df3a7a]">
-                            {bank.failureRate}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            <>
+              <div className="flex shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 py-3 md:px-8">
+                <p className="text-sm font-medium text-[#5c6e93]">
+                  {financeTab === "ePayment"
+                    ? "E-Payment — bank-wise transactions"
+                    : "E-POS — bank-wise transactions"}
+                </p>
+                <ExportButton variant="dark" onClick={() => console.log("Exporting...")} className="!h-10 !py-0" />
               </div>
-            </div>
+              <div className="min-h-0 flex-1 overflow-auto bg-white px-4 py-6 md:px-8 md:py-8">
+                <div className="overflow-hidden rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
+                  <table className="w-full border-collapse text-sm">
+                    <thead className="sticky top-0 z-10 border-y border-gray-200">
+                      <tr className="border-b border-gray-200">
+                        <th className="sticky left-0 z-20 min-w-[200px] border-r border-gray-200 bg-[#f9fafb] py-3 pl-8 pr-4 text-left text-xs font-bold text-[#6a7282f7]">
+                          Bank name
+                        </th>
+                        <th className="min-w-[120px] border-l border-gray-200 bg-[#f1f5f9] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                          Total amount
+                        </th>
+                        <th className="min-w-[110px] border-l border-gray-200 bg-[#f0fdf4] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                          Success count
+                        </th>
+                        <th className="min-w-[110px] border-l border-gray-200 bg-[#fff1f2] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                          Failure count
+                        </th>
+                        <th className="min-w-[100px] border-l border-gray-200 bg-[#fffbeb] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                          Success rate
+                        </th>
+                        <th className="min-w-[100px] border-l border-gray-200 bg-[#f5f3ff] py-2 pl-4 pr-8 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                          Failure rate
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {banks.map((bank, index) => {
+                        const stripe = index % 2 === 0 ? "bg-white" : "bg-[#F6F9FB]";
+                        return (
+                          <tr
+                            key={bank.id}
+                            className={`border-b border-gray-100 ${stripe} hover:bg-gray-50/80`}
+                          >
+                            <td
+                              className={`sticky left-0 z-10 border-r border-gray-100 py-3 pl-8 pr-4 text-sm font-semibold text-[#101828] ${stripe}`}
+                            >
+                              {bank.name}
+                            </td>
+                            <td className="border-l border-gray-100 px-4 py-2 text-right text-sm font-semibold tabular-nums text-[#009fd2]">
+                              ₹{bank.totalAmount}
+                            </td>
+                            <td className="border-l border-gray-100 px-4 py-2 text-right text-sm font-normal tabular-nums text-[#00a78e]">
+                              {bank.successCount}
+                            </td>
+                            <td className="border-l border-gray-100 px-4 py-2 text-right text-sm font-normal tabular-nums text-[#df3a7a]">
+                              {bank.failureCount}
+                            </td>
+                            <td className="border-l border-gray-100 px-4 py-2 text-right text-sm font-medium text-[#d08700]">
+                              {bank.successRate}
+                            </td>
+                            <td className="border-l border-gray-100 py-2 pl-4 pr-8 text-right text-sm font-medium text-[#6a7282]">
+                              {bank.failureRate}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           ) : (
             // District/Office Type Table View
             <>
@@ -542,15 +692,153 @@ export function DetailsModal({
     );
   }
 
+  // ── Property Tax · Finance tab (₹ DCB-style district breakdown) ───────────
+  if (contentMode === "propertyTaxFinance") {
+    const ptSlice: PtFinanceSlice =
+      kpiType === "disposed" ? "disposed" : kpiType === "inProcess" ? "inProcess" : "total";
+    const ptMeta = PT_FINANCE_MODAL_META[ptSlice];
+    const fullPtRows = level1.map((row) => ({
+      id: row.id,
+      name: row.name,
+      ...getPtFinanceAmounts(row, ptSlice),
+    }));
+    const sums = fullPtRows.reduce(
+      (acc, r) => ({
+        demand: acc.demand + r.demand,
+        collected: acc.collected + r.collected,
+        balance: acc.balance + r.balance,
+      }),
+      { demand: 0, collected: 0, balance: 0 }
+    );
+    const ptTopKpis = [
+      { label: ptMeta.kpiLabels[0], value: formatINR(sums.demand) },
+      { label: ptMeta.kpiLabels[1], value: formatINR(sums.collected) },
+      { label: ptMeta.kpiLabels[2], value: formatINR(sums.balance) },
+    ];
+    const q = searchQuery.trim().toLowerCase();
+    const filteredPtRows = q
+      ? fullPtRows.filter((r) => r.name.toLowerCase().includes(q))
+      : fullPtRows;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
+        <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
+          <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-[#009fd2]">
+                Property tax · Finance
+              </p>
+              <h2 className="text-base font-semibold text-gray-900 leading-6">
+                {moduleName} — {ptMeta.headline}
+              </h2>
+              <p className="text-sm font-medium text-gray-500 leading-5">
+                {moduleName}{" "}
+                {subModuleName !== "Select" ? `/ ${subModuleName}` : ""}{" "}
+                {serviceName !== "Select" ? `/ ` : ""}
+                {serviceName !== "Select" ? <span className="font-bold">{serviceName}</span> : null}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"
+            >
+              <X size={16} className="text-gray-700" />
+            </button>
+          </div>
+
+          <div className="flex flex-nowrap items-stretch gap-3 md:gap-4 px-4 md:px-8 py-6 border-b border-gray-100 shrink-0 bg-white overflow-x-auto">
+            {ptTopKpis.map((kpi) => (
+              <div
+                key={kpi.label}
+                className="flex min-w-[160px] flex-1 basis-0 flex-col gap-2 rounded-lg border border-[#e8eff4] bg-white p-4 shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]"
+              >
+                <p className="text-sm font-medium text-[#5c6e93] leading-tight">{kpi.label}</p>
+                <p className="mt-auto text-[18px] font-semibold text-[#232f50] leading-tight tabular-nums md:text-[20px]">
+                  {kpi.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between shrink-0 bg-white px-[24px] py-[8px] border-b border-gray-100">
+            <div className="relative h-10 w-full sm:w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">
+              <input
+                type="text"
+                placeholder="Search district"
+                className="w-full text-sm text-[#222533] placeholder-[#222533] placeholder-opacity-50 outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search size={20} className="text-[#323232] shrink-0" />
+            </div>
+            <ExportButton variant="dark" onClick={() => console.log("Exporting...")} className="!h-10 !py-0 hidden sm:flex" />
+          </div>
+
+          <div className="overflow-auto flex-1 bg-white p-[24px]">
+            <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
+              <table className="w-full text-sm border-collapse">
+                <thead className="border-y border-gray-200 sticky top-0 z-10">
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left pl-8 pr-4 py-3 text-xs bg-[#f9fafb] text-[#6a7282f7] font-bold">
+                      District
+                    </th>
+                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f1f5f9] whitespace-nowrap">
+                      Demand (₹)
+                    </th>
+                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f0fdf4] whitespace-nowrap">
+                      Collected (₹)
+                    </th>
+                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#fffbeb] whitespace-nowrap">
+                      Balance (₹)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPtRows.map((row, index) => {
+                    const isEven = index % 2 === 0;
+                    const rowBg = isEven ? "bg-white" : "bg-[#F6F9FB]";
+                    return (
+                      <tr key={row.id} className={`border-b border-gray-100 h-12 ${rowBg} hover:bg-gray-50/80`}>
+                        <td className="pl-8 pr-4 py-2 text-sm font-normal text-[#101828]">{row.name}</td>
+                        <td className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100 tabular-nums">
+                          {formatINR(row.demand)}
+                        </td>
+                        <td className="text-right px-4 py-2 text-sm font-normal text-[#00a78e] border-l border-gray-100 tabular-nums">
+                          {formatINR(row.collected)}
+                        </td>
+                        <td className="text-right px-4 py-2 text-sm font-normal text-[#df3a7a] border-l border-gray-100 tabular-nums">
+                          {formatINR(row.balance)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredPtRows.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="text-center py-10 text-gray-400 text-sm">
+                        No districts match your search.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Main hierarchy table view ─────────────────────────────────────────────
   return (
+    <Fragment>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
       <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-base font-semibold text-gray-900 leading-6">{moduleName} {kpiLabel}</h2>
+            <h2 className="text-base font-semibold text-gray-900 leading-6">{moduleName} — {modalDetailTitle}</h2>
             <p className="text-sm font-medium text-gray-500 leading-5">
               {moduleName} {subModuleName !== "Select" ? `/ ${subModuleName}` : ""} {serviceName !== "Select" ? `/ ` : ""}
               {serviceName !== "Select" ? <span className="font-bold">{serviceName}</span> : null}
@@ -564,19 +852,27 @@ export function DetailsModal({
           </button>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-3 gap-3 md:gap-4 px-4 md:px-8 py-6 border-b border-gray-100 shrink-0 bg-white">
-          {[
-            { label: "Collection Total", value: formatRupee(totalFiles) },
-            { label: "Arrear Demand", value: formatRupee(disposed) },
-            { label: "Current Demand", value: formatRupee(inProcess) },
-          ].map((kpi, idx) => (
+        {/* KPIs — single horizontal row, equal-width cards, same height; scroll on narrow viewports */}
+        <div className="flex flex-nowrap items-stretch gap-3 md:gap-4 px-4 md:px-8 py-6 border-b border-gray-100 shrink-0 bg-[#fafbfc] overflow-x-auto">
+          {modalStripKpis.map((kpi) => (
             <div
-              key={idx}
-              className="min-w-0 border border-[#e8eff4] rounded-lg p-4 flex flex-col gap-2 bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]"
+              key={String(kpi.columnKey)}
+              className="flex min-w-[152px] flex-1 basis-0 flex-col rounded-xl border border-[#e8eff4] overflow-hidden shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] bg-white"
             >
-              <p className="text-sm font-medium text-[#5c6e93] leading-tight">{kpi.label}</p>
-              <p className="text-[20px] font-semibold text-[#232f50] leading-tight">{kpi.value}</p>
+              <div className={`h-1.5 w-full shrink-0 ${kpi.headerClass}`} aria-hidden />
+              <div className="p-3 sm:p-4 flex min-h-0 flex-1 flex-col gap-1 bg-white">
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#6a7282] leading-snug break-words">
+                  {kpi.label}
+                </p>
+                <p className="text-lg sm:text-[22px] font-semibold text-[#232f50] leading-tight tabular-nums tracking-tight">
+                  {kpi.value}
+                </p>
+                <p className="text-[10px] sm:text-[11px] font-medium text-[#8896a8] leading-snug pt-1 border-t border-[#e8eff4] mt-auto">
+                  {isBuildingFinanceModal
+                    ? "State total · fee category"
+                    : "State total · matches table column"}
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -616,22 +912,34 @@ export function DetailsModal({
           </div>
         </div>
 
-        {/* Table */}
+        {/* Hierarchy table */}
         <div className="overflow-auto flex-1 bg-white p-[24px]">
           <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
             <table className="w-full text-sm border-collapse">
               <thead className="border-y border-gray-200 sticky top-0 z-10">
-                {/* ── Sub-column header row ── */}
                 <tr className="border-b border-gray-200">
                   <th className="text-left pl-8 pr-4 py-3 text-xs bg-[#f9fafb] sticky left-0 z-20 border-r border-gray-200 min-w-[200px] align-middle text-[#6a7282f7]">
                     Name
                   </th>
-                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Collection Total</th>
-                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Arrear Demand</th>
-                <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] border-l border-gray-200 min-w-[140px] whitespace-nowrap">Current Demand</th>
-                
-              </tr>
-            </thead>
+                  {isBuildingFinanceModal
+                    ? BUILDING_FINANCE_COLS.map((col) => (
+                        <th
+                          key={col.id}
+                          className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                        >
+                          {col.label}
+                        </th>
+                      ))
+                    : fileStatusColumns.map((col) => (
+                        <th
+                          key={col.key}
+                          className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                        >
+                          {col.label}
+                        </th>
+                      ))}
+                </tr>
+              </thead>
             <tbody>
               {visibleRows.map((row, index) => {
                 const isEven = index % 2 === 0;
@@ -646,7 +954,7 @@ export function DetailsModal({
                 if ("isPagination" in row) {
                   return (
                     <tr key={row.id} className={`${rowBg} ${dimmedClass} border-b border-gray-100 h-10`}>
-                      <td colSpan={100} className="pl-8 pr-4 py-1">
+                      <td colSpan={1 + tableMetricColumnCount} className="pl-8 pr-4 py-1">
                         <div
                           className="flex items-center gap-3"
                           style={{ paddingLeft: `${indentPx(row.level) + 26}px` }}
@@ -680,10 +988,39 @@ export function DetailsModal({
                   );
                 }
 
+                const isSeatRow = !("isPagination" in row) && Boolean(row.isSeat);
+                const seatSelected =
+                  isSeatRow && seatFileModalOpen && selectedSeat?.id === row.id;
+
                 return (
                   <tr
                     key={row.id}
-                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} hover:bg-gray-50/80`}
+                    role={isSeatRow && !isBuildingFinanceModal ? "button" : undefined}
+                    tabIndex={isSeatRow && !isBuildingFinanceModal ? 0 : undefined}
+                    onClick={
+                      isSeatRow && !isBuildingFinanceModal
+                        ? () => {
+                            setSelectedSeat(row);
+                            setSeatFileModalOpen(true);
+                          }
+                        : undefined
+                    }
+                    onKeyDown={
+                      isSeatRow && !isBuildingFinanceModal
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedSeat(row);
+                              setSeatFileModalOpen(true);
+                            }
+                          }
+                        : undefined
+                    }
+                    className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} ${
+                      isSeatRow && !isBuildingFinanceModal
+                        ? "cursor-pointer hover:bg-[#eef6ff]/90"
+                        : "hover:bg-gray-50/80"
+                    } ${seatSelected ? "bg-[#e8f4fc]/80 ring-1 ring-inset ring-[#009fd2]/40" : ""}`}
                   >
                     {/* Name — sticky left column */}
                     <td className={`pl-8 pr-4 py-2 sticky left-0 z-10 ${rowBg} border-r border-gray-100`}>
@@ -693,7 +1030,11 @@ export function DetailsModal({
                       >
                         {hasChildren(row.id) ? (
                           <button
-                            onClick={() => toggleRow(row.id)}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRow(row.id);
+                            }}
                             className="p-0.5 rounded text-[#99a1af] hover:text-gray-700 shrink-0 border border-transparent"
                           >
                             {expandedRows.has(row.id) ? (
@@ -716,19 +1057,29 @@ export function DetailsModal({
                       </div>
                     </td>
 
-                    {/* Collection Total */}
-                    <td className="text-right px-6 py-2 text-sm font-normal text-[#364153] border-l border-gray-100">{formatRupee(row.totalFiles)}</td>
-                    {/* Arrear Demand */}
-                    <td className="text-right px-6 py-2 text-sm font-normal text-[#00a63e] border-l border-gray-100">{formatRupee(row.disposed)}</td>
-                    {/* Current Demand */}
-                    <td className="text-right px-6 py-2 text-sm font-normal text-[#d08700] border-l border-gray-100">{formatRupee(row.inProcess)}</td>
-                    
+                    {isBuildingFinanceModal
+                      ? BUILDING_FINANCE_COLS.map((col, idx) => (
+                          <td
+                            key={col.id}
+                            className="border-l border-gray-100 px-4 py-2 text-right text-sm font-normal tabular-nums text-[#364153]"
+                          >
+                            {formatINR(getBuildingFinanceFee(row, idx))}
+                          </td>
+                        ))
+                      : fileStatusColumns.map((col) => (
+                          <td
+                            key={col.key}
+                            className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100"
+                          >
+                            {formatFileCount(getRowMetric(row, col.key))}
+                          </td>
+                        ))}
                   </tr>
                 );
               })}
               {visibleRows.length === 0 && (
                 <tr>
-                  <td colSpan={100} className="text-center py-10 text-gray-400 text-sm">
+                  <td colSpan={1 + tableMetricColumnCount} className="text-center py-10 text-gray-400 text-sm">
                     No results found.
                   </td>
                 </tr>
@@ -739,5 +1090,17 @@ export function DetailsModal({
         </div>
       </div>
     </div>
+
+    <SeatDetailModal
+      isOpen={seatFileModalOpen && Boolean(selectedSeat)}
+      onClose={() => {
+        setSeatFileModalOpen(false);
+        setSelectedSeat(null);
+      }}
+      selectedSeat={selectedSeat}
+      moduleName={moduleName}
+      kpiLabel="— File details"
+    />
+    </Fragment>
   );
 }
