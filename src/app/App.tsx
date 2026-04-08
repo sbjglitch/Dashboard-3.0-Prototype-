@@ -683,8 +683,8 @@ export default function App() {
               />
             )}
 
-            {/* Building permission charts: dedicated module + All Module overview (otherwise this file never mounts on the default screen) */}
-            {(selectedModule === "Building Permissions" || selectedModule === "All Module") && (
+            {/* Building permission charts: dedicated module only */}
+            {selectedModule === "Building Permissions" && (
               <BuildingPermissionGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
