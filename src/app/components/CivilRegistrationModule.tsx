@@ -241,13 +241,16 @@ const MarriageIcon = () => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function CivilRegistrationModule({
+  selectedSubModule,
   onViewMore,
 }: {
+  selectedSubModule: string;
   onViewMore: (type?: "total" | "disposed" | "inProcess" | "delayed" | "all") => void;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("fileStatus");
 
   const dhTotal = DIGITAL_HEALTH_KPIS.reduce((sum, k) => sum + k.value, 0);
+  const isBirthRegistration = selectedSubModule.toLowerCase().includes("birth");
 
   const tabs: { id: TabId; label: string; icon: (active: boolean) => React.ReactNode }[] = [
     { id: "fileStatus", label: "File Status", icon: (a) => <FileStatusIcon active={a} /> },
@@ -336,38 +339,67 @@ export function CivilRegistrationModule({
 
       {/* ── Module Details ── */}
       {activeTab === "moduleDetails" && (
-        <div className="flex flex-col lg:flex-row gap-3 md:gap-[24px] w-full">
-          <ModuleKpiCard
-            label="Birth Count"
-            value="18,420"
-            approvedValue="15,200"
-            pendingValue="3,220"
-            rate="82.5%"
-            bgClass="bg-[#1ebe72]"
-            dotColor="text-[#1ebe72]"
-            icon={<BirthIcon />}
-          />
-          <ModuleKpiCard
-            label="Death Count"
-            value="9,800"
-            approvedValue="8,100"
-            pendingValue="1,700"
-            rate="82.7%"
-            bgClass="bg-[#5c6e93]"
-            dotColor="text-[#5c6e93]"
-            icon={<DeathIcon />}
-          />
-          <ModuleKpiCard
-            label="Marriage Count"
-            value="7,340"
-            approvedValue="5,900"
-            pendingValue="1,440"
-            rate="80.4%"
-            bgClass="bg-[#df3a7a]"
-            dotColor="text-[#df3a7a]"
-            icon={<MarriageIcon />}
-          />
-        </div>
+        <>
+          {isBirthRegistration ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 md:gap-[16px] w-full">
+              {[
+                { label: "Total Birth", value: 18420, color: "bg-[#1ebe72]" },
+                { label: "Male Birth", value: 9620, color: "bg-[#009fd2]" },
+                { label: "Female Birth", value: 8620, color: "bg-[#7b61ff]" },
+                { label: "Transgender Birth", value: 120, color: "bg-[#df3a7a]" },
+                { label: "Unidentified Births", value: 60, color: "bg-[#f59e0b]" },
+              ].map((kpi) => (
+                <div
+                  key={kpi.label}
+                  className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]"
+                >
+                  <div className="flex items-center gap-[10px] min-w-0">
+                    <div className={`${kpi.color} w-[10px] h-[10px] rounded-sm shrink-0`} />
+                    <span className="font-sans font-semibold text-[13px] text-[#5c6e93] truncate">
+                      {kpi.label}
+                    </span>
+                  </div>
+                  <span className="font-sans font-bold text-[28px] text-[#232f50]">
+                    {kpi.value.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-3 md:gap-[24px] w-full">
+              <ModuleKpiCard
+                label="Birth Count"
+                value="18,420"
+                approvedValue="15,200"
+                pendingValue="3,220"
+                rate="82.5%"
+                bgClass="bg-[#1ebe72]"
+                dotColor="text-[#1ebe72]"
+                icon={<BirthIcon />}
+              />
+              <ModuleKpiCard
+                label="Death Count"
+                value="9,800"
+                approvedValue="8,100"
+                pendingValue="1,700"
+                rate="82.7%"
+                bgClass="bg-[#5c6e93]"
+                dotColor="text-[#5c6e93]"
+                icon={<DeathIcon />}
+              />
+              <ModuleKpiCard
+                label="Marriage Count"
+                value="7,340"
+                approvedValue="5,900"
+                pendingValue="1,440"
+                rate="80.4%"
+                bgClass="bg-[#df3a7a]"
+                dotColor="text-[#df3a7a]"
+                icon={<MarriageIcon />}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Digital Health ── */}

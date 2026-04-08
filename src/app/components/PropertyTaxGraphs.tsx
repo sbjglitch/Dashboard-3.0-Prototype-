@@ -1,32 +1,6 @@
 import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
-
-// ─── Shared floating tooltip ──────────────────────────────────────────────────
-interface TipState { label: string; rows: { color: string; name: string; value: string }[] }
-
-function GraphTooltip({ tip, mouse }: { tip: TipState; mouse: { x: number; y: number } }) {
-  return (
-    <div className="fixed z-50 pointer-events-none" style={{ left: mouse.x, top: mouse.y, transform: "translate(-50%, -100%) translateY(-12px)" }}>
-      <div className="relative">
-        <div className="bg-white border border-[#e8eff4] rounded-[8px] p-[12px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)] whitespace-nowrap flex flex-col gap-[6px] min-w-[130px] relative z-10">
-          <span className="font-sans font-semibold text-[13px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">{tip.label}</span>
-          <div className="flex flex-col gap-[4px]">
-            {tip.rows.map((r) => (
-              <div key={r.name} className="flex items-center justify-between gap-[16px]">
-                <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">
-                  <div className="w-[6px] h-[6px] rounded-full shrink-0" style={{ backgroundColor: r.color }} />
-                  {r.name}
-                </span>
-                <span className="font-sans font-semibold text-[12px] text-[#232f50]">{r.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-[10px] h-[10px] bg-white border-b border-r border-[#e8eff4] rotate-45 z-0" />
-      </div>
-    </div>
-  );
-}
+import { PieChart } from "@mui/x-charts/PieChart";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 const DCB_DATA = {
   arrear:  { demand: 17500, collection: 10200, balance: 13500 },
@@ -40,145 +14,57 @@ const SUCCESS_FAILURE_DATA = [
   { label: "Failure Count", pct: 32, color: "#e83a7a" },
 ];
 
-const DONUT_SEGMENTS = [
-  { pct: 22, color: "#00c49f" },
-  { pct: 18, color: "#e83a7a" },
-  { pct: 15, color: "#00b2eb" },
-  { pct: 12, color: "#f5a623" },
-  { pct: 10, color: "#7b61ff" },
-  { pct: 23, color: "#56ba85" },
+const DCB_CHART_DATA = [
+  { category: "Arrear", ...DCB_DATA.arrear },
+  { category: "Current", ...DCB_DATA.current },
+  { category: "Total", ...DCB_DATA.total },
 ];
 
-function DCBBarGroup({
-  label,
-  demand,
-  collection,
-  balance,
-  onBarEnter,
-  onBarLeave,
-}: {
-  label: string;
-  demand: number;
-  collection: number;
-  balance: number;
-  onBarEnter: (bar: { label: string; name: string; color: string; value: number }) => void;
-  onBarLeave: () => void;
-}) {
-  const barH = (v: number) => `${(v / DCB_MAX) * 100}%`;
-  return (
-    <div className="flex flex-col gap-[16px] items-center flex-1 min-w-0 justify-end">
-      <div className="flex gap-[8px] md:gap-[16px] items-end w-full h-[280px] md:h-[320px]">
-        {[
-          { key: "demand", val: demand, color: "#56ba85", name: "Demand" },
-          { key: "collection", val: collection, color: "#00b2eb", name: "Collection" },
-          { key: "balance", val: balance, color: "#7b61ff", name: "Balance" },
-        ].map((bar) => (
-          <div key={bar.key} className="flex-1 flex flex-col items-center justify-end h-full">
-            <div
-              className="w-full rounded-t-[4px] transition-all hover:opacity-80 cursor-default"
-              style={{ height: barH(bar.val), backgroundColor: bar.color }}
-              onMouseEnter={() => onBarEnter({ label, name: bar.name, color: bar.color, value: bar.val })}
-              onMouseLeave={onBarLeave}
-            />
-            <span className="text-[11px] md:text-[12px] text-[#5c6e93] font-sans font-medium mt-[8px] text-center">
-              {bar.name}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="bg-[#f2f6ff] rounded-[4px] py-[4px] w-full text-center">
-        <span className="font-sans font-bold text-[12px] text-[#5c6e93]">{label}</span>
-      </div>
-    </div>
-  );
-}
-
 function DCBGraph() {
-  const [sortBy, setSortBy] = useState("Ascending");
-  const [tooltip, setTooltip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent) => setMouse({ x: e.clientX, y: e.clientY });
-  const handleBarEnter = (bar: { label: string; name: string; color: string; value: number }) => {
-    setTooltip({ label: `${bar.label} — ${bar.name}`, rows: [{ color: bar.color, name: bar.name, value: bar.value.toLocaleString() }] });
-  };
-
-  const yLabels = [30000, 25000, 20000, 15000, 10000, 5000, 0];
-
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[24px]">
-        <div className="flex flex-col gap-[16px]">
-          <h3 className="font-sans font-semibold text-[20px] text-[#232f50] leading-[normal] capitalize">
-            Demand, Collection &amp; Balance Graph
-          </h3>
-          <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[normal] capitalize">
-            Occupancy wise split up of application under general + self certified
-          </p>
-        </div>
-        <button
-          type="button"
-          className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors shrink-0"
-          onClick={() => setSortBy(sortBy === "Ascending" ? "Descending" : "Ascending")}
-        >
-          <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
-          <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortBy}</span>
-          <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
-        </button>
+      <div className="flex flex-col gap-[16px] mb-[16px]">
+        <h3 className="font-sans font-semibold text-[20px] text-[#232f50] leading-[normal] capitalize">
+          Demand, Collection &amp; Balance Graph
+        </h3>
+        <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[normal] capitalize">
+          Occupancy wise split up of application under general + self certified
+        </p>
       </div>
 
-      <div className="flex-1 flex gap-[16px] min-h-0">
-        <div className="flex flex-col justify-between items-end text-[12px] text-[#5c6e93] font-sans font-medium w-[43px] shrink-0 h-[280px] md:h-[320px]">
-          {yLabels.map((v) => (
-            <span key={v}>{v.toLocaleString()}</span>
-          ))}
-        </div>
-
-        <div className="flex-1 relative min-w-0" onMouseMove={handleMouseMove}>
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-0 h-[280px] md:h-[320px]">
-            {yLabels.map((v) => (
-              <div key={v} className="w-full h-px border-b border-dashed border-[#e8eff4]" />
-            ))}
-          </div>
-
-          <div className="relative z-10 flex gap-[40px] md:gap-[80px] lg:gap-[120px] items-end justify-center px-[12px] w-full">
-            <DCBBarGroup label="Arrear" {...DCB_DATA.arrear} onBarEnter={handleBarEnter} onBarLeave={() => setTooltip(null)} />
-            <DCBBarGroup label="Current" {...DCB_DATA.current} onBarEnter={handleBarEnter} onBarLeave={() => setTooltip(null)} />
-            <DCBBarGroup label="Total" {...DCB_DATA.total} onBarEnter={handleBarEnter} onBarLeave={() => setTooltip(null)} />
-          </div>
-          {tooltip && <GraphTooltip tip={tooltip} mouse={mouse} />}
-        </div>
+      <div className="flex-1 min-h-0">
+        <BarChart
+          dataset={DCB_CHART_DATA}
+          xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 12, fill: "#5c6e93", fontWeight: 600 } }]}
+          yAxis={[{ max: DCB_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+          series={[
+            { dataKey: "demand", label: "Demand", color: "#56ba85" },
+            { dataKey: "collection", label: "Collection", color: "#00b2eb" },
+            { dataKey: "balance", label: "Balance", color: "#7b61ff" },
+          ]}
+          borderRadius={4}
+          slots={{ legend: () => null }}
+          height={360}
+        />
       </div>
 
-      <div className="flex items-center gap-[24px] mt-[24px]">
-        <div className="flex items-center gap-[8px]">
-          <div className="w-[12px] h-[12px] rounded-[2px] bg-[#56ba85]" />
-          <span className="font-sans font-medium text-[13px] text-[#5c6e93]">Demand</span>
-        </div>
-        <div className="flex items-center gap-[8px]">
-          <div className="w-[12px] h-[12px] rounded-[2px] bg-[#00b2eb]" />
-          <span className="font-sans font-medium text-[13px] text-[#5c6e93]">Collection</span>
-        </div>
-        <div className="flex items-center gap-[8px]">
-          <div className="w-[12px] h-[12px] rounded-[2px] bg-[#7b61ff]" />
-          <span className="font-sans font-medium text-[13px] text-[#5c6e93]">Balance</span>
-        </div>
+      <div className="flex items-center gap-[24px] mt-[8px]">
+        {[
+          { color: "#56ba85", label: "Demand" },
+          { color: "#00b2eb", label: "Collection" },
+          { color: "#7b61ff", label: "Balance" },
+        ].map((l) => (
+          <div key={l.label} className="flex items-center gap-[8px]">
+            <div className="w-[12px] h-[12px] rounded-[2px]" style={{ backgroundColor: l.color }} />
+            <span className="font-sans font-medium text-[13px] text-[#5c6e93]">{l.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 function BuildingStatisticsGraph({ selectedLocalBody }: { selectedLocalBody: string }) {
-  let cumulativePct = 0;
-  const conicStops = DONUT_SEGMENTS.map((seg) => {
-    const start = cumulativePct;
-    cumulativePct += seg.pct;
-    return `${seg.color} ${start}% ${cumulativePct}%`;
-  }).join(", ");
-  const [tooltip, setTooltip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const handleMouseMove = (e: React.MouseEvent) => setMouse({ x: e.clientX, y: e.clientY });
-
   return (
     <div className="flex flex-col h-full w-full">
       <div className="flex flex-col gap-[16px] mb-[32px]">
@@ -196,20 +82,30 @@ function BuildingStatisticsGraph({ selectedLocalBody }: { selectedLocalBody: str
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-[40px] md:gap-[64px]">
-        <div
-          className="w-[240px] h-[240px] md:w-[300px] md:h-[300px] lg:w-[361px] lg:h-[361px] rounded-full relative shrink-0"
-          style={{ background: `conic-gradient(${conicStops})` }}
-        >
-          <div className="absolute inset-0 m-auto w-[40px] h-[40px] bg-white rounded-full" />
-        </div>
+        <PieChart
+          series={[{
+            data: SUCCESS_FAILURE_DATA.map((item, i) => ({
+              id: i,
+              value: item.pct,
+              label: item.label,
+              color: item.color,
+            })),
+            innerRadius: 60,
+            outerRadius: 140,
+            paddingAngle: 3,
+            cornerRadius: 4,
+            highlightScope: { fade: "global", highlight: "item" },
+          }]}
+          width={320}
+          height={300}
+          slots={{ legend: () => null }}
+        />
 
-        <div className="flex flex-col gap-[8px]" onMouseMove={handleMouseMove}>
+        <div className="flex flex-col gap-[8px]">
           {SUCCESS_FAILURE_DATA.map((item) => (
             <div
               key={item.label}
               className="flex items-center gap-[8px] px-[16px] py-[8px] rounded-[6px] hover:bg-[#f6f9fb] transition-colors cursor-default"
-              onMouseEnter={() => setTooltip({ label: item.label, rows: [{ color: item.color, name: "Share", value: `${item.pct}%` }] })}
-              onMouseLeave={() => setTooltip(null)}
             >
               <div
                 className="w-[24px] h-[24px] rounded-full flex items-center justify-center shrink-0"
@@ -225,7 +121,6 @@ function BuildingStatisticsGraph({ selectedLocalBody }: { selectedLocalBody: str
               </span>
             </div>
           ))}
-          {tooltip && <GraphTooltip tip={tooltip} mouse={mouse} />}
         </div>
       </div>
     </div>

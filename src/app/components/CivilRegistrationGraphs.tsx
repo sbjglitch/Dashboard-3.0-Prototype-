@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 // ─── Colour tokens (from Figma) ───────────────────────────────────────────────
 const C_APPLICATION = "#0cbea4";
@@ -16,7 +17,6 @@ const C_MARRIAGE    = "#bda6ff";
 const Y_MAX = 30000;
 const Y_STEPS = [30000, 25000, 20000, 15000, 10000, 5000, 0];
 
-// Five-bar state totals (used by Disposal Rate, New Registrations, Corrections)
 const STATE_TOTALS = [
   { label: "Total Application", value: 22500, color: C_APPLICATION },
   { label: "Total Approved",    value: 11800, color: C_APPROVED    },
@@ -25,32 +25,29 @@ const STATE_TOTALS = [
   { label: "Total Delayed",     value:  7200, color: C_DELAYED     },
 ];
 
-// Per-district single-bar data
 const DISTRICTS = [
-  { label: "TVM",     value: 18500 },
-  { label: "Kollam",  value: 17500 },
-  { label: "Pathanm", value:  7000 },
-  { label: "Alappuz", value:  7000 },
-  { label: "Kottaym", value: 18500 },
-  { label: "Idukki",  value: 18500 },
-  { label: "Ernklm",  value:  7500 },
-  { label: "Thrissur",value:  7500 },
-  { label: "Palakkd", value: 17000 },
-  { label: "Malappr", value: 15000 },
-  { label: "Kozhikd", value: 14000 },
-  { label: "Wayanad", value: 12500 },
-  { label: "Kannur",  value: 10500 },
-  { label: "Kasargd", value:  9000 },
+  { district: "Thiruvananthapuram", totalFiles: 18500, disposedFiles: 12300, pendingFiles: 6200 },
+  { district: "Kollam",            totalFiles: 17500, disposedFiles: 11800, pendingFiles: 5700 },
+  { district: "Pathanamthitta",    totalFiles:  7000, disposedFiles:  4900, pendingFiles: 2100 },
+  { district: "Alappuzha",         totalFiles:  7000, disposedFiles:  5200, pendingFiles: 1800 },
+  { district: "Kottayam",          totalFiles: 18500, disposedFiles: 13100, pendingFiles: 5400 },
+  { district: "Idukki",            totalFiles: 18500, disposedFiles: 14200, pendingFiles: 4300 },
+  { district: "Ernakulam",         totalFiles:  7500, disposedFiles:  5600, pendingFiles: 1900 },
+  { district: "Thrissur",          totalFiles:  7500, disposedFiles:  5100, pendingFiles: 2400 },
+  { district: "Palakkad",          totalFiles: 17000, disposedFiles: 11400, pendingFiles: 5600 },
+  { district: "Malappuram",        totalFiles: 15000, disposedFiles:  9800, pendingFiles: 5200 },
+  { district: "Kozhikode",         totalFiles: 14000, disposedFiles: 10200, pendingFiles: 3800 },
+  { district: "Wayanad",           totalFiles: 12500, disposedFiles:  9100, pendingFiles: 3400 },
+  { district: "Kannur",            totalFiles: 10500, disposedFiles:  7300, pendingFiles: 3200 },
+  { district: "Kasaragod",         totalFiles:  9000, disposedFiles:  6400, pendingFiles: 2600 },
 ];
 
-// Grouped data for "Application Count"
 const APP_COUNT_GROUPS = [
   { label: "Birth Registration",   values: [22500, 11800, 17600, 14200, 7200] },
   { label: "Death Registration",   values: [21000, 11200, 16800, 13500, 6900] },
   { label: "Marriage Registration",values: [12400,  6800,  9200,  7900, 4100] },
 ];
 
-// Birth-specific data
 const CRUDE_BIRTH_RATE = [
   { label: "TVM",     value: 18.2 },
   { label: "Kollam",  value: 16.8 },
@@ -70,18 +67,91 @@ const CRUDE_BIRTH_RATE = [
 const CBR_MAX = 25;
 
 const BIRTH_SEX_RATIO = DISTRICTS.map((d, i) => ({
-  label: d.label,
+  label: d.district,
   value: 930 + ((i * 17) % 80),
 }));
 const SEX_RATIO_MAX = 1100;
 
 const STILL_BIRTH_RATE = DISTRICTS.map((d, i) => ({
-  label: d.label,
+  label: d.district,
   value: parseFloat((3 + ((i * 1.3) % 12)).toFixed(1)),
 }));
 const STILL_MAX = 20;
 
-// Year-wise comparison (Births)
+// Local body mock datasets (Birth Registration)
+const LOCAL_BODIES_TOP_20 = [
+  "Thiruvananthapuram Corp",
+  "Kochi Corp",
+  "Kozhikode Corp",
+  "Thrissur Corp",
+  "Kollam Corp",
+  "Alappuzha Muni",
+  "Kottayam Muni",
+  "Palakkad Muni",
+  "Kannur Muni",
+  "Malappuram Muni",
+  "Varkala Muni",
+  "Kanhangad Muni",
+  "Chalakudy Muni",
+  "Nedumangad Muni",
+  "Ponnani Muni",
+  "Kalamassery Muni",
+  "Ottapalam Muni",
+  "Perinthalmanna Muni",
+  "Vadakara Muni",
+  "Mattannur Muni",
+];
+
+const LOCAL_BODIES_BOTTOM_20 = [
+  "Puzhakkal Grama Panch.",
+  "Perumanna Grama Panch.",
+  "Mokeri Grama Panch.",
+  "Kadukutty Grama Panch.",
+  "Edathua Grama Panch.",
+  "Meenadam Grama Panch.",
+  "Kodanchery Grama Panch.",
+  "Kuruva Grama Panch.",
+  "Elankunnapuzha Grama",
+  "Koppam Grama Panch.",
+  "Alagappanagar Grama",
+  "Aymanam Grama Panch.",
+  "Thenkara Grama Panch.",
+  "Mankada Grama Panch.",
+  "Edavaka Grama Panch.",
+  "Oachira Grama Panch.",
+  "Bharananganam Grama",
+  "Marady Grama Panch.",
+  "Arookutty Grama Panch.",
+  "Kanimangalam Grama",
+];
+
+const LOCAL_BODY_CRUDE_BIRTH_TOP = LOCAL_BODIES_TOP_20.map((label, i) => ({
+  label,
+  value: parseFloat((19.5 - (i % 7) * 0.6).toFixed(1)),
+}));
+const LOCAL_BODY_CRUDE_BIRTH_BOTTOM = LOCAL_BODIES_BOTTOM_20.map((label, i) => ({
+  label,
+  value: parseFloat((11.2 - (i % 8) * 0.5).toFixed(1)),
+}));
+
+const LOCAL_BODY_SEX_RATIO_TOP = LOCAL_BODIES_TOP_20.map((label, i) => ({
+  label,
+  value: 980 - (i % 10) * 6,
+}));
+const LOCAL_BODY_SEX_RATIO_BOTTOM = LOCAL_BODIES_BOTTOM_20.map((label, i) => ({
+  label,
+  value: 900 - (i % 10) * 7,
+}));
+
+const LOCAL_BODY_STILL_BIRTH_TOP = LOCAL_BODIES_TOP_20.map((label, i) => ({
+  label,
+  value: parseFloat((7.8 - (i % 8) * 0.35).toFixed(1)),
+}));
+const LOCAL_BODY_STILL_BIRTH_BOTTOM = LOCAL_BODIES_BOTTOM_20.map((label, i) => ({
+  label,
+  value: parseFloat((3.4 - (i % 8) * 0.25).toFixed(1)),
+}));
+
 const YEAR_WISE_BIRTHS = [
   { label: "2019", birth: 18000, stillBirth: 1200 },
   { label: "2020", birth: 17200, stillBirth: 1150 },
@@ -91,7 +161,6 @@ const YEAR_WISE_BIRTHS = [
 ];
 const YEAR_MAX = 25000;
 
-// Birth year-wise analysis (age group of mothers)
 const BIRTH_AGE_ANALYSIS = [
   { label: "<18",   value: 3200  },
   { label: "18-25", value: 18400 },
@@ -101,66 +170,7 @@ const BIRTH_AGE_ANALYSIS = [
   { label: ">40",   value:  2100 },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function barH(value: number, max: number) {
-  return `${Math.min((value / max) * 100, 100)}%`;
-}
-
-// ─── Floating tooltip ─────────────────────────────────────────────────────────
-interface TipRow { color: string; name: string; value: string }
-interface TipState { label: string; rows: TipRow[] }
-
-function GraphTooltip({ tip, mouse }: { tip: TipState; mouse: { x: number; y: number } }) {
-  return (
-    <div
-      className="fixed z-50 pointer-events-none"
-      style={{ left: mouse.x, top: mouse.y, transform: "translate(-50%, -100%) translateY(-12px)" }}
-    >
-      <div className="relative">
-        <div className="bg-white border border-[#e8eff4] rounded-[8px] p-[12px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)] whitespace-nowrap flex flex-col gap-[6px] min-w-[130px] relative z-10">
-          <span className="font-sans font-semibold text-[13px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">
-            {tip.label}
-          </span>
-          <div className="flex flex-col gap-[4px]">
-            {tip.rows.map((r) => (
-              <div key={r.name} className="flex items-center justify-between gap-[16px]">
-                <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">
-                  <div className="w-[6px] h-[6px] rounded-full shrink-0" style={{ backgroundColor: r.color }} />
-                  {r.name}
-                </span>
-                <span className="font-sans font-semibold text-[12px] text-[#232f50]">{r.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-[10px] h-[10px] bg-white border-b border-r border-[#e8eff4] rotate-45 z-0" />
-      </div>
-    </div>
-  );
-}
-
 // ─── Shared sub-components ────────────────────────────────────────────────────
-
-function YAxis({ steps }: { steps: (number | string)[] }) {
-  return (
-    <div className="flex flex-col justify-between items-end pr-[12px] w-[52px] shrink-0 text-[12px] text-[#5c6e93] font-sans font-medium">
-      {steps.map((v) => (
-        <span key={v}>{typeof v === "number" ? v.toLocaleString() : v}</span>
-      ))}
-    </div>
-  );
-}
-
-function GridLines({ count }: { count: number }) {
-  return (
-    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-0">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="w-full h-px border-b border-dashed border-[#e8eff4]" />
-      ))}
-    </div>
-  );
-}
 
 function FilterChip({
   label,
@@ -258,158 +268,98 @@ function StatusLegend() {
   );
 }
 
+const valueFormatter = (value: number | null) =>
+  value != null ? value.toLocaleString() : "";
+
 // ─── Individual graph renderers ───────────────────────────────────────────────
 
-/** State totals: one bar per status category */
+function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
+  return (
+    <div className="w-full flex flex-col items-center justify-end h-full">
+      <BarChart
+        dataset={data}
+        xAxis={[{
+          scaleType: "band",
+          dataKey: "district",
+          tickLabelStyle: { fontSize: 10, fill: "#5c6e93", angle: -35, textAnchor: "end" },
+        }]}
+        yAxis={[{ tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+        series={[
+          { dataKey: "totalFiles", label: "Total Files", valueFormatter, color: "#0cbea4" },
+          { dataKey: "disposedFiles", label: "Disposed Files", valueFormatter, color: "#33c1ef" },
+          { dataKey: "pendingFiles", label: "Pending Files", valueFormatter, color: "#f5b95b" },
+        ]}
+        borderRadius={4}
+        grid={{ horizontal: true }}
+        height={400}
+        margin={{ bottom: 80, top: 10 }}
+        slots={{ legend: () => null }}
+      />
+    </div>
+  );
+}
+
 function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
-  const [tip, setTip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
   return (
-    <div className="flex gap-[12px] w-full items-end h-full" onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}>
-      <YAxis steps={Y_STEPS} />
-      <div className="flex-1 relative min-h-0 h-full">
-        <GridLines count={Y_STEPS.length} />
-        <div className="absolute inset-0 flex items-end justify-center gap-[24px] px-[16px] pb-[28px] z-10">
-          {data.map((bar) => (
-            <div
-              key={bar.label}
-              className="flex flex-col items-center justify-end flex-1 h-full gap-[8px]"
-              onMouseEnter={() => setTip({ label: bar.label, rows: [{ color: bar.color, name: "Count", value: bar.value.toLocaleString() }] })}
-              onMouseLeave={() => setTip(null)}
-            >
-              <div
-                className="w-full rounded-t-[8px] transition-all hover:opacity-80 cursor-default"
-                style={{ height: barH(bar.value, Y_MAX), backgroundColor: bar.color }}
-              />
-              <span className="absolute -bottom-0 text-[11px] text-[#5c6e93] font-sans font-medium text-center whitespace-nowrap" style={{ transform: "translateY(100%)" }}>
-                {bar.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      {tip && <GraphTooltip tip={tip} mouse={mouse} />}
-    </div>
+    <BarChart
+      xAxis={[{ scaleType: "band", data: data.map((d) => d.label), tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
+      yAxis={[{ max: Y_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+      series={[{ data: data.map((d) => d.value), label: "Count", color: "#0cbea4" }]}
+      colors={data.map((d) => d.color)}
+      borderRadius={6}
+      slots={{ legend: () => null }}
+      height={340}
+    />
   );
 }
 
-/** District bars: one bar per district, single color */
-function DistrictBarChart({
-  data,
-  max,
-  color,
-  valueLabel = "Count",
-}: {
-  data: { label: string; value: number }[];
-  max: number;
-  color: string;
-  valueLabel?: string;
-}) {
-  const [tip, setTip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+function DistrictBarChart({ data, max, color, valueLabel = "Count" }: { data: { label: string; value: number }[]; max: number; color: string; valueLabel?: string }) {
   return (
-    <div className="flex gap-[12px] w-full items-end h-full" onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}>
-      <YAxis steps={[max, max * 0.833, max * 0.667, max * 0.5, max * 0.333, max * 0.167, 0].map((v) => Math.round(v))} />
-      <div className="flex-1 relative min-h-0 h-full">
-        <GridLines count={7} />
-        <div className="absolute inset-0 flex items-end justify-between pb-[28px] px-[8px] z-10">
-          {data.map((bar) => (
-            <div
-              key={bar.label}
-              className="flex flex-col items-center justify-end flex-1 h-full"
-              style={{ maxWidth: 36 }}
-              onMouseEnter={() => setTip({ label: bar.label, rows: [{ color, name: valueLabel, value: bar.value.toLocaleString() }] })}
-              onMouseLeave={() => setTip(null)}
-            >
-              <div
-                className="w-full rounded-t-[4px] transition-all hover:opacity-80 cursor-default"
-                style={{ height: barH(bar.value, max), backgroundColor: color }}
-              />
-              <span className="text-[10px] text-[#5c6e93] font-sans font-medium text-center mt-[4px] absolute -bottom-0" style={{ transform: "translateY(100%)" }}>
-                {bar.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      {tip && <GraphTooltip tip={tip} mouse={mouse} />}
-    </div>
+    <BarChart
+      dataset={data}
+      xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
+      yAxis={[{ max, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+      series={[{ dataKey: "value", label: valueLabel, color }]}
+      borderRadius={4}
+      slots={{ legend: () => null }}
+      height={340}
+    />
   );
 }
 
-/** Grouped bar chart: Birth / Death / Marriage each with 5 sub-bars */
 function GroupedBarChart() {
-  const [tip, setTip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const dataset = APP_COUNT_GROUPS.map((g) => {
+    const row: Record<string, string | number> = { category: g.label };
+    STATUS_LEGEND.forEach((s, i) => { row[s.label] = g.values[i]; });
+    return row;
+  });
   return (
-    <div className="flex gap-[12px] w-full items-end h-full" onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}>
-      <YAxis steps={Y_STEPS} />
-      <div className="flex-1 relative min-h-0 h-full">
-        <GridLines count={Y_STEPS.length} />
-        <div className="absolute inset-0 flex items-end justify-center gap-[40px] md:gap-[80px] pb-[28px] px-[8px] z-10">
-          {APP_COUNT_GROUPS.map((group) => (
-            <div key={group.label} className="flex flex-col items-center justify-end gap-[12px] flex-1 h-full">
-              <div className="flex items-end justify-center gap-[4px] w-full h-full">
-                {STATUS_LEGEND.map((s, i) => (
-                  <div
-                    key={s.label}
-                    className="flex-1 rounded-t-[6px] transition-all hover:opacity-80 cursor-default"
-                    style={{ height: barH(group.values[i], Y_MAX), backgroundColor: s.color }}
-                    onMouseEnter={() => setTip({
-                      label: group.label,
-                      rows: [{ color: s.color, name: s.label, value: group.values[i].toLocaleString() }],
-                    })}
-                    onMouseLeave={() => setTip(null)}
-                  />
-                ))}
-              </div>
-              <span className="absolute -bottom-0 font-sans font-bold text-[12px] text-[#5c6e93] text-center whitespace-nowrap" style={{ transform: "translateY(100%)" }}>
-                {group.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      {tip && <GraphTooltip tip={tip} mouse={mouse} />}
-    </div>
+    <BarChart
+      dataset={dataset}
+      xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 11, fill: "#5c6e93", fontWeight: 600 } }]}
+      yAxis={[{ max: Y_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+      series={STATUS_LEGEND.map((s) => ({ dataKey: s.label, label: s.label, color: s.color }))}
+      borderRadius={4}
+      slots={{ legend: () => null }}
+      height={340}
+    />
   );
 }
 
-/** Year-wise comparison: grouped pairs of Births + Still Births */
 function YearWiseChart({ metric }: { metric: "births" | "stillbirths" }) {
-  const [tip, setTip] = useState<TipState | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const dataKey = metric === "births" ? "birth" : "stillBirth";
+  const color = metric === "births" ? C_BIRTH : C_REJECTED;
+  const seriesLabel = metric === "births" ? "Birth Count" : "Still Birth Count";
   return (
-    <div className="flex gap-[12px] w-full items-end h-full" onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}>
-      <YAxis steps={[25000, 20000, 15000, 10000, 5000, 0]} />
-      <div className="flex-1 relative min-h-0 h-full">
-        <GridLines count={6} />
-        <div className="absolute inset-0 flex items-end justify-center gap-[20px] md:gap-[40px] pb-[28px] px-[8px] z-10">
-          {YEAR_WISE_BIRTHS.map((y) => {
-            const val = metric === "births" ? y.birth : y.stillBirth;
-            const color = metric === "births" ? C_BIRTH : C_REJECTED;
-            const rowName = metric === "births" ? "Birth Count" : "Still Birth Count";
-            return (
-              <div
-                key={y.label}
-                className="flex flex-col items-center justify-end gap-[8px] flex-1 h-full"
-                onMouseEnter={() => setTip({ label: y.label, rows: [{ color, name: rowName, value: val.toLocaleString() }] })}
-                onMouseLeave={() => setTip(null)}
-              >
-                <div
-                  className="w-full rounded-t-[6px] hover:opacity-80 transition-all cursor-default"
-                  style={{ height: barH(val, YEAR_MAX), backgroundColor: color }}
-                />
-                <span className="absolute -bottom-0 font-sans font-semibold text-[11px] text-[#5c6e93] text-center" style={{ transform: "translateY(100%)" }}>
-                  {y.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {tip && <GraphTooltip tip={tip} mouse={mouse} />}
-    </div>
+    <BarChart
+      dataset={YEAR_WISE_BIRTHS}
+      xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 12, fill: "#5c6e93", fontWeight: 600 } }]}
+      yAxis={[{ max: YEAR_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+      series={[{ dataKey, label: seriesLabel, color }]}
+      borderRadius={4}
+      slots={{ legend: () => null }}
+      height={340}
+    />
   );
 }
 
@@ -444,11 +394,14 @@ function GraphContent({ id }: { id: GraphId }) {
   const [view, setView]   = useState<"state" | "district">("state");
   const [scope, setScope] = useState<"district" | "local">("district");
   const [sort, setSort]   = useState("Descending");
+  const [show, setShow] = useState<"Top 20" | "Bottom 20">("Top 20");
+  const [isShowMenuOpen, setIsShowMenuOpen] = useState(false);
 
   const meta = GRAPH_META[id];
 
   const hasScopeTabs  = ["crudeBirth", "sexRatio", "stillBirth"].includes(id);
   const hasStateTabs  = ["disposal", "newReg", "correction"].includes(id);
+  const hasShowMenu = hasScopeTabs && scope === "local";
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -468,6 +421,36 @@ function GraphContent({ id }: { id: GraphId }) {
             value={sort}
             onClick={() => setSort((s) => (s === "Descending" ? "Ascending" : "Descending"))}
           />
+          {hasShowMenu && (
+            <div className="relative">
+              <FilterChip
+                label="Show:"
+                value={show}
+                onClick={() => setIsShowMenuOpen((v) => !v)}
+              />
+              {isShowMenuOpen && (
+                <div className="absolute right-0 top-[calc(100%+6px)] z-20 bg-white border border-[#e8eff4] rounded-[8px] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] py-1 min-w-[140px]">
+                  {(["Top 20", "Bottom 20"] as const).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => {
+                        setShow(item);
+                        setIsShowMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-[14px] transition-colors ${
+                        show === item
+                          ? "bg-[#f6f9fb] text-[#232f50] font-semibold"
+                          : "text-[#5c6e93] hover:bg-[#f6f9fb]"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -484,11 +467,27 @@ function GraphContent({ id }: { id: GraphId }) {
       )}
 
       {/* Legend */}
-      {["disposal", "newReg", "correction", "appCount"].includes(id) && (
+      {["disposal", "newReg", "correction"].includes(id) && view === "district" && (
+        <div className="mb-[20px]">
+          <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[8px]">
+            {[
+              { label: "Total Files", color: C_APPLICATION },
+              { label: "Disposed Files", color: C_APPROVED },
+              { label: "Pending Files", color: C_DELAYED },
+            ].map((l) => (
+              <div key={l.label} className="flex items-center gap-[8px] px-[8px] py-[4px]">
+                <div className="w-[10px] h-[10px] rounded-full shrink-0" style={{ backgroundColor: l.color }} />
+                <span className="font-sans font-medium text-[13px] text-[#383c51] whitespace-nowrap">{l.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {(["disposal", "newReg", "correction"].includes(id) && view === "state") || id === "appCount" ? (
         <div className="mb-[20px]">
           <StatusLegend />
         </div>
-      )}
+      ) : null}
       {id === "yearBirth" && (
         <div className="flex items-center gap-[8px] mb-[20px] px-[8px]">
           <div className="w-[10px] h-[10px] rounded-full" style={{ backgroundColor: C_BIRTH }} />
@@ -534,28 +533,51 @@ function GraphContent({ id }: { id: GraphId }) {
           <FiveBarStateChart data={STATE_TOTALS} />
         )}
         {["disposal", "newReg", "correction"].includes(id) && view === "district" && (
-          <DistrictBarChart data={DISTRICTS} max={Y_MAX} color={C_APPLICATION} />
+          <DistrictDatasetChart data={DISTRICTS} />
         )}
 
         {id === "crudeBirth" && (
           <DistrictBarChart
-            data={CRUDE_BIRTH_RATE.map((d) => ({ label: d.label, value: Math.round(d.value * 1000) }))}
+            data={
+              (scope === "district"
+                ? CRUDE_BIRTH_RATE
+                : show === "Top 20"
+                  ? LOCAL_BODY_CRUDE_BIRTH_TOP
+                  : LOCAL_BODY_CRUDE_BIRTH_BOTTOM
+              ).map((d) => ({ label: d.label, value: Math.round(d.value * 1000) }))
+            }
             max={CBR_MAX * 1000}
             color={C_BIRTH}
+            valueLabel="Rate"
           />
         )}
         {id === "sexRatio" && (
           <DistrictBarChart
-            data={BIRTH_SEX_RATIO}
+            data={
+              scope === "district"
+                ? BIRTH_SEX_RATIO
+                : show === "Top 20"
+                  ? LOCAL_BODY_SEX_RATIO_TOP
+                  : LOCAL_BODY_SEX_RATIO_BOTTOM
+            }
             max={SEX_RATIO_MAX}
             color={C_IN_PROGRESS}
+            valueLabel="Ratio"
           />
         )}
         {id === "stillBirth" && (
           <DistrictBarChart
-            data={STILL_BIRTH_RATE.map((d) => ({ label: d.label, value: Math.round(d.value * 100) }))}
+            data={
+              (scope === "district"
+                ? STILL_BIRTH_RATE
+                : show === "Top 20"
+                  ? LOCAL_BODY_STILL_BIRTH_TOP
+                  : LOCAL_BODY_STILL_BIRTH_BOTTOM
+              ).map((d) => ({ label: d.label, value: Math.round(d.value * 100) }))
+            }
             max={STILL_MAX * 100}
             color={C_REJECTED}
+            valueLabel="Rate"
           />
         )}
         {id === "yearBirth"      && <YearWiseChart metric="births" />}
@@ -599,12 +621,11 @@ export function CivilRegistrationGraphs({
 
   const [activeGraph, setActiveGraph] = useState<GraphId>("disposal");
 
-  // If selected sub-module changes and active graph is no longer available, reset
   const availableIds = allTabs.map((t) => t.id);
   const safeActive = availableIds.includes(activeGraph) ? activeGraph : "disposal";
 
   return (
-    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-[16px]">
+    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:min-h-[606px] w-full shrink-0 p-[16px]">
       {/* Sidebar */}
       <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
@@ -622,7 +643,6 @@ export function CivilRegistrationGraphs({
             <p className="leading-[20px]">Select Graph</p>
           </div>
 
-          {/* Common graphs */}
           {COMMON_TABS.map((tab) => (
             <button
               type="button"
@@ -640,7 +660,6 @@ export function CivilRegistrationGraphs({
             </button>
           ))}
 
-          {/* Birth-only graphs */}
           {isBirth && (
             <>
               <div className="flex flex-col font-sans font-medium justify-center leading-[0] opacity-70 relative shrink-0 text-[#5c6e93] text-[14px] whitespace-nowrap px-[4px] py-[8px] mt-[8px]">
@@ -668,7 +687,7 @@ export function CivilRegistrationGraphs({
       </div>
 
       {/* Graph content */}
-      <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[400px] overflow-hidden">
+      <div className="bg-white flex-[1_0_0] relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[400px] overflow-auto">
         <GraphContent key={safeActive} id={safeActive} />
       </div>
     </div>

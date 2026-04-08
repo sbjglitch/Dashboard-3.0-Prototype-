@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { PieChart } from "@mui/x-charts/PieChart";
 import svgPaths from "../../imports/svg-4i5smnjigf";
 
 const SUCCESS_COLOR = "#00B1EB";
@@ -213,27 +213,20 @@ export function FinanceModule({
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 w-full min-h-[280px] md:min-h-[320px]">
-          <div className="w-full max-w-[360px] h-[280px] md:h-[320px] shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="52%"
-                  outerRadius="88%"
-                  paddingAngle={2}
-                  stroke="#fff"
-                  strokeWidth={3}
-                >
-                  {pieData.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="shrink-0 flex items-center justify-center">
+            <PieChart
+              series={[{
+                data: pieData.map((d, i) => ({ id: i, value: d.value, label: d.name, color: d.fill })),
+                innerRadius: 72,
+                outerRadius: 130,
+                paddingAngle: 3,
+                cornerRadius: 4,
+                highlightScope: { fade: "global", highlight: "item" },
+              }]}
+              width={300}
+              height={280}
+              slots={{ legend: () => null }}
+            />
           </div>
 
           <div className="flex flex-col gap-2 w-full md:w-auto">

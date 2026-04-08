@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DetailsModal, type DetailsModalContentMode } from "./components/DetailsModal";
 import { LocalBodySelector } from "./components/LocalBodySelector";
 import { TimePeriodSelector } from "./components/TimePeriodSelector";
@@ -160,6 +160,40 @@ export default function App() {
   const [activeMainTab, setActiveMainTab] = useState<"fileStatus" | "finance" | "digitalHealth">("fileStatus");
   const [hoveredChartItem, setHoveredChartItem] = useState<any>(null);
   const [chartMousePos, setChartMousePos] = useState({ x: 0, y: 0 });
+  const [filtersStuck, setFiltersStuck] = useState(false);
+  const filterStickySentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const sentinelEl = filterStickySentinelRef.current;
+    if (!sentinelEl) return;
+
+    const computeStickyTopPx = () => (window.innerWidth >= 768 ? 80 : 56);
+
+    let observer: IntersectionObserver | null = null;
+    const attachObserver = () => {
+      observer?.disconnect();
+      const stickyTopPx = computeStickyTopPx();
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          setFiltersStuck(!entry.isIntersecting);
+        },
+        {
+          root: null,
+          threshold: 0,
+          rootMargin: `-${stickyTopPx}px 0px 0px 0px`,
+        },
+      );
+      observer.observe(sentinelEl);
+    };
+
+    attachObserver();
+    window.addEventListener("resize", attachObserver);
+    return () => {
+      window.removeEventListener("resize", attachObserver);
+      observer?.disconnect();
+    };
+  }, []);
 
   const moduleOptions = Object.keys(MODULE_DATA);
   const buildingTypeOptions = ["All", "Residential", "Commercial"];
@@ -272,34 +306,45 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section & Filters Container */}
-      <div className="relative">
-        {/* Hero Section */}
-        <div className="bg-[#09327b] px-4 md:px-[32px] pt-8 md:pt-[56px] pb-[80px] md:pb-[100px] relative overflow-hidden min-h-[200px] md:h-[280px]">
-          <ImageWithFallback src="https://images.unsplash.com/photo-1704365159668-d6567db52f33?auto=format&fit=crop&q=80&w=1920" alt="Hero Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none brightness-[0.4]" />
-          <div className="relative flex flex-col sm:flex-row items-start justify-between w-full max-w-[1568px] mx-auto gap-4">
-            <div className="flex flex-col gap-4 md:gap-[24px]">
-              <button className="flex items-center gap-[4px] w-fit hover:opacity-80 transition-opacity">
-                <ArrowLeft className="w-4 h-4 text-white" />
-                <span className="font-sans font-semibold text-[14px] text-white">Back</span>
-              </button>
-              <div className="flex flex-col gap-1 md:gap-2">
-                <h1 className="font-sans font-bold text-[24px] md:text-[32px] text-white leading-[normal]">
-                  KSMART Dashboard
-                </h1>
-                <p className="font-sans font-medium text-[14px] md:text-[16px] text-white opacity-70 leading-[normal]">
-                  All the info you need about KSMART Services is right at your fingertips!
-                </p>
-              </div>
+      {/* Hero Section */}
+      <div className="bg-[#09327b] px-4 md:px-[32px] pt-8 md:pt-[56px] pb-[80px] md:pb-[100px] relative overflow-hidden min-h-[200px] md:h-[280px]">
+        <ImageWithFallback src="https://images.unsplash.com/photo-1704365159668-d6567db52f33?auto=format&fit=crop&q=80&w=1920" alt="Hero Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none brightness-[0.4]" />
+        <div className="relative flex flex-col sm:flex-row items-start justify-between w-full max-w-[1568px] mx-auto gap-4">
+          <div className="flex flex-col gap-4 md:gap-[24px]">
+            <button className="flex items-center gap-[4px] w-fit hover:opacity-80 transition-opacity">
+              <ArrowLeft className="w-4 h-4 text-white" />
+              <span className="font-sans font-semibold text-[14px] text-white">Back</span>
+            </button>
+            <div className="flex flex-col gap-1 md:gap-2">
+              <h1 className="font-sans font-bold text-[24px] md:text-[32px] text-white leading-[normal]">
+                KSMART Dashboard
+              </h1>
+              <p className="font-sans font-medium text-[14px] md:text-[16px] text-white opacity-70 leading-[normal]">
+                All the info you need about KSMART Services is right at your fingertips!
+              </p>
             </div>
-            <ExportButton onClick={() => console.log("Exporting...")} />
           </div>
+          <ExportButton onClick={() => console.log("Exporting...")} />
         </div>
+      </div>
 
-        {/* Filters */}
-        <div className="absolute bottom-0 translate-y-1/2 left-0 right-0 z-30 px-4 md:px-[32px] py-[0px]">
-          <div className="max-w-[1718px] mx-auto">
-            <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] w-full p-3 md:p-[24px]">
+      {/* Filters — sticky below header */}
+      <div ref={filterStickySentinelRef} className="h-px w-full" aria-hidden />
+      <div
+        className={`sticky top-[56px] md:top-[80px] z-30 -mt-[48px] md:-mt-[56px] mb-[24px] md:mb-[32px] ${
+          filtersStuck
+            ? "bg-white border-b border-[#e8e8e8] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] py-1 md:py-2"
+            : ""
+        }`}
+      >
+        <div className="max-w-[1718px] mx-auto px-4 md:px-[32px]">
+          <div
+            className={`w-full p-3 md:p-[24px] ${
+              filtersStuck
+                ? "bg-transparent border-0 shadow-none rounded-none"
+                : "bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] border border-[#e8e8e8]"
+            }`}
+          >
               <div
                 className={`grid w-full grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,1fr))] gap-3 md:gap-[16px] xl:gap-[24px] ${
                   isPropertyTaxModule
@@ -379,10 +424,9 @@ export default function App() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Main Content */}
-      <div className="max-w-[1718px] mx-auto px-4 md:px-[32px] pt-[72px] md:pt-[88px] pb-[24px] md:pb-[32px]">
+      <div className="max-w-[1718px] mx-auto px-4 md:px-[32px] pb-[24px] md:pb-[32px]">
         <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4] overflow-hidden">
           {/* Heading strip — always visible */}
           <div className="p-4 md:p-[24px]">
@@ -423,6 +467,7 @@ export default function App() {
             {selectedModule === "Civil Registration" && (
               <>
                 <CivilRegistrationModule
+                  selectedSubModule={selectedSubModule}
                   onViewMore={(type) => {
                     setDetailsModalContentMode("fileKpi");
                     setModalKpiType(type || "all");

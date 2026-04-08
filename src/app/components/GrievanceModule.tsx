@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { BarChart } from "@mui/x-charts/BarChart";
 import { StatCard } from "./StatCard";
 import { FinanceModule } from "./FinanceModule";
 
@@ -17,7 +18,6 @@ const KERALA_DISTRICTS = [
   "Malappuram", "Kozhikode", "Wayanad", "Kannur", "Kasaragod",
 ];
 
-// Deterministic hash for consistent dummy numbers
 const h = (s: string) => {
   let v = 0;
   for (let i = 0; i < s.length; i++) v = (Math.imul(31, v) + s.charCodeAt(i)) | 0;
@@ -25,7 +25,6 @@ const h = (s: string) => {
 };
 const rn = (seed: string, min: number, max: number) => min + (h(seed) % (max - min + 1));
 
-// Disposal percentage bar chart data — unique short names
 const DISTRICT_SHORT: Record<string, string> = {
   Thiruvananthapuram: "TVM",
   Kollam: "KLM",
@@ -49,7 +48,6 @@ const disposalChartData = KERALA_DISTRICTS.map((d) => {
   return { name: DISTRICT_SHORT[d] ?? d.slice(0, 3), fullName: d, total, disposed };
 });
 
-// Mode of Submission bar chart data
 const submissionModeData = [
   { name: "Self Apply", total: 18450, disposed: 12300 },
   { name: "Third Party", total: 14200, disposed: 9800 },
@@ -58,7 +56,6 @@ const submissionModeData = [
   { name: "CW Centre", total: 6200, disposed: 4100 },
 ];
 
-// File Status KPI data
 const FILE_STATUS_KPIS = {
   totalFiles: {
     label: "Total Files",
@@ -114,7 +111,6 @@ const FILE_STATUS_KPIS = {
   },
 };
 
-// Digital Health KPI data
 const DIGITAL_HEALTH_KPIS = [
   { label: "Total",       value: 74830, color: "bg-[#232f50]" },
   { label: "Self Apply",  value: 18450, color: "bg-[#1ebe72]" },
@@ -145,104 +141,22 @@ function DigitalHealthCard({ label, value, color }: { label: string; value: numb
   );
 }
 
-// ─── Custom Recharts Tooltip ──────────────────────────────────────────────────
-// Not needed anymore since we are using custom HTML Tooltip
-
-// ─── Custom Bar Chart ───────────────────────────────────────────────────────────────
-function CustomChart({ data }: { data: any[] }) {
-  const maxVal = Math.max(...data.map((d: any) => d.total));
-  const step = maxVal > 20000 ? 5000 : 5000; // Force step to 5000 for consistency or dynamic
-  const maxY = Math.ceil(maxVal / step) * step || 30000; // default 30k if 0
-  
-  const [hoveredItem, setHoveredItem] = useState<any>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const steps = [];
-  for (let i = 0; i <= 6; i++) {
-    steps.push(Math.round(maxY - (maxY / 6) * i));
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
+// ─── MUI X Bar Chart wrapper ─────────────────────────────────────────────────
+function CustomChart({ data }: { data: { name: string; total: number; disposed: number }[] }) {
   return (
-    <div className="flex-[1_0_0] w-full relative pl-[45px] pb-[30px] h-[250px] sm:h-[320px]">
-      {/* Tooltip */}
-      {hoveredItem && (
-        <div 
-          className="fixed z-50 pointer-events-none"
-          style={{ 
-            left: mousePos.x, 
-            top: mousePos.y,
-            transform: 'translate(-50%, -100%) translateY(-12px)'
-          }}
-        >
-          <div className="relative">
-            <div className="bg-white border border-[#e8eff4] rounded-[8px] p-[12px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)] whitespace-nowrap flex flex-col gap-[8px] min-w-[140px] relative z-10">
-              <span className="font-sans font-bold text-[14px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">{hoveredItem.fullName || hoveredItem.name}</span>
-              <div className="flex flex-col gap-[4px]">
-                <div className="flex justify-between items-center gap-[16px]">
-                  <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">
-                    <div className="w-[6px] h-[6px] rounded-full bg-[#56ba85]" /> Total Files
-                  </span>
-                  <span className="font-sans text-[12px] text-[#232f50]">{hoveredItem.total.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center gap-[16px]">
-                  <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">
-                    <div className="w-[6px] h-[6px] rounded-full bg-[#00b2eb]" /> Disposed Files
-                  </span>
-                  <span className="font-sans text-[12px] text-[#232f50]">{hoveredItem.disposed.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-            <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-[10px] h-[10px] bg-white border-b border-r border-[#e8eff4] rotate-45 z-0"></div>
-          </div>
-        </div>
-      )}
-
-      {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-[30px] flex flex-col justify-between text-right text-[12px] font-sans text-[#8d8d8d] py-0 z-10 w-[35px]">
-        {steps.map((val, i) => (
-          <span key={i}>{val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}</span>
-        ))}
-      </div>
-      
-      {/* Chart Area */}
-      <div className="w-full h-full relative" onMouseMove={handleMouseMove}>
-        {/* Horizontal Grid Lines */}
-        <div className="absolute inset-0 flex flex-col justify-between z-0 pointer-events-none">
-          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="w-full h-px bg-transparent border-b border-dashed border-[#e8eff4]" />
-          ))}
-        </div>
-
-        {/* Bars Container */}
-        <div className="absolute inset-0 z-10 flex items-end gap-[32px] px-[12px]">
-          {data.map((d, idx) => (
-            <div 
-              key={idx} 
-              className="flex flex-[1_0_0] flex-col items-center h-full justify-end relative group min-w-px"
-              onMouseEnter={() => setHoveredItem(d)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div className="content-stretch flex items-end gap-[8px] h-full justify-center relative shrink-0 w-full">
-                <div
-                  className="bg-[#56ba85] flex-[1_0_0] min-h-px min-w-px rounded-tl-[4px] rounded-tr-[4px] group-hover:opacity-80 transition-opacity cursor-pointer"
-                  style={{ height: `${(d.total / maxY) * 100}%` }}
-                />
-                <div
-                  className="bg-[#00b2eb] flex-[1_0_0] min-h-px min-w-px rounded-tl-[4px] rounded-tr-[4px] group-hover:opacity-80 transition-opacity cursor-pointer"
-                  style={{ height: `${(d.disposed / maxY) * 100}%` }}
-                />
-              </div>
-              <span className="font-sans text-[12px] text-[#5c6e93] text-center absolute -bottom-[24px] whitespace-nowrap">
-                {d.name}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="flex-[1_0_0] w-full h-[250px] sm:h-[320px]">
+      <BarChart
+        dataset={data}
+        xAxis={[{ scaleType: "band", dataKey: "name", tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+        yAxis={[{ tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+        series={[
+          { dataKey: "total", label: "Total Files", color: "#56ba85" },
+          { dataKey: "disposed", label: "Disposed Files", color: "#00b2eb" },
+        ]}
+        borderRadius={4}
+        slots={{ legend: () => null }}
+        height={320}
+      />
     </div>
   );
 }
