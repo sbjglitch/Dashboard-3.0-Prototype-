@@ -14,7 +14,7 @@ import { StatCard } from "./components/StatCard";
 import { MODULE_DATA } from "./data/serviceData";
 import imgGovernmentOfKeralaLogo from "../assets/828f18076f30eadbc8ffd05a9253419bb04f21ef.png";
 import imgLsgdLogo2 from "../assets/7c183a0a0c9ac3c4483c0f6d150efedb7cac5cb1.png";
-import imgHeroBannerBg from "../assets/b280c70468785c684b20318aa461dbb8807cc51f.png";
+import imgHeroBackground from "../assets/hero-banner-bg.png";
 import svgPaths from "../imports/svg-hkl0il95bp";
 import { ArrowLeft, Download, ChevronDown } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
@@ -307,31 +307,35 @@ export default function App() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-[#09327b] px-4 md:px-[32px] pt-8 md:pt-[56px] pb-[80px] md:pb-[100px] relative overflow-hidden min-h-[200px] md:h-[280px]">
-        <ImageWithFallback src="https://images.unsplash.com/photo-1704365159668-d6567db52f33?auto=format&fit=crop&q=80&w=1920" alt="Hero Background" className="absolute inset-0 w-full h-full object-cover pointer-events-none brightness-[0.4]" />
-        <div className="relative flex flex-col sm:flex-row items-start justify-between w-full max-w-[1568px] mx-auto gap-4">
-          <div className="flex flex-col gap-4 md:gap-[24px]">
-            <button className="flex items-center gap-[4px] w-fit hover:opacity-80 transition-opacity">
+      <div className="bg-[#09327b] px-4 md:px-[32px] pt-3 md:pt-9 pb-5 md:pb-9 relative overflow-hidden min-h-[108px] md:min-h-[128px] md:h-[140px]">
+        <ImageWithFallback
+          src={imgHeroBackground}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+        />
+        <div className="relative flex flex-row items-center w-full max-w-[1568px] mx-auto gap-2 sm:gap-4">
+          <div className="flex min-w-0 flex-1 basis-0 justify-start">
+            <button
+              type="button"
+              className="flex items-center gap-[4px] w-fit hover:opacity-80 transition-opacity shrink-0"
+            >
               <ArrowLeft className="w-4 h-4 text-white" />
               <span className="font-sans font-semibold text-[14px] text-white">Back</span>
             </button>
-            <div className="flex flex-col gap-1 md:gap-2">
-              <h1 className="font-sans font-bold text-[24px] md:text-[32px] text-white leading-[normal]">
-                KSMART Dashboard
-              </h1>
-              <p className="font-sans font-medium text-[14px] md:text-[16px] text-white opacity-70 leading-[normal]">
-                All the info you need about KSMART Services is right at your fingertips!
-              </p>
-            </div>
           </div>
-          <ExportButton onClick={() => console.log("Exporting...")} />
+          <h1 className="font-sans font-bold text-[18px] sm:text-[24px] md:text-[32px] text-white leading-[normal] text-center shrink min-w-0 px-1">
+            KSMART Dashboard
+          </h1>
+          <div className="flex min-w-0 flex-1 basis-0 justify-end">
+            <ExportButton onClick={() => console.log("Exporting...")} />
+          </div>
         </div>
       </div>
 
       {/* Filters — sticky below header */}
       <div ref={filterStickySentinelRef} className="h-px w-full" aria-hidden />
       <div
-        className={`sticky top-[56px] md:top-[80px] z-30 -mt-[48px] md:-mt-[56px] mb-[24px] md:mb-[32px] ${
+        className={`sticky top-[56px] md:top-[80px] z-30 -mt-6 md:-mt-8 mb-[24px] md:mb-[32px] ${
           filtersStuck
             ? "bg-white border-b border-[#e8e8e8] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] py-1 md:py-2"
             : ""
@@ -435,7 +439,7 @@ export default function App() {
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Time Period</p>
                 <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedTimePeriod}</p>
               </div>
-              <div className="flex flex-col gap-[2px] items-start justify-center min-w-0 flex-1">
+              <div className="flex flex-col gap-[2px] items-start justify-center min-w-0">
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Module</p>
                 <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px] max-w-full truncate" title={displayModule}>{displayModule}</p>
               </div>
@@ -481,8 +485,13 @@ export default function App() {
             {/* Dashboard Content Area: Tabs + Cards (shown for All Module and other non-grievance/non-finance/non-civil-reg modules) */}
             {selectedModule !== "Public Grievance and complaints" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="w-full">
-                {/* Tabs */}
-                <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit mb-4 md:mb-[24px] h-[40px] md:h-[44px]">
+                {/* Tabs / Heading */}
+                {selectedModule === "All Module" ? (
+                  <h3 className="font-sans font-bold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px] mb-4 md:mb-[24px]">
+                    File Status
+                  </h3>
+                ) : (
+                  <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit mb-4 md:mb-[24px] h-[40px] md:h-[44px]">
                   {/* File Status */}
                   <div 
                     onClick={() => setActiveMainTab("fileStatus")}
@@ -515,7 +524,9 @@ export default function App() {
                         <path clipRule="evenodd" d="M2.66667 14V14C3.40333 14 4 13.4033 4 12.6667V10.912C4 10.1753 3.40333 9.57867 2.66667 9.57867V9.57867C1.93 9.57867 1.33333 10.1753 1.33333 10.912V12.6667C1.33333 13.4033 1.93 14 2.66667 14Z" fill={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
                       </svg>
                     </div>
-                    <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "finance" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>Finance</span>
+                    <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "finance" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>
+                      {isPropertyTaxModule ? "DCB" : "Finance"}
+                    </span>
                   </div>
 
                   {/* Digital Health — only for qualifying Property Tax sub-modules */}
@@ -535,7 +546,8 @@ export default function App() {
                     </div>
                   )}
 
-                </div>
+                  </div>
+                )}
 
                 {/* Main Tab Content */}
                 {activeMainTab === "fileStatus" && (
@@ -614,7 +626,7 @@ export default function App() {
                   isPropertyTaxModule ? (
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-[16px] w-full">
                       <PropertyTaxKpiCard
-                        title="Collection Total"
+                        title="Demand"
                         value="51,251"
                         arrearDemand="25,251"
                         currentDemand="25,251"
@@ -626,7 +638,7 @@ export default function App() {
                         }}
                       />
                       <PropertyTaxKpiCard
-                        title="Arrear Demand"
+                        title="Collection"
                         value="25,251"
                         arrearDemand="15,251"
                         currentDemand="10,000"
@@ -638,7 +650,7 @@ export default function App() {
                         }}
                       />
                       <PropertyTaxKpiCard
-                        title="Current Demand"
+                        title="Balance"
                         value="26,000"
                         arrearDemand="12,000"
                         currentDemand="14,000"

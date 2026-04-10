@@ -88,32 +88,76 @@ function buildingFinanceFactor(rowId: string, colIdx: number): number {
 
 type PtFinanceSlice = "total" | "disposed" | "inProcess";
 
-const PT_FINANCE_MODAL_META: Record<
+/** Maps to DCB cards: total → Demand, disposed → Collection, inProcess → Balance */
+const PT_DCB_MODAL_META: Record<
   PtFinanceSlice,
-  { headline: string; kpiLabels: [string, string, string] }
+  {
+    headline: string;
+    kpiLabels: [string, string, string];
+    tableDataLabels: [string, string, string];
+  }
 > = {
   total: {
-    headline: "Collection overview",
-    kpiLabels: ["Total demand", "Total collected", "Outstanding balance"],
+    headline: "Demand",
+    kpiLabels: ["Demand Total", "Arrear Demand", "Current Demand"],
+    tableDataLabels: ["Demand Total", "Arrear Demand", "Current Demand"],
   },
   disposed: {
-    headline: "Arrear demand breakdown",
-    kpiLabels: ["Arrear outstanding", "Arrear collected", "Net arrear balance"],
+    headline: "Collection",
+    kpiLabels: ["Collection Total", "Arrear Demand", "Current Demand"],
+    tableDataLabels: ["Collection Total", "Arrear Demand", "Current Demand"],
   },
   inProcess: {
-    headline: "Current demand breakdown",
-    kpiLabels: ["Current demand", "Current collected", "Net current balance"],
+    headline: "Balance",
+    kpiLabels: ["Balance Total", "Arrear Demand", "Current Demand"],
+    tableDataLabels: ["Balance Total", "Arrear Demand", "Current Demand"],
   },
 };
 
-function getPtFinanceAmounts(row: TableRow, slice: PtFinanceSlice) {
+function getPtDcbDistrictRow(row: TableRow) {
   const base = row.totalFiles * 920 + row.disposed * 180 + (row.delayed || 0) * 40;
-  const sliceMult = slice === "total" ? 1 : slice === "disposed" ? 0.48 : 0.38;
-  const demand = Math.round(base * sliceMult);
+  const demandTotal = Math.round(base);
+  const arrearShare = 0.38 + (hashSeed(row.id) % 19) / 100;
+  const arrearDemand = Math.round(demandTotal * arrearShare);
+  const currentDemand = demandTotal - arrearDemand;
+
   const rate = 0.58 + (row.name.length % 7) * 0.03;
-  const collected = Math.min(demand, Math.round(demand * rate));
-  const balance = demand - collected;
-  return { demand, collected, balance };
+  const collectionTotal = Math.min(demandTotal, Math.round(demandTotal * rate));
+  const arrearCollection =
+    demandTotal > 0
+      ? Math.min(arrearDemand, Math.round((collectionTotal * arrearDemand) / demandTotal))
+      : 0;
+  const currentCollection = collectionTotal - arrearCollection;
+
+  const balanceTotal = demandTotal - collectionTotal;
+  const arrearBalance = Math.max(0, arrearDemand - arrearCollection);
+  const currentBalance = balanceTotal - arrearBalance;
+
+  return {
+    demandTotal,
+    arrearDemand,
+    currentDemand,
+    collectionTotal,
+    arrearCollection,
+    currentCollection,
+    balanceTotal,
+    arrearBalance,
+    currentBalance,
+  };
+}
+
+function getPtDcbTriple(
+  metrics: ReturnType<typeof getPtDcbDistrictRow>,
+  slice: PtFinanceSlice
+): [number, number, number] {
+  switch (slice) {
+    case "total":
+      return [metrics.demandTotal, metrics.arrearDemand, metrics.currentDemand];
+    case "disposed":
+      return [metrics.collectionTotal, metrics.arrearCollection, metrics.currentCollection];
+    case "inProcess":
+      return [metrics.balanceTotal, metrics.arrearBalance, metrics.currentBalance];
+  }
 }
 
 export function DetailsModal({ 
@@ -692,28 +736,28 @@ export function DetailsModal({
     );
   }
 
-  // ── Property Tax · Finance tab (₹ DCB-style district breakdown) ───────────
+  // ── Property Tax · DCB (demand / collection / balance by district) ───────────
   if (contentMode === "propertyTaxFinance") {
     const ptSlice: PtFinanceSlice =
       kpiType === "disposed" ? "disposed" : kpiType === "inProcess" ? "inProcess" : "total";
-    const ptMeta = PT_FINANCE_MODAL_META[ptSlice];
-    const fullPtRows = level1.map((row) => ({
-      id: row.id,
-      name: row.name,
-      ...getPtFinanceAmounts(row, ptSlice),
-    }));
+    const ptMeta = PT_DCB_MODAL_META[ptSlice];
+    const fullPtRows = level1.map((row) => {
+      const m = getPtDcbDistrictRow(row);
+      const [c0, c1, c2] = getPtDcbTriple(m, ptSlice);
+      return { id: row.id, name: row.name, c0, c1, c2 };
+    });
     const sums = fullPtRows.reduce(
       (acc, r) => ({
-        demand: acc.demand + r.demand,
-        collected: acc.collected + r.collected,
-        balance: acc.balance + r.balance,
+        c0: acc.c0 + r.c0,
+        c1: acc.c1 + r.c1,
+        c2: acc.c2 + r.c2,
       }),
-      { demand: 0, collected: 0, balance: 0 }
+      { c0: 0, c1: 0, c2: 0 }
     );
     const ptTopKpis = [
-      { label: ptMeta.kpiLabels[0], value: formatINR(sums.demand) },
-      { label: ptMeta.kpiLabels[1], value: formatINR(sums.collected) },
-      { label: ptMeta.kpiLabels[2], value: formatINR(sums.balance) },
+      { label: ptMeta.kpiLabels[0], value: formatINR(sums.c0) },
+      { label: ptMeta.kpiLabels[1], value: formatINR(sums.c1) },
+      { label: ptMeta.kpiLabels[2], value: formatINR(sums.c2) },
     ];
     const q = searchQuery.trim().toLowerCase();
     const filteredPtRows = q
@@ -726,7 +770,7 @@ export function DetailsModal({
           <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
             <div className="flex flex-col gap-0.5">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#009fd2]">
-                Property tax · Finance
+                Property tax · DCB
               </p>
               <h2 className="text-base font-semibold text-gray-900 leading-6">
                 {moduleName} — {ptMeta.headline}
@@ -784,13 +828,13 @@ export function DetailsModal({
                       District
                     </th>
                     <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f1f5f9] whitespace-nowrap">
-                      Demand (₹)
+                      {ptMeta.tableDataLabels[0]} (₹)
                     </th>
                     <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f0fdf4] whitespace-nowrap">
-                      Collected (₹)
+                      {ptMeta.tableDataLabels[1]} (₹)
                     </th>
                     <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#fffbeb] whitespace-nowrap">
-                      Balance (₹)
+                      {ptMeta.tableDataLabels[2]} (₹)
                     </th>
                   </tr>
                 </thead>
@@ -802,13 +846,13 @@ export function DetailsModal({
                       <tr key={row.id} className={`border-b border-gray-100 h-12 ${rowBg} hover:bg-gray-50/80`}>
                         <td className="pl-8 pr-4 py-2 text-sm font-normal text-[#101828]">{row.name}</td>
                         <td className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100 tabular-nums">
-                          {formatINR(row.demand)}
+                          {formatINR(row.c0)}
                         </td>
                         <td className="text-right px-4 py-2 text-sm font-normal text-[#00a78e] border-l border-gray-100 tabular-nums">
-                          {formatINR(row.collected)}
+                          {formatINR(row.c1)}
                         </td>
                         <td className="text-right px-4 py-2 text-sm font-normal text-[#df3a7a] border-l border-gray-100 tabular-nums">
-                          {formatINR(row.balance)}
+                          {formatINR(row.c2)}
                         </td>
                       </tr>
                     );

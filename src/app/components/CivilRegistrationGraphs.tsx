@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BarChart } from "@mui/x-charts/BarChart";
 
@@ -271,12 +271,29 @@ function StatusLegend() {
 const valueFormatter = (value: number | null) =>
   value != null ? value.toLocaleString() : "";
 
+function useContainerChartWidth() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(600);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setWidth(Math.max(280, Math.floor(el.getBoundingClientRect().width)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
+
 // ─── Individual graph renderers ───────────────────────────────────────────────
 
 function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
+  const { ref, width } = useContainerChartWidth();
   return (
-    <div className="w-full flex flex-col items-center justify-end h-full">
+    <div ref={ref} className="w-full min-w-0 flex flex-col justify-end h-full">
       <BarChart
+        width={width}
         dataset={data}
         xAxis={[{
           scaleType: "band",
@@ -285,27 +302,41 @@ function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
         }]}
         yAxis={[{ tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
         series={[
-          { dataKey: "totalFiles", label: "Total Files", valueFormatter, color: "#0cbea4" },
-          { dataKey: "disposedFiles", label: "Disposed Files", valueFormatter, color: "#33c1ef" },
-          { dataKey: "pendingFiles", label: "Pending Files", valueFormatter, color: "#f5b95b" },
+          { dataKey: "totalFiles", label: "Total Files", valueFormatter, color: C_APPLICATION },
+          { dataKey: "disposedFiles", label: "Disposed Files", valueFormatter, color: C_APPROVED },
+          { dataKey: "pendingFiles", label: "Pending Files", valueFormatter, color: C_DELAYED },
         ]}
         borderRadius={4}
         grid={{ horizontal: true }}
         height={400}
-        margin={{ bottom: 80, top: 10 }}
+        margin={{ bottom: 80, top: 10, left: 8, right: 8 }}
         slots={{ legend: () => null }}
       />
     </div>
   );
 }
 
+/** One stacked segment per category so each bar uses the matching STATUS_LEGEND colour. */
 function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
+  const n = data.length;
+  const dataset = data.map((d, i) => {
+    const row: Record<string, string | number> = { category: d.label };
+    for (let j = 0; j < n; j++) {
+      row[`slot${j}`] = j === i ? d.value : 0;
+    }
+    return row;
+  });
   return (
     <BarChart
-      xAxis={[{ scaleType: "band", data: data.map((d) => d.label), tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
+      dataset={dataset}
+      xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
       yAxis={[{ max: Y_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-      series={[{ data: data.map((d) => d.value), label: "Count", color: "#0cbea4" }]}
-      colors={data.map((d) => d.color)}
+      series={data.map((d, i) => ({
+        dataKey: `slot${i}`,
+        label: d.label,
+        color: d.color,
+        stack: "stateTotals",
+      }))}
       borderRadius={6}
       slots={{ legend: () => null }}
       height={340}

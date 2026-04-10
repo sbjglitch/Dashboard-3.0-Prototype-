@@ -140,6 +140,23 @@ const PIE_DATA_OCCUPANCY = [
   { label: "Others", value: 5, color: "bg-[#a4c400]" },
 ];
 
+const OCCUPANCY_AREA_SPLIT_DATA = [
+  { label: "Single Family Residential", lt80: 4000, m80to150: 7000, m150to300: 3800, m300to500: 4400, gt500: 3600 },
+  { label: "Commercial", lt80: 7400, m80to150: 7000, m150to300: 3800, m300to500: 4400, gt500: 3600 },
+  { label: "Residence-Apartments", lt80: 4000, m80to150: 10800, m150to300: 1700, m300to500: 1200, gt500: 700 },
+  { label: "Special Residence", lt80: 4000, m80to150: 7000, m150to300: 3800, m300to500: 4400, gt500: 3600 },
+  { label: "Small scale Industries", lt80: 4000, m80to150: 7000, m150to300: 3800, m300to500: 4400, gt500: 3600 },
+  { label: "Others", lt80: 4000, m80to150: 7000, m150to300: 3800, m300to500: 4400, gt500: 3600 },
+];
+
+const OCCUPANCY_AREA_LEGEND = [
+  { key: "lt80", label: "Less than 80 m²", color: "#00b69b" },
+  { key: "m80to150", label: "80-150 m²", color: "#00b2eb" },
+  { key: "m150to300", label: "150-300 m²", color: "#fbba23" },
+  { key: "m300to500", label: "300-500 m²", color: "#df3a7a" },
+  { key: "gt500", label: "Above 500 m²", color: "#7b61ff" },
+] as const;
+
 
 function toSentenceCase(text: string) { 
   if (!text) return text;
@@ -158,7 +175,8 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
     "File split up based on service",
     "Avg. time to Dispose",
     "Avg. time to Grant Permit",
-    "Occupancy-wise split up"
+    "Occupancy-wise split up",
+    "Occupancy-wise, built-up area-wise split up",
   ];
 
   const activeBarData = useMemo(() => {
@@ -329,6 +347,54 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
     );
   };
 
+  const renderOccupancyAreaSplitChart = () => {
+    return (
+      <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[24px]">
+          <div className="flex flex-col gap-[8px]">
+            <div className="flex flex-wrap items-center gap-[12px]">
+              <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+                Occupancy-wise, built-up areawise split up of application
+              </h3>
+              <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
+                {selectedLocalBody}
+              </div>
+            </div>
+            <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
+              Occupancy-wise, built-up areawise split up of applications under general and self-certified categories.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1 w-full min-h-0">
+          <BarChart
+            dataset={OCCUPANCY_AREA_SPLIT_DATA}
+            xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 10, fill: "#09327b" } }]}
+            yAxis={[{ max: 30000, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+            series={OCCUPANCY_AREA_LEGEND.map((item) => ({
+              dataKey: item.key,
+              label: item.label,
+              stack: "total",
+              color: item.color,
+            }))}
+            borderRadius={8}
+            height={360}
+            slots={{ legend: () => null }}
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[12px] mt-[12px]">
+          {OCCUPANCY_AREA_LEGEND.map((item) => (
+            <div key={item.key} className="flex items-center gap-[8px]">
+              <span className="w-[16px] h-[16px] rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="font-sans font-medium text-[16px] text-[#09327b]">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 0:
@@ -361,6 +427,8 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
           "Occupancy-category distribution of applications submitted under general and self-certified permits.",
           PIE_DATA_OCCUPANCY
         );
+      case 5:
+        return renderOccupancyAreaSplitChart();
       default:
         return null;
     }

@@ -28,7 +28,7 @@ function DCBGraph() {
           Demand, Collection &amp; Balance Graph
         </h3>
         <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[normal] capitalize">
-          Occupancy wise split up of application under general + self certified
+          District-wise comparison of demand raised, amount collected, and outstanding balance.
         </p>
       </div>
 
