@@ -9,6 +9,7 @@ import { CivilRegistrationModule } from "./components/CivilRegistrationModule";
 import { CivilRegistrationGraphs } from "./components/CivilRegistrationGraphs";
 import { BuildingFinanceOverview } from "./components/BuildingFinanceOverview";
 import { BuildingPermissionGraphs } from "./components/BuildingPermissionGraphs";
+import { BusinessFacilitationGraphs } from "./components/BusinessFacilitationGraphs";
 import { PropertyTaxGraphs } from "./components/PropertyTaxGraphs";
 import { StatCard } from "./components/StatCard";
 import { MODULE_DATA } from "./data/serviceData";
@@ -19,6 +20,7 @@ import svgPaths from "../imports/svg-hkl0il95bp";
 import { ArrowLeft, Download, ChevronDown } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { ExportButton } from "./components/ExportButton";
+import { GlobalChartStyles } from "./constants/chartStyles";
 
 function FilterSelect({ label, value }: { label: string; value: string }) {
   return (
@@ -260,6 +262,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f2f6ff]">
+      <GlobalChartStyles />
       {/* Header */}
       <header className="bg-white h-auto md:h-[80px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] sticky top-0 z-40">
         <div className="flex flex-wrap items-center justify-between px-4 md:px-[32px] py-3 md:py-0 h-full gap-3 md:gap-0">
@@ -700,11 +703,16 @@ export default function App() {
               <BuildingPermissionGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
+            {/* Business Facilitation charts: dedicated module only */}
+            {selectedModule === "Business Facilitation" && (
+              <BusinessFacilitationGraphs selectedLocalBody={selectedLocalBody} />
+            )}
+
             {isPropertyTaxModule && (
               <PropertyTaxGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
-            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
+            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Business Facilitation" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-[16px] bg-[#f6f9fb] rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-0">
                 {/* Left Sidebar */}
                 <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-4 lg:p-[16px]">

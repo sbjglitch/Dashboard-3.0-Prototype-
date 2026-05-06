@@ -1,16 +1,23 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BarChart } from "@mui/x-charts/BarChart";
+import {
+  CHART_PALETTE,
+  barChartBaseProps,
+  xAxisBand,
+  yAxisLinear,
+} from "../constants/chartStyles";
 
-// ─── Colour tokens (from Figma) ───────────────────────────────────────────────
-const C_APPLICATION = "#0cbea4";
-const C_APPROVED    = "#33c1ef";
-const C_REJECTED    = "#e8719f";
-const C_IN_PROGRESS = "#bda6ff";
-const C_DELAYED     = "#f5b95b";
-const C_BIRTH       = "#0cbea4";
-const C_DEATH       = "#33c1ef";
-const C_MARRIAGE    = "#bda6ff";
+// ─── Color tokens — mapped onto the unified CHART_PALETTE ─────────────────────
+const C_APPLICATION = CHART_PALETTE[2]; // success/teal
+const C_APPROVED    = CHART_PALETTE[1]; // accent sky
+const C_REJECTED    = CHART_PALETTE[5]; // pink/danger
+const C_IN_PROGRESS = CHART_PALETTE[3]; // purple
+const C_DELAYED     = CHART_PALETTE[4]; // amber
+const C_BIRTH       = CHART_PALETTE[2];
+// Reserved for future death/marriage-specific charts.
+// const C_DEATH    = CHART_PALETTE[1];
+// const C_MARRIAGE = CHART_PALETTE[3];
 
 // ─── Static data ─────────────────────────────────────────────────────────────
 
@@ -293,24 +300,18 @@ function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
   return (
     <div ref={ref} className="w-full min-w-0 flex flex-col justify-end h-full">
       <BarChart
+        {...barChartBaseProps}
         width={width}
+        height={400}
+        margin={{ ...barChartBaseProps.margin, bottom: 88 }}
         dataset={data}
-        xAxis={[{
-          scaleType: "band",
-          dataKey: "district",
-          tickLabelStyle: { fontSize: 10, fill: "#5c6e93", angle: -35, textAnchor: "end" },
-        }]}
-        yAxis={[{ tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+        xAxis={[xAxisBand("district", { angle: -35, textAnchor: "end" })]}
+        yAxis={[yAxisLinear()]}
         series={[
           { dataKey: "totalFiles", label: "Total Files", valueFormatter, color: C_APPLICATION },
           { dataKey: "disposedFiles", label: "Disposed Files", valueFormatter, color: C_APPROVED },
           { dataKey: "pendingFiles", label: "Pending Files", valueFormatter, color: C_DELAYED },
         ]}
-        borderRadius={4}
-        grid={{ horizontal: true }}
-        height={400}
-        margin={{ bottom: 80, top: 10, left: 8, right: 8 }}
-        slots={{ legend: () => null }}
       />
     </div>
   );
@@ -328,18 +329,17 @@ function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
   });
   return (
     <BarChart
+      {...barChartBaseProps}
+      height={340}
       dataset={dataset}
-      xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
-      yAxis={[{ max: Y_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+      xAxis={[xAxisBand("category")]}
+      yAxis={[yAxisLinear(Y_MAX)]}
       series={data.map((d, i) => ({
         dataKey: `slot${i}`,
         label: d.label,
         color: d.color,
         stack: "stateTotals",
       }))}
-      borderRadius={6}
-      slots={{ legend: () => null }}
-      height={340}
     />
   );
 }
@@ -347,13 +347,12 @@ function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
 function DistrictBarChart({ data, max, color, valueLabel = "Count" }: { data: { label: string; value: number }[]; max: number; color: string; valueLabel?: string }) {
   return (
     <BarChart
-      dataset={data}
-      xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
-      yAxis={[{ max, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-      series={[{ dataKey: "value", label: valueLabel, color }]}
-      borderRadius={4}
-      slots={{ legend: () => null }}
+      {...barChartBaseProps}
       height={340}
+      dataset={data}
+      xAxis={[xAxisBand("label")]}
+      yAxis={[yAxisLinear(max)]}
+      series={[{ dataKey: "value", label: valueLabel, color }]}
     />
   );
 }
@@ -366,13 +365,12 @@ function GroupedBarChart() {
   });
   return (
     <BarChart
-      dataset={dataset}
-      xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 11, fill: "#5c6e93", fontWeight: 600 } }]}
-      yAxis={[{ max: Y_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-      series={STATUS_LEGEND.map((s) => ({ dataKey: s.label, label: s.label, color: s.color }))}
-      borderRadius={4}
-      slots={{ legend: () => null }}
+      {...barChartBaseProps}
       height={340}
+      dataset={dataset}
+      xAxis={[xAxisBand("category")]}
+      yAxis={[yAxisLinear(Y_MAX)]}
+      series={STATUS_LEGEND.map((s) => ({ dataKey: s.label, label: s.label, color: s.color }))}
     />
   );
 }
@@ -383,13 +381,12 @@ function YearWiseChart({ metric }: { metric: "births" | "stillbirths" }) {
   const seriesLabel = metric === "births" ? "Birth Count" : "Still Birth Count";
   return (
     <BarChart
-      dataset={YEAR_WISE_BIRTHS}
-      xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 12, fill: "#5c6e93", fontWeight: 600 } }]}
-      yAxis={[{ max: YEAR_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-      series={[{ dataKey, label: seriesLabel, color }]}
-      borderRadius={4}
-      slots={{ legend: () => null }}
+      {...barChartBaseProps}
       height={340}
+      dataset={YEAR_WISE_BIRTHS}
+      xAxis={[xAxisBand("label")]}
+      yAxis={[yAxisLinear(YEAR_MAX)]}
+      series={[{ dataKey, label: seriesLabel, color }]}
     />
   );
 }
@@ -424,7 +421,6 @@ const GRAPH_META: Record<GraphId, { title: string; desc: string }> = {
 function GraphContent({ id }: { id: GraphId }) {
   const [view, setView]   = useState<"state" | "district">("state");
   const [scope, setScope] = useState<"district" | "local">("district");
-  const [sort, setSort]   = useState("Descending");
   const [show, setShow] = useState<"Top 20" | "Bottom 20">("Top 20");
   const [isShowMenuOpen, setIsShowMenuOpen] = useState(false);
 
@@ -447,11 +443,6 @@ function GraphContent({ id }: { id: GraphId }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-[12px] items-center">
-          <FilterChip
-            label="Sort By:"
-            value={sort}
-            onClick={() => setSort((s) => (s === "Descending" ? "Ascending" : "Descending"))}
-          />
           {hasShowMenu && (
             <div className="relative">
               <FilterChip

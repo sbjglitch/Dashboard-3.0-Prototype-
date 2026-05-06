@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { BarChart } from "@mui/x-charts/BarChart";
+import {
+  CHART_PALETTE,
+  Legend,
+  TEXT_MUTED,
+  barChartBaseProps,
+  pieChartBaseProps,
+  pieSeriesGeometry,
+  xAxisBand,
+  yAxisLinear,
+} from "../constants/chartStyles";
 
 const DCB_DATA = {
   arrear:  { demand: 17500, collection: 10200, balance: 13500 },
@@ -9,9 +19,15 @@ const DCB_DATA = {
 };
 const DCB_MAX = 30000;
 
+const DCB_SERIES = [
+  { dataKey: "demand", label: "Demand", color: CHART_PALETTE[2] },
+  { dataKey: "collection", label: "Collection", color: CHART_PALETTE[1] },
+  { dataKey: "balance", label: "Balance", color: CHART_PALETTE[3] },
+];
+
 const SUCCESS_FAILURE_DATA = [
-  { label: "Success Count", pct: 68, color: "#00c49f" },
-  { label: "Failure Count", pct: 32, color: "#e83a7a" },
+  { label: "Success Count", pct: 68, color: CHART_PALETTE[2] },
+  { label: "Failure Count", pct: 32, color: CHART_PALETTE[5] },
 ];
 
 const DCB_CHART_DATA = [
@@ -34,31 +50,16 @@ function DCBGraph() {
 
       <div className="flex-1 min-h-0">
         <BarChart
+          {...barChartBaseProps}
           dataset={DCB_CHART_DATA}
-          xAxis={[{ scaleType: "band", dataKey: "category", tickLabelStyle: { fontSize: 12, fill: "#5c6e93", fontWeight: 600 } }]}
-          yAxis={[{ max: DCB_MAX, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-          series={[
-            { dataKey: "demand", label: "Demand", color: "#56ba85" },
-            { dataKey: "collection", label: "Collection", color: "#00b2eb" },
-            { dataKey: "balance", label: "Balance", color: "#7b61ff" },
-          ]}
-          borderRadius={4}
-          slots={{ legend: () => null }}
-          height={360}
+          xAxis={[xAxisBand("category")]}
+          yAxis={[yAxisLinear(DCB_MAX)]}
+          series={DCB_SERIES}
         />
       </div>
 
-      <div className="flex items-center gap-[24px] mt-[8px]">
-        {[
-          { color: "#56ba85", label: "Demand" },
-          { color: "#00b2eb", label: "Collection" },
-          { color: "#7b61ff", label: "Balance" },
-        ].map((l) => (
-          <div key={l.label} className="flex items-center gap-[8px]">
-            <div className="w-[12px] h-[12px] rounded-[2px]" style={{ backgroundColor: l.color }} />
-            <span className="font-sans font-medium text-[13px] text-[#5c6e93]">{l.label}</span>
-          </div>
-        ))}
+      <div className="mt-[8px]">
+        <Legend items={DCB_SERIES.map((s) => ({ label: s.label, color: s.color }))} />
       </div>
     </div>
   );
@@ -81,43 +82,36 @@ function BuildingStatisticsGraph({ selectedLocalBody }: { selectedLocalBody: str
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-[40px] md:gap-[64px]">
+      <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-[24px] md:gap-[48px]">
         <PieChart
+          {...pieChartBaseProps}
+          width={320}
+          height={300}
           series={[{
+            ...pieSeriesGeometry,
+            outerRadius: 140,
+            paddingAngle: 3,
             data: SUCCESS_FAILURE_DATA.map((item, i) => ({
               id: i,
               value: item.pct,
               label: item.label,
               color: item.color,
             })),
-            innerRadius: 60,
-            outerRadius: 140,
-            paddingAngle: 3,
-            cornerRadius: 4,
-            highlightScope: { fade: "global", highlight: "item" },
           }]}
-          width={320}
-          height={300}
-          slots={{ legend: () => null }}
         />
 
         <div className="flex flex-col gap-[8px]">
           {SUCCESS_FAILURE_DATA.map((item) => (
             <div
               key={item.label}
-              className="flex items-center gap-[8px] px-[16px] py-[8px] rounded-[6px] hover:bg-[#f6f9fb] transition-colors cursor-default"
+              className="flex items-center gap-[10px] px-[12px] py-[8px] rounded-[8px] hover:bg-[#f6f9fb] transition-colors cursor-default"
             >
-              <div
-                className="w-[24px] h-[24px] rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${item.color}20` }}
-              >
-                <div
-                  className="w-[10px] h-[10px] rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
-              </div>
-              <span className="font-['Inter:Medium',sans-serif] font-medium text-[14px] text-[#383c51] whitespace-nowrap">
-                {item.label} {item.pct}%
+              <span
+                className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="font-sans font-medium text-[14px] text-[#232f50] whitespace-nowrap">
+                {item.label} <span style={{ color: TEXT_MUTED }}>({item.pct}%)</span>
               </span>
             </div>
           ))}

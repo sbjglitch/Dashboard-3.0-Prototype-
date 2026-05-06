@@ -1,8 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { StatCard } from "./StatCard";
 import { FinanceModule } from "./FinanceModule";
+import {
+  CHART_PALETTE,
+  barChartBaseProps,
+  xAxisBand,
+  yAxisLinear,
+} from "../constants/chartStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -146,16 +152,15 @@ function CustomChart({ data }: { data: { name: string; total: number; disposed: 
   return (
     <div className="flex-[1_0_0] w-full h-[250px] sm:h-[320px]">
       <BarChart
-        dataset={data}
-        xAxis={[{ scaleType: "band", dataKey: "name", tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-        yAxis={[{ tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-        series={[
-          { dataKey: "total", label: "Total Files", color: "#56ba85" },
-          { dataKey: "disposed", label: "Disposed Files", color: "#00b2eb" },
-        ]}
-        borderRadius={4}
-        slots={{ legend: () => null }}
+        {...barChartBaseProps}
         height={320}
+        dataset={data}
+        xAxis={[xAxisBand("name")]}
+        yAxis={[yAxisLinear()]}
+        series={[
+          { dataKey: "total", label: "Total Files", color: CHART_PALETTE[2] },
+          { dataKey: "disposed", label: "Disposed Files", color: CHART_PALETTE[1] },
+        ]}
       />
     </div>
   );
@@ -346,17 +351,19 @@ export function GrievanceModule({
 
           {/* Legend */}
           <div className="flex items-center gap-[24px] mb-[24px]">
-            <div className="flex items-center gap-[8px] justify-center px-[16px] py-[8px]">
-              <div className="w-[24px] h-[24px] bg-[#f8f8f8] rounded-[4px] flex items-center justify-center shrink-0">
-                <div className="w-[8px] h-[8px] rounded-full bg-[#56ba85]" />
-              </div>
-              <span className="font-['Inter:Medium',sans-serif] font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
+            <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
+              <span
+                className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+                style={{ backgroundColor: CHART_PALETTE[2] }}
+              />
+              <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
             </div>
-            <div className="flex items-center gap-[8px] justify-center px-[16px] py-[8px]">
-              <div className="w-[24px] h-[24px] bg-[#f8f8f8] rounded-[4px] flex items-center justify-center shrink-0">
-                <div className="w-[8px] h-[8px] rounded-full bg-[#00b2eb]" />
-              </div>
-              <span className="font-['Inter:Medium',sans-serif] font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
+            <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
+              <span
+                className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+                style={{ backgroundColor: CHART_PALETTE[1] }}
+              />
+              <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
             </div>
           </div>
 

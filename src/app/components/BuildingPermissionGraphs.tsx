@@ -1,7 +1,32 @@
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useRef, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { BarChart } from "@mui/x-charts/BarChart";
+import {
+  CHART_CONFIG,
+  CHART_PALETTE,
+  Legend,
+  barChartBaseProps,
+  pieChartBaseProps,
+  pieSeriesGeometry,
+  xAxisBand,
+  yAxisLinear,
+} from "../constants/chartStyles";
+
+function useContainerChartWidth() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(600);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setWidth(Math.max(280, Math.floor(el.getBoundingClientRect().width)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
 
 // Mock Data
 const BAR_DATA_DISTRICT = [
@@ -123,21 +148,21 @@ const LOCAL_BODIES_BOTTOM_20_GRANT_DAYS = LOCAL_BODIES_BOTTOM_20.map((item, idx)
 }));
 
 const PIE_DATA_SERVICE_SPLIT = [
-  { label: "General Permit", value: 32, color: "bg-[#00c49f]" },
-  { label: "Self Certified", value: 32, color: "bg-[#00b2eb]" },
-  { label: "Regularization+ Permit", value: 32, color: "bg-[#e83a7a]" },
-  { label: "Regularization+ Com...", value: 32, color: "bg-[#f5a623]" },
-  { label: "Regularization+ par...", value: 32, color: "bg-[#7b61ff]" },
-  { label: "Others", value: 32, color: "bg-[#a4c400]" },
+  { label: "General Permit", value: 32, color: CHART_PALETTE[2] },
+  { label: "Self Certified", value: 32, color: CHART_PALETTE[1] },
+  { label: "Regularization+ Permit", value: 32, color: CHART_PALETTE[5] },
+  { label: "Regularization+ Com...", value: 32, color: CHART_PALETTE[4] },
+  { label: "Regularization+ par...", value: 32, color: CHART_PALETTE[3] },
+  { label: "Others", value: 32, color: CHART_PALETTE[6] },
 ];
 
 const PIE_DATA_OCCUPANCY = [
-  { label: "Single Family Residential", value: 35, color: "bg-[#00c49f]" },
-  { label: "Commercial", value: 25, color: "bg-[#00b2eb]" },
-  { label: "Residence - Apartments", value: 15, color: "bg-[#e83a7a]" },
-  { label: "Special Residence", value: 10, color: "bg-[#f5a623]" },
-  { label: "Small Scale Industries", value: 10, color: "bg-[#7b61ff]" },
-  { label: "Others", value: 5, color: "bg-[#a4c400]" },
+  { label: "Single Family Residential", value: 35, color: CHART_PALETTE[2] },
+  { label: "Commercial", value: 25, color: CHART_PALETTE[1] },
+  { label: "Residence - Apartments", value: 15, color: CHART_PALETTE[5] },
+  { label: "Special Residence", value: 10, color: CHART_PALETTE[4] },
+  { label: "Small Scale Industries", value: 10, color: CHART_PALETTE[3] },
+  { label: "Others", value: 5, color: CHART_PALETTE[6] },
 ];
 
 const OCCUPANCY_AREA_SPLIT_DATA = [
@@ -150,11 +175,11 @@ const OCCUPANCY_AREA_SPLIT_DATA = [
 ];
 
 const OCCUPANCY_AREA_LEGEND = [
-  { key: "lt80", label: "Less than 80 m²", color: "#00b69b" },
-  { key: "m80to150", label: "80-150 m²", color: "#00b2eb" },
-  { key: "m150to300", label: "150-300 m²", color: "#fbba23" },
-  { key: "m300to500", label: "300-500 m²", color: "#df3a7a" },
-  { key: "gt500", label: "Above 500 m²", color: "#7b61ff" },
+  { key: "lt80", label: "Less than 80 m²", color: CHART_PALETTE[2] },
+  { key: "m80to150", label: "80-150 m²", color: CHART_PALETTE[1] },
+  { key: "m150to300", label: "150-300 m²", color: CHART_PALETTE[4] },
+  { key: "m300to500", label: "300-500 m²", color: CHART_PALETTE[5] },
+  { key: "gt500", label: "Above 500 m²", color: CHART_PALETTE[3] },
 ] as const;
 
 
@@ -179,25 +204,47 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
     "Occupancy-wise, built-up area-wise split up",
   ];
 
+  const { ref: barChartContainerRef, width: barChartWidth } = useContainerChartWidth();
+
   const activeBarData = useMemo(() => {
+    let data = BAR_DATA_DISTRICT;
+
     if (activeTab === 0) {
-      if (activeSubTab === "District") return BAR_DATA_DISTRICT;
-      return showTop === "Top 20" ? LOCAL_BODIES_TOP_20 : LOCAL_BODIES_BOTTOM_20;
+      data = activeSubTab === "District"
+        ? BAR_DATA_DISTRICT
+        : showTop === "Top 20"
+          ? LOCAL_BODIES_TOP_20
+          : LOCAL_BODIES_BOTTOM_20;
+    } else if (activeTab === 2) {
+      data = activeSubTab === "District"
+        ? DISTRICT_AVG_DISPOSE_DAYS
+        : showTop === "Top 20"
+          ? LOCAL_BODIES_TOP_20_DISPOSE_DAYS
+          : LOCAL_BODIES_BOTTOM_20_DISPOSE_DAYS;
+    } else if (activeTab === 3) {
+      data = activeSubTab === "District"
+        ? DISTRICT_AVG_GRANT_DAYS
+        : showTop === "Top 20"
+          ? LOCAL_BODIES_TOP_20_GRANT_DAYS
+          : LOCAL_BODIES_BOTTOM_20_GRANT_DAYS;
     }
-    if (activeTab === 2) {
-      if (activeSubTab === "District") return DISTRICT_AVG_DISPOSE_DAYS;
-      return showTop === "Top 20" ? LOCAL_BODIES_TOP_20_DISPOSE_DAYS : LOCAL_BODIES_BOTTOM_20_DISPOSE_DAYS;
+
+    const sorted = [...data].sort((a, b) =>
+      sortBy === "Ascending" ? a.value - b.value : b.value - a.value
+    );
+
+    if (activeTab === 0 && activeSubTab === "District") {
+      const stateAvg = sorted.find((item) => item.isAvg);
+      const others = sorted.filter((item) => !item.isAvg);
+      return stateAvg ? [stateAvg, ...others] : others;
     }
-    if (activeTab === 3) {
-      if (activeSubTab === "District") return DISTRICT_AVG_GRANT_DAYS;
-      return showTop === "Top 20" ? LOCAL_BODIES_TOP_20_GRANT_DAYS : LOCAL_BODIES_BOTTOM_20_GRANT_DAYS;
-    }
-    return BAR_DATA_DISTRICT;
-  }, [activeSubTab, activeTab, showTop]);
+
+    return sorted;
+  }, [activeSubTab, activeTab, showTop, sortBy]);
 
   const renderBarChart = (title: string, desc: string, yAxisMax: number = 30000, yAxisName: string = "Files", _yAxisIncrement: number = 5000, hasShowFilter: boolean = false) => {
     return (
-      <div className="flex flex-col h-full w-full">
+      <div className="flex flex-col w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
           <div className="flex flex-col gap-[8px]">
@@ -228,11 +275,17 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
           </div>
           <div className="flex flex-wrap flex-col sm:flex-row items-center gap-[16px]">
              {/* Filters */}
-             <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
-               <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
-               <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortBy}</span>
-               <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
-             </div>
+             {activeSubTab === "District" && (
+               <button
+                 type="button"
+                 onClick={() => setSortBy((prev) => (prev === "Descending" ? "Ascending" : "Descending"))}
+                 className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors"
+               >
+                 <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
+                 <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortBy}</span>
+                 <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
+               </button>
+             )}
              {hasShowFilter && activeSubTab === "Local Bodies" && (
                 <div className="relative">
                   <button
@@ -271,16 +324,26 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         </div>
 
         {/* Chart */}
-        <div className="flex-1 w-full min-h-0">
+        <div ref={barChartContainerRef} className="w-full min-w-0">
           <BarChart
+            {...barChartBaseProps}
+            width={barChartWidth}
+            height={400}
+            margin={{ ...barChartBaseProps.margin, bottom: 88 }}
             dataset={activeBarData.map((d) => ({ label: d.label, value: d.value }))}
-            xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 10, fill: "#5c6e93" } }]}
-            yAxis={[{ max: yAxisMax, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
-            series={[{ dataKey: "value", label: yAxisName, color: "#00b2eb" }]}
-            borderRadius={4}
-            slots={{ legend: () => null }}
-            height={360}
+            xAxis={[xAxisBand("label", { angle: -35, textAnchor: "end" })]}
+            yAxis={[yAxisLinear(yAxisMax)]}
+            series={[{
+              dataKey: "value",
+              label: yAxisName,
+              color: CHART_PALETTE[1],
+            }]}
           />
+        </div>
+
+        {/* Series legend */}
+        <div className="mt-[8px]">
+          <Legend items={[{ label: yAxisName, color: CHART_PALETTE[1] }]} />
         </div>
       </div>
     );
@@ -307,37 +370,37 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         </div>
 
         {/* Pie Content */}
-        <div className="flex-[1_0_0] flex items-center justify-center gap-[80px]">
+        <div className="flex-[1_0_0] flex items-center justify-center gap-[24px]">
           <PieChart
+            {...pieChartBaseProps}
+            width={300}
+            height={300}
             series={[{
+              ...pieSeriesGeometry,
+              innerRadius: 50,
               data: data.map((item, i) => ({
                 id: i,
                 value: item.value,
                 label: item.label,
-                color: item.color.replace("bg-[", "").replace("]", ""),
+                color: item.color,
               })),
-              innerRadius: 50,
-              outerRadius: 130,
-              paddingAngle: 2,
-              cornerRadius: 4,
-              highlightScope: { fade: "global", highlight: "item" },
             }]}
-            width={300}
-            height={300}
-            slots={{ legend: () => null }}
           />
 
            {/* Legends */}
-           <div className="flex flex-col gap-[16px]">
+           <div className="flex flex-col gap-[12px]">
              {data.map((item, idx) => {
                return (
                  <div
                    key={idx}
                    className="flex items-center gap-[12px] rounded-[6px] px-[8px] py-[4px] cursor-default transition-colors hover:bg-[#f6f9fb]"
                  >
-                   <div className={`w-[20px] h-[20px] rounded-full shrink-0 ${item.color}`} />
-                   <span className="font-sans font-semibold text-[16px] text-[#232f50] w-[200px] truncate">{item.label}</span>
-                   <span className="font-sans font-bold text-[16px] text-[#232f50]">{item.value}%</span>
+                   <span
+                     className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+                     style={{ backgroundColor: item.color }}
+                   />
+                   <span className="font-sans font-semibold text-[14px] text-[#232f50] w-[200px] truncate">{item.label}</span>
+                   <span className="font-sans font-bold text-[14px] text-[#0c3080]">{item.value}%</span>
                  </div>
                );
              })}
@@ -368,28 +431,21 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
 
         <div className="flex-1 w-full min-h-0">
           <BarChart
+            {...barChartBaseProps}
             dataset={OCCUPANCY_AREA_SPLIT_DATA}
-            xAxis={[{ scaleType: "band", dataKey: "label", tickLabelStyle: { fontSize: 10, fill: "#09327b" } }]}
-            yAxis={[{ max: 30000, tickLabelStyle: { fontSize: 11, fill: "#5c6e93" } }]}
+            xAxis={[xAxisBand("label")]}
+            yAxis={[yAxisLinear(30000)]}
             series={OCCUPANCY_AREA_LEGEND.map((item) => ({
               dataKey: item.key,
               label: item.label,
               stack: "total",
               color: item.color,
             }))}
-            borderRadius={8}
-            height={360}
-            slots={{ legend: () => null }}
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[12px] mt-[12px]">
-          {OCCUPANCY_AREA_LEGEND.map((item) => (
-            <div key={item.key} className="flex items-center gap-[8px]">
-              <span className="w-[16px] h-[16px] rounded-full" style={{ backgroundColor: item.color }} />
-              <span className="font-sans font-medium text-[16px] text-[#09327b]">{item.label}</span>
-            </div>
-          ))}
+        <div className="mt-[12px]">
+          <Legend items={OCCUPANCY_AREA_LEGEND.map((item) => ({ label: item.label, color: item.color }))} />
         </div>
       </div>
     );
@@ -435,7 +491,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-[16px]">
+    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:min-h-[606px] w-full shrink-0 p-[16px]">
       {/* Left sidebar — matches GrievanceModule graph panel */}
       <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
@@ -476,7 +532,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
       </div>
 
       {/* Graph content */}
-      <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[350px]">
+      <div className="bg-white flex-[1_0_0] relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[400px] overflow-auto">
          {renderContent()}
       </div>
     </div>

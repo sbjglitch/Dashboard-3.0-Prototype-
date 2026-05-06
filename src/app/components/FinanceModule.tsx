@@ -1,9 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
 import svgPaths from "../../imports/svg-4i5smnjigf";
+import {
+  CHART_PALETTE,
+  TEXT_MUTED,
+  pieChartBaseProps,
+  pieSeriesGeometry,
+} from "../constants/chartStyles";
 
-const SUCCESS_COLOR = "#00B1EB";
-const FAILURE_COLOR = "#E5548E";
+const SUCCESS_COLOR = CHART_PALETTE[1]; // accent sky
+const FAILURE_COLOR = CHART_PALETTE[5]; // pink/danger
 
 const FINANCE_METRICS = {
   ePayment: { totalAmount: "51,251", success: 21251, failure: 15000 },
@@ -212,36 +218,34 @@ export function FinanceModule({
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 w-full min-h-[280px] md:min-h-[320px]">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 w-full min-h-[280px] md:min-h-[320px]">
           <div className="shrink-0 flex items-center justify-center">
             <PieChart
-              series={[{
-                data: pieData.map((d, i) => ({ id: i, value: d.value, label: d.name, color: d.fill })),
-                innerRadius: 72,
-                outerRadius: 130,
-                paddingAngle: 3,
-                cornerRadius: 4,
-                highlightScope: { fade: "global", highlight: "item" },
-              }]}
+              {...pieChartBaseProps}
               width={300}
               height={280}
-              slots={{ legend: () => null }}
+              series={[{
+                ...pieSeriesGeometry,
+                innerRadius: 72,
+                paddingAngle: 3,
+                data: pieData.map((d, i) => ({ id: i, value: d.value, label: d.name, color: d.fill })),
+              }]}
             />
           </div>
 
           <div className="flex flex-col gap-2 w-full md:w-auto">
-            <div className="flex items-center gap-2 px-4 py-2">
-              <div className="size-6 rounded-[4px] shrink-0" style={{ backgroundColor: SUCCESS_COLOR }} />
-              <p className="font-sans font-medium text-[14px] text-[#383c51]">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <span className="w-[14px] h-[14px] rounded-[4px] shrink-0" style={{ backgroundColor: SUCCESS_COLOR }} />
+              <p className="font-sans font-medium text-[14px] text-[#232f50]">
                 Success count {formatCount(success)}
-                <span className="text-[#5c6e93]"> ({successPct}%)</span>
+                <span style={{ color: TEXT_MUTED }}> ({successPct}%)</span>
               </p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <div className="size-6 rounded-[4px] shrink-0" style={{ backgroundColor: FAILURE_COLOR }} />
-              <p className="font-sans font-medium text-[14px] text-[#383c51]">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <span className="w-[14px] h-[14px] rounded-[4px] shrink-0" style={{ backgroundColor: FAILURE_COLOR }} />
+              <p className="font-sans font-medium text-[14px] text-[#232f50]">
                 Failure count {formatCount(failure)}
-                <span className="text-[#5c6e93]"> ({failurePct}%)</span>
+                <span style={{ color: TEXT_MUTED }}> ({failurePct}%)</span>
               </p>
             </div>
           </div>
