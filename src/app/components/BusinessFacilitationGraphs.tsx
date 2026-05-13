@@ -97,11 +97,8 @@ const ENTERPRISE_CAPITAL_INVESTMENT: PieDatum[] = [
 ];
 
 const ENTERPRISE_SECTOR_WISE: PieDatum[] = [
-  { label: "Manufacturing", value: 30, color: CHART_PALETTE[2] },
-  { label: "Services", value: 25, color: CHART_PALETTE[1] },
-  { label: "Trade & Retail", value: 20, color: CHART_PALETTE[3] },
-  { label: "Agriculture / Allied", value: 15, color: CHART_PALETTE[4] },
-  { label: "Other", value: 10, color: CHART_PALETTE[6] },
+  { label: "Category1 (manufacturing)", value: 30, color: CHART_PALETTE[2] },
+  { label: "Category 2 (Services)", value: 25, color: CHART_PALETTE[1] },
 ];
 
 const REG_PARAMEDICAL: PieDatum[] = [
@@ -121,8 +118,8 @@ const REG_TUTORIAL: PieDatum[] = [
 ];
 
 const REG_DOG_LICENSE: PieDatum[] = [
-  { label: "New Issued", value: 78, color: CHART_PALETTE[2] },
-  { label: "Renewal", value: 22, color: CHART_PALETTE[1] },
+  { label: "Processed", value: 78, color: CHART_PALETTE[2] },
+  { label: "Approved", value: 22, color: CHART_PALETTE[1] },
 ];
 
 // ─── Tree view configuration ──────────────────────────────────────────────────
@@ -317,11 +314,55 @@ function TreeView({
 function PieBlock({
   data,
   size = 280,
+  legendBelow = false,
 }: {
   data: PieDatum[];
   size?: number;
+  legendBelow?: boolean;
 }) {
-  return (
+  const legend = (
+    <div className={`flex gap-[10px] ${legendBelow ? "flex-row flex-wrap justify-center" : "flex-col"}`}>
+      {data.map((item) => (
+        <div
+          key={item.label}
+          className="flex items-center gap-[10px] rounded-[6px] px-[6px] py-[4px]"
+        >
+          <span
+            className="h-[14px] w-[14px] shrink-0 rounded-[4px]"
+            style={{ backgroundColor: item.color }}
+          />
+          <span className="font-sans text-[14px] font-semibold text-[#232f50]">
+            {item.label}
+          </span>
+          <span className="font-sans text-[14px] font-bold text-[#0c3080]">{item.value}%</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  return legendBelow ? (
+    <div className="flex flex-col items-center gap-[12px]">
+      <PieChart
+        {...pieChartBaseProps}
+        width={size}
+        height={size}
+        series={[
+          {
+            ...pieSeriesGeometry,
+            innerRadius: Math.round(size / 6.5),
+            outerRadius: Math.round(size / 2.2),
+            data: data.map((item, i) => ({
+              id: i,
+              value: item.value,
+              label: item.label,
+              color: item.color,
+            })),
+          },
+        ]}
+      />
+      {legend}
+    </div>
+  ) : (
     <div className="flex flex-col items-center gap-[12px] sm:flex-row sm:items-center sm:gap-[24px]">
       <PieChart
         {...pieChartBaseProps}
@@ -341,41 +382,19 @@ function PieBlock({
           },
         ]}
       />
-      <div className="flex flex-col gap-[10px]">
-        {data.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center gap-[10px] rounded-[6px] px-[6px] py-[4px]"
-          >
-            <span
-              className="h-[14px] w-[14px] shrink-0 rounded-[4px]"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="font-sans text-[14px] font-semibold text-[#232f50]">
-              {item.label}
-            </span>
-            <span className="font-sans text-[14px] font-bold text-[#0c3080]">{item.value}%</span>
-          </div>
-        ))}
-      </div>
+      {legend}
     </div>
   );
 }
 
 function CombinedEnterprisePie() {
   return (
-    <div className="flex flex-col gap-[32px]">
-      <div className="rounded-[12px] border border-[#e8eff4] bg-[#f6f9fb]/60 p-[16px]">
+    <div className="flex flex-row flex-wrap gap-[16px]">
+      <div className="flex-1 min-w-[220px] rounded-[12px] border border-[#e8eff4] bg-[#f6f9fb]/60 p-[16px]">
         <h4 className="mb-[12px] font-sans text-[14px] font-bold uppercase tracking-wide text-[#5c6e93]">
-          Capital investment wise
+          Overall license status
         </h4>
-        <PieBlock data={ENTERPRISE_CAPITAL_INVESTMENT} size={240} />
-      </div>
-      <div className="rounded-[12px] border border-[#e8eff4] bg-[#f6f9fb]/60 p-[16px]">
-        <h4 className="mb-[12px] font-sans text-[14px] font-bold uppercase tracking-wide text-[#5c6e93]">
-          Sector wise split up
-        </h4>
-        <PieBlock data={ENTERPRISE_SECTOR_WISE} size={240} />
+        <PieBlock data={ENTERPRISE_OVERALL} size={240} legendBelow />
       </div>
     </div>
   );
@@ -550,17 +569,11 @@ export function BusinessFacilitationGraphs({
           <div className="flex h-full w-full flex-col">
             {renderHeader(
               "Enterprise License — Combined view",
-              "Capital investment and sector-wise split of enterprise license applications.",
+              "Overall status, capital investment, and sector-wise split of enterprise license applications.",
             )}
             <div className="flex flex-1 items-start">
               <div className="w-full">
                 <CombinedEnterprisePie />
-                <div className="mt-[24px] rounded-[12px] border border-[#e8eff4] bg-[#f6f9fb]/60 p-[16px]">
-                  <h4 className="mb-[12px] font-sans text-[14px] font-bold uppercase tracking-wide text-[#5c6e93]">
-                    Overall license status
-                  </h4>
-                  <PieBlock data={ENTERPRISE_OVERALL} size={240} />
-                </div>
               </div>
             </div>
           </div>
