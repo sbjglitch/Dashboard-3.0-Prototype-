@@ -3,12 +3,13 @@ import React, { useState } from "react";
 export interface StatCardProps {
   label: string;
   value: string;
-  subValue: string;
-  subLabel: string;
-  otherValue: string;
-  otherLabel: string;
+  subValue?: string;
+  subLabel?: string;
+  otherValue?: string;
+  otherLabel?: string;
   percentage?: string;
   color: string;
+  hideInfoIcon?: boolean;
   onClick?: () => void;
 }
 
@@ -21,13 +22,14 @@ export function StatCard({
   otherLabel,
   percentage,
   color,
+  hideInfoIcon,
   onClick,
 }: StatCardProps) {
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
   return (
     <div 
-      className="bg-white border border-[#e8eff4] rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:shadow-md transition-shadow min-h-[140px] sm:h-[156px] flex flex-col p-[16px] justify-between" 
+      className="bg-white border border-[#e8eff4] rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:shadow-md transition-shadow h-fit flex flex-col gap-[8px] p-[16px] justify-between" 
       onClick={onClick}
     >
       <div className="flex items-center justify-between w-full">
@@ -53,9 +55,11 @@ export function StatCard({
               onClick={(e) => e.stopPropagation()}
             >
               <span className="font-sans font-semibold text-[14px] text-[#09327b] leading-[20px]">{percentage}</span>
-              <div className="w-[14px] h-[14px] rounded-full bg-[#09327b] flex items-center justify-center shrink-0">
-                <span className="font-sans font-bold text-[9px] text-white leading-none">!</span>
-              </div>
+              {!hideInfoIcon && (
+                <div className="w-[14px] h-[14px] rounded-full bg-[#09327b] flex items-center justify-center shrink-0">
+                  <span className="font-sans font-bold text-[9px] text-white leading-none">!</span>
+                </div>
+              )}
             </div>
             {tooltipVisible && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
@@ -69,16 +73,22 @@ export function StatCard({
         )}
       </div>
       
-      <div className="flex items-center justify-between w-full pt-[8px] border-t border-[#e8eff4]">
-        <div className="flex flex-col gap-[2px] items-start">
-          <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-[16px]">{subLabel}</span>
-          <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{subValue}</span>
+      {(subLabel || otherLabel) && (
+        <div className="flex items-center justify-between w-full pt-[8px] border-t border-[#e8eff4]">
+          {subLabel && (
+            <div className="flex flex-col gap-[2px] items-start">
+              <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-[16px]">{subLabel}</span>
+              <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{subValue}</span>
+            </div>
+          )}
+          {otherLabel && (
+            <div className="flex flex-col gap-[2px] items-end">
+              <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-[16px]">{otherLabel}</span>
+              <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{otherValue}</span>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-[2px] items-end">
-          <span className="font-sans font-medium text-[12px] text-[#5c6e93] leading-[16px]">{otherLabel}</span>
-          <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{otherValue}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

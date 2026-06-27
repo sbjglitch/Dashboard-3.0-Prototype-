@@ -63,7 +63,7 @@ function formatINR(n: number) {
   return n.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 }
 
-export type DetailsModalContentMode = "fileKpi" | "propertyTaxFinance" | "buildingFinance";
+export type DetailsModalContentMode = "fileKpi" | "propertyTaxFinance" | "buildingFinance" | "meetingManagement";
 
 /** State-level targets (₹) — aligned with BuildingFinanceOverview KPI strip */
 const BUILDING_FINANCE_TARGETS = [125_000, 840_000, 215_000, 450_000, 95_000] as const;
@@ -75,6 +75,23 @@ const BUILDING_FINANCE_COLS = [
   { id: "additionalFsi", label: "Additional FSI", headerClass: "bg-[#fef2f2]" },
   { id: "renewalFees", label: "Renewal Fees", headerClass: "bg-[#f5f3ff]" },
 ] as const;
+
+const MEETING_MANAGEMENT_COLS = [
+  { id: "allMeetings", label: "All Meetings", headerClass: "bg-[#f1f5f9]" },
+  { id: "meetingsHeld", label: "Meetings Held", headerClass: "bg-[#f0fdf4]" },
+  { id: "meetingsCancelled", label: "Meetings Cancelled", headerClass: "bg-[#fffbeb]" },
+  { id: "minutesApproved", label: "Minutes Approved", headerClass: "bg-[#fef2f2]" },
+  { id: "minutesNotApproved", label: "Minutes Not Approved", headerClass: "bg-[#f5f3ff]" },
+] as const;
+
+function getMeetingManagementMetric(row: TableRow, colIdx: number): number {
+  const base = row.totalFiles || 100;
+  if (colIdx === 0) return base;
+  if (colIdx === 1) return Math.floor(base * 0.4);
+  if (colIdx === 2) return Math.floor(base * 0.2);
+  if (colIdx === 3) return Math.floor(base * 0.25);
+  return Math.floor(base * 0.15);
+}
 
 function hashSeed(s: string): number {
   let h = 0;
@@ -249,6 +266,8 @@ export function DetailsModal({
   }, []);
 
   const isBuildingFinanceModal = contentMode === "buildingFinance";
+  const isMeetingManagementModal = contentMode === "meetingManagement";
+  const isNotSelectableModal = isBuildingFinanceModal || isMeetingManagementModal;
 
   const toggleRow = (rowId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -317,7 +336,7 @@ export function DetailsModal({
   };
 
   const allVisibleRows = getVisibleRows();
-  const visibleRows = isBuildingFinanceModal
+  const visibleRows = isNotSelectableModal
     ? allVisibleRows.filter((row) => "isPagination" in row || !row.isSeat)
     : allVisibleRows;
   const indentPx = (level: number) => (level - 1) * 24;
@@ -325,7 +344,7 @@ export function DetailsModal({
     const sourceData = viewMode === "district" ? mockData : officeTypeRows;
     const children = sourceData.filter((r) => r.parentId === id);
     if (children.length === 0) return false;
-    if (isBuildingFinanceModal && children.every((r) => r.isSeat)) return false;
+    if (isNotSelectableModal && children.every((r) => r.isSeat)) return false;
     return true;
   };
 
@@ -354,11 +373,11 @@ export function DetailsModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (isBuildingFinanceModal) {
+    if (isNotSelectableModal) {
       setSelectedSeat(null);
       setSeatFileModalOpen(false);
     }
-  }, [isBuildingFinanceModal]);
+  }, [isNotSelectableModal]);
 
   const fileStatusModalTitle =
     kpiType === "all"
@@ -391,11 +410,30 @@ export function DetailsModal({
     value: formatINR(level1.reduce((sum, row) => sum + getBuildingFinanceFee(row, idx), 0)),
   }));
 
-  const modalStripKpis = isBuildingFinanceModal ? buildingFinanceStripKpis : fileModalStripKpis;
+  const meetingManagementStripKpis = MEETING_MANAGEMENT_COLS.map((col, idx) => ({
+    columnKey: col.id,
+    label: col.label,
+    headerClass: col.headerClass,
+    value: formatFileCount(level1.reduce((sum, row) => sum + getMeetingManagementMetric(row, idx), 0)),
+  }));
+
+  const modalStripKpis = isBuildingFinanceModal 
+    ? buildingFinanceStripKpis 
+    : isMeetingManagementModal
+      ? meetingManagementStripKpis
+      : fileModalStripKpis;
+
   const tableMetricColumnCount = isBuildingFinanceModal
     ? BUILDING_FINANCE_COLS.length
-    : fileStatusColumns.length;
-  const modalDetailTitle = isBuildingFinanceModal ? "Financial overview" : fileStatusModalTitle;
+    : isMeetingManagementModal
+      ? MEETING_MANAGEMENT_COLS.length
+      : fileStatusColumns.length;
+
+  const modalDetailTitle = isBuildingFinanceModal 
+    ? "Financial overview" 
+    : isMeetingManagementModal
+      ? "Meeting Status"
+      : fileStatusModalTitle;
 
   if (!isOpen) return null;
 
@@ -914,7 +952,9 @@ export function DetailsModal({
                 <p className="text-[10px] sm:text-[11px] font-medium text-[#8896a8] leading-snug pt-1 border-t border-[#e8eff4] mt-auto">
                   {isBuildingFinanceModal
                     ? "State total · fee category"
-                    : "State total · matches table column"}
+                    : isMeetingManagementModal
+                      ? "State total"
+                      : "State total · matches table column"}
                 </p>
               </div>
             </div>
@@ -974,14 +1014,23 @@ export function DetailsModal({
                           {col.label}
                         </th>
                       ))
-                    : fileStatusColumns.map((col) => (
-                        <th
-                          key={col.key}
-                          className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
-                        >
-                          {col.label}
-                        </th>
-                      ))}
+                    : isMeetingManagementModal
+                      ? MEETING_MANAGEMENT_COLS.map((col) => (
+                          <th
+                            key={col.id}
+                            className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                          >
+                            {col.label}
+                          </th>
+                        ))
+                      : fileStatusColumns.map((col) => (
+                          <th
+                            key={col.key}
+                            className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                          >
+                            {col.label}
+                          </th>
+                        ))}
                 </tr>
               </thead>
             <tbody>
@@ -1033,35 +1082,41 @@ export function DetailsModal({
                 }
 
                 const isSeatRow = !("isPagination" in row) && Boolean(row.isSeat);
+                const isLocalBodyRow = !("isPagination" in row) && !row.isSeat && row.level > 1 && !["Municipalities", "Grama Panchayaths", "Corporations"].includes(row.name);
+                
+                const isSelectable = 
+                  (isMeetingManagementModal && isLocalBodyRow) || 
+                  (!isNotSelectableModal && isSeatRow);
+
                 const seatSelected =
-                  isSeatRow && seatFileModalOpen && selectedSeat?.id === row.id;
+                  isSelectable && seatFileModalOpen && selectedSeat?.id === row.id;
 
                 return (
                   <tr
                     key={row.id}
-                    role={isSeatRow && !isBuildingFinanceModal ? "button" : undefined}
-                    tabIndex={isSeatRow && !isBuildingFinanceModal ? 0 : undefined}
+                    role={isSelectable ? "button" : undefined}
+                    tabIndex={isSelectable ? 0 : undefined}
                     onClick={
-                      isSeatRow && !isBuildingFinanceModal
+                      isSelectable
                         ? () => {
-                            setSelectedSeat(row);
+                            setSelectedSeat(row as any);
                             setSeatFileModalOpen(true);
                           }
                         : undefined
                     }
                     onKeyDown={
-                      isSeatRow && !isBuildingFinanceModal
+                      isSelectable
                         ? (e) => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              setSelectedSeat(row);
+                              setSelectedSeat(row as any);
                               setSeatFileModalOpen(true);
                             }
                           }
                         : undefined
                     }
                     className={`border-b border-gray-100 h-12 ${rowBg} ${dimmedClass} ${
-                      isSeatRow && !isBuildingFinanceModal
+                      isSelectable
                         ? "cursor-pointer hover:bg-[#eef6ff]/90"
                         : "hover:bg-gray-50/80"
                     } ${seatSelected ? "bg-[#e8f4fc]/80 ring-1 ring-inset ring-[#009fd2]/40" : ""}`}
@@ -1110,14 +1165,23 @@ export function DetailsModal({
                             {formatINR(getBuildingFinanceFee(row, idx))}
                           </td>
                         ))
-                      : fileStatusColumns.map((col) => (
-                          <td
-                            key={col.key}
-                            className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100"
-                          >
-                            {formatFileCount(getRowMetric(row, col.key))}
-                          </td>
-                        ))}
+                      : isMeetingManagementModal
+                        ? MEETING_MANAGEMENT_COLS.map((col, idx) => (
+                            <td
+                              key={col.id}
+                              className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100"
+                            >
+                              {formatFileCount(getMeetingManagementMetric(row, idx))}
+                            </td>
+                          ))
+                        : fileStatusColumns.map((col) => (
+                            <td
+                              key={col.key}
+                              className="text-right px-4 py-2 text-sm font-normal text-[#364153] border-l border-gray-100"
+                            >
+                              {formatFileCount(getRowMetric(row, col.key))}
+                            </td>
+                          ))}
                   </tr>
                 );
               })}
@@ -1143,7 +1207,7 @@ export function DetailsModal({
       }}
       selectedSeat={selectedSeat}
       moduleName={moduleName}
-      kpiLabel="— File details"
+      kpiLabel={isMeetingManagementModal ? "— All Meetings" : "— File details"}
     />
     </Fragment>
   );

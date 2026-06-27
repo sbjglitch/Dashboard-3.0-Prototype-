@@ -345,5 +345,6 @@ export const MODULE_DATA: ServiceData = {
       "Conducting of Adalats and allied activities",
       "Reports (Adalath)"
     ]
-  }
+  },
+  "Meeting Management": {}
 };

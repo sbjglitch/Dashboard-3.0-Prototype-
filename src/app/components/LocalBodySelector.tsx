@@ -34,10 +34,33 @@ const MOCK_LSG_DATA = [
   { name: "Ollur", type: "Gramapanchayaths", district: "Kozhikode" },
 ];
 
-export function LocalBodySelector({ onClose, onApply }: { onClose?: () => void, onApply?: (value: string) => void }) {
+export function LocalBodySelector({ 
+  onClose, 
+  onApply,
+  isMeetingManagement,
+  isOnboarding
+}: { 
+  onClose?: () => void, 
+  onApply?: (value: string) => void,
+  isMeetingManagement?: boolean,
+  isOnboarding?: boolean
+}) {
   const [districtOpen, setDistrictOpen] = useState(false);
-  const [typeOpen, setTypeOpen] = useState(false);
+  const [typeOpen, setTypeOpen] = useState(isOnboarding || false);
   const [lsgOpen, setLsgOpen] = useState(false);
+
+  const currentLsgTypes = useMemo(() => {
+    if (isMeetingManagement) {
+      return [...LSG_TYPES, 'Block Panchayat', 'District Panchayat'];
+    }
+    return LSG_TYPES;
+  }, [isMeetingManagement]);
+
+  useEffect(() => {
+    if (isOnboarding && dropdownRef.current) {
+      dropdownRef.current.focus();
+    }
+  }, [isOnboarding]);
 
   const [selectedDistrict, setSelectedDistrict] = useState<string>("Kerala");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -106,7 +129,7 @@ export function LocalBodySelector({ onClose, onApply }: { onClose?: () => void, 
   };
 
   return (
-    <div className="bg-white relative rounded-[12px] w-[calc(100vw-2rem)] sm:w-[448px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]" ref={dropdownRef}>
+    <div className={`bg-white relative rounded-[12px] w-[calc(100vw-2rem)] sm:w-[448px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4] transition-all ${isOnboarding ? 'outline-none focus:ring-2 focus:ring-[#09327b] focus:border-transparent' : ''}`} ref={dropdownRef} tabIndex={-1}>
       <div className="flex flex-col gap-[16px] p-[16px]">
         {/* Header */}
         <div className="flex items-center justify-between w-full h-[32px]">
@@ -232,7 +255,7 @@ export function LocalBodySelector({ onClose, onApply }: { onClose?: () => void, 
             {typeOpen && (
               <div className="absolute top-full mt-1 w-full bg-white border border-[#e7eff5] rounded-[8px] shadow-lg max-h-[300px] z-50 flex flex-col overflow-hidden">
                 <div className="overflow-y-auto py-2">
-                  {LSG_TYPES.map(type => (
+                  {currentLsgTypes.map(type => (
                     <label key={type} className="flex items-center gap-[16px] px-[16px] py-[8px] hover:bg-[#f6f9fb] cursor-pointer">
                       <input 
                         type="checkbox" 

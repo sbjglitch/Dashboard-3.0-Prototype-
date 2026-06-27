@@ -9,6 +9,7 @@ import { CivilRegistrationModule } from "./components/CivilRegistrationModule";
 import { CivilRegistrationGraphs } from "./components/CivilRegistrationGraphs";
 import { BuildingFinanceOverview } from "./components/BuildingFinanceOverview";
 import { BuildingPermissionGraphs } from "./components/BuildingPermissionGraphs";
+import { MeetingManagementGraphs } from "./components/MeetingManagementGraphs";
 import { BusinessFacilitationGraphs } from "./components/BusinessFacilitationGraphs";
 import { PropertyTaxGraphs } from "./components/PropertyTaxGraphs";
 import { StatCard } from "./components/StatCard";
@@ -151,6 +152,7 @@ export default function App() {
   const [detailsModalContentMode, setDetailsModalContentMode] =
     useState<DetailsModalContentMode>("fileKpi");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [showMeetingOnboarding, setShowMeetingOnboarding] = useState(false);
   const [isTimePeriodOpen, setIsTimePeriodOpen] = useState(false);
   const [selectedTimePeriod, setSelectedTimePeriod] = useState("Upto today");
   const [selectedLocalBody, setSelectedLocalBody] = useState("Kerala");
@@ -164,6 +166,15 @@ export default function App() {
   const [chartMousePos, setChartMousePos] = useState({ x: 0, y: 0 });
   const [filtersStuck, setFiltersStuck] = useState(false);
   const filterStickySentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (selectedModule === "Meeting Management") {
+      setIsSelectorOpen(true);
+      setShowMeetingOnboarding(true);
+    } else {
+      setShowMeetingOnboarding(false);
+    }
+  }, [selectedModule]);
 
   useEffect(() => {
     const sentinelEl = filterStickySentinelRef.current;
@@ -216,6 +227,9 @@ export default function App() {
   
   const subModuleOptions = useMemo(() => {
     if (selectedModule === "Select") return [];
+    if (selectedModule === "Meeting Management") {
+      return ["Council Meetings", "Panchayat Meetings", "Committee Meetings"];
+    }
     return Object.keys(MODULE_DATA[selectedModule] || {});
   }, [selectedModule]);
 
@@ -363,9 +377,20 @@ export default function App() {
                   <div id="local-body-toggle" className="w-full min-w-0" onClick={() => setIsSelectorOpen(!isSelectorOpen)}>
                     <FilterSelect label="Local Body/state" value={selectedLocalBody} />
                   </div>
+                  {isSelectorOpen && showMeetingOnboarding && (
+                    <div className="fixed inset-0 bg-black/40 z-40" aria-hidden="true" />
+                  )}
                   {isSelectorOpen && (
                     <div className="absolute top-full left-0 right-0 sm:right-auto mt-2 transition-all z-50">
-                       <LocalBodySelector onClose={() => setIsSelectorOpen(false)} onApply={setSelectedLocalBody} />
+                       <LocalBodySelector 
+                         onClose={() => {
+                           setIsSelectorOpen(false);
+                           setShowMeetingOnboarding(false);
+                         }} 
+                         onApply={setSelectedLocalBody} 
+                         isMeetingManagement={selectedModule === "Meeting Management"}
+                         isOnboarding={showMeetingOnboarding}
+                       />
                     </div>
                   )}
                 </div>
@@ -392,7 +417,7 @@ export default function App() {
                 </div>
                 <div className="w-full min-w-0">
                   <FilterDropdown 
-                    label="Sub-Module" 
+                    label={selectedModule === "Meeting Management" ? "Meeting Type" : "Sub-Module"} 
                     value={selectedSubModule} 
                     options={subModuleOptions} 
                     onSelect={handleSubModuleChange}
@@ -400,22 +425,24 @@ export default function App() {
                     muted={selectedSubModule === "Select"}
                   />
                 </div>
-                <div
-                  className={
-                    isPropertyTaxModule
-                      ? "w-full min-w-0"
-                      : "w-full min-w-0 sm:col-span-2 xl:col-span-1"
-                  }
-                >
-                  <FilterDropdown 
-                    label="Service" 
-                    value={selectedService} 
-                    options={serviceOptions} 
-                    onSelect={setSelectedService}
-                    disabled={selectedSubModule === "Select"}
-                    muted={selectedService === "Select"}
-                  />
-                </div>
+                {selectedModule !== "Meeting Management" && (
+                  <div
+                    className={
+                      isPropertyTaxModule
+                        ? "w-full min-w-0"
+                        : "w-full min-w-0 sm:col-span-2 xl:col-span-1"
+                    }
+                  >
+                    <FilterDropdown 
+                      label="Service" 
+                      value={selectedService} 
+                      options={serviceOptions} 
+                      onSelect={setSelectedService}
+                      disabled={selectedSubModule === "Select"}
+                      muted={selectedService === "Select"}
+                    />
+                  </div>
+                )}
                 {isPropertyTaxModule && (
                   <div className="w-full min-w-0">
                     <FilterDropdown
@@ -450,6 +477,12 @@ export default function App() {
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Local body/state</p>
                 <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedLocalBody}</p>
               </div>
+              {selectedModule === "Meeting Management" && selectedSubModule !== "Select" && (
+                <div className="flex flex-col gap-[2px] items-start justify-center">
+                  <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Meeting Type</p>
+                  <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedSubModule}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -489,7 +522,31 @@ export default function App() {
             {selectedModule !== "Public Grievance and complaints" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="w-full">
                 {/* Tabs / Heading */}
-                {selectedModule === "All Module" ? (
+                {selectedModule === "Meeting Management" ? (
+                  <div className="flex items-center justify-between mb-4 md:mb-[24px]">
+                    <h3 className="font-sans font-bold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px]">
+                      Meeting Status
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDetailsModalContentMode("meetingManagement");
+                        setModalKpiType("all");
+                        setIsModalOpen(true);
+                      }}
+                      className="bg-white border border-[#dedede] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#dedede,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="font-sans font-semibold text-[14px] text-[#323232]">View More Details</span>
+                      <div className="size-[16px]">
+                        <svg fill="none" viewBox="0 0 16 16">
+                          <path clipRule="evenodd" d={svgPaths.p1f857780} fillRule="evenodd" stroke="#323232" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                          <path d="M10 6L6 10" stroke="#323232" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                          <path d="M7 6H10V9" stroke="#323232" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    </button>
+                  </div>
+                ) : selectedModule === "All Module" ? (
                   <h3 className="font-sans font-bold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px] mb-4 md:mb-[24px]">
                     File Status
                   </h3>
@@ -554,67 +611,106 @@ export default function App() {
 
                 {/* Main Tab Content */}
                 {activeMainTab === "fileStatus" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-[24px] w-full">
-                    <StatCard
-                      label="Total Received"
-                      value="51,251"
-                      subValue="25,251"
-                      subLabel="Citizen Files"
-                      otherValue="26,000"
-                      otherLabel="Other Files"
-                      color="bg-[#1ebe72]"
-                      onClick={() => {
-                        setDetailsModalContentMode("fileKpi");
-                        setModalKpiType("total");
-                        setIsModalOpen(true);
-                      }}
-                    />
-                    <StatCard
-                      label="Disposed"
-                      value="21,251"
-                      subValue="13,657"
-                      subLabel="Citizen Files"
-                      otherValue="7,594"
-                      otherLabel="Other Files"
-                      percentage="41.5%"
-                      color="bg-[#009fd2]"
-                      onClick={() => {
-                        setDetailsModalContentMode("fileKpi");
-                        setModalKpiType("disposed");
-                        setIsModalOpen(true);
-                      }}
-                    />
-                    <StatCard
-                      label="Under Process"
-                      value="15,000"
-                      subValue="10,000"
-                      subLabel="Citizen Files"
-                      otherValue="5,000"
-                      otherLabel="Other Files"
-                      percentage="25%"
-                      color="bg-[#7b61ff]"
-                      onClick={() => {
-                        setDetailsModalContentMode("fileKpi");
-                        setModalKpiType("inProcess");
-                        setIsModalOpen(true);
-                      }}
-                    />
-                    <StatCard
-                      label="Delayed"
-                      value="15,000"
-                      subValue="10,000"
-                      subLabel="Citizen Files"
-                      otherValue="5,000"
-                      otherLabel="Other Files"
-                      percentage="25%"
-                      color="bg-[#df3a7a]"
-                      onClick={() => {
-                        setDetailsModalContentMode("fileKpi");
-                        setModalKpiType("delayed");
-                        setIsModalOpen(true);
-                      }}
-                    />
-                  </div>
+                  selectedModule === "Meeting Management" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 md:gap-[24px] w-full">
+                      <StatCard
+                        label="All meetings"
+                        value="51,251"
+                        color="bg-[#1ebe72]"
+                        hideInfoIcon={true}
+                      />
+                      <StatCard
+                        label="Meetings held"
+                        value="21,251"
+                        percentage="41.5%"
+                        color="bg-[#009fd2]"
+                        hideInfoIcon={true}
+                      />
+                      <StatCard
+                        label="Meetings cancelled"
+                        value="15,000"
+                        percentage="25%"
+                        color="bg-[#7b61ff]"
+                        hideInfoIcon={true}
+                      />
+                      <StatCard
+                        label="Minutes approved"
+                        value="15,000"
+                        percentage="25%"
+                        color="bg-[#df3a7a]"
+                        hideInfoIcon={true}
+                      />
+                      <StatCard
+                        label="Minutes not approved"
+                        value="10,000"
+                        percentage="18%"
+                        color="bg-[#f59e0b]"
+                        hideInfoIcon={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-[24px] w-full">
+                      <StatCard
+                        label="Total Received"
+                        value="51,251"
+                        subValue="25,251"
+                        subLabel="Citizen Files"
+                        otherValue="26,000"
+                        otherLabel="Other Files"
+                        color="bg-[#1ebe72]"
+                        onClick={() => {
+                          setDetailsModalContentMode("fileKpi");
+                          setModalKpiType("total");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                      <StatCard
+                        label="Disposed"
+                        value="21,251"
+                        subValue="13,657"
+                        subLabel="Citizen Files"
+                        otherValue="7,594"
+                        otherLabel="Other Files"
+                        percentage="41.5%"
+                        color="bg-[#009fd2]"
+                        onClick={() => {
+                          setDetailsModalContentMode("fileKpi");
+                          setModalKpiType("disposed");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                      <StatCard
+                        label="Under Process"
+                        value="15,000"
+                        subValue="10,000"
+                        subLabel="Citizen Files"
+                        otherValue="5,000"
+                        otherLabel="Other Files"
+                        percentage="25%"
+                        color="bg-[#7b61ff]"
+                        onClick={() => {
+                          setDetailsModalContentMode("fileKpi");
+                          setModalKpiType("inProcess");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                      <StatCard
+                        label="Delayed"
+                        value="15,000"
+                        subValue="10,000"
+                        subLabel="Citizen Files"
+                        otherValue="5,000"
+                        otherLabel="Other Files"
+                        percentage="25%"
+                        color="bg-[#df3a7a]"
+                        onClick={() => {
+                          setDetailsModalContentMode("fileKpi");
+                          setModalKpiType("delayed");
+                          setIsModalOpen(true);
+                        }}
+                      />
+                    </div>
+                  )
                 )}
 
                 {activeMainTab === "digitalHealth" && showDigitalHealthTab && (
@@ -703,6 +799,11 @@ export default function App() {
               <BuildingPermissionGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
+            {/* Meeting Management charts */}
+            {selectedModule === "Meeting Management" && (
+              <MeetingManagementGraphs selectedLocalBody={selectedLocalBody} />
+            )}
+
             {/* Business Facilitation charts: dedicated module only */}
             {selectedModule === "Business Facilitation" && (
               <BusinessFacilitationGraphs selectedLocalBody={selectedLocalBody} />
@@ -712,7 +813,7 @@ export default function App() {
               <PropertyTaxGraphs selectedLocalBody={selectedLocalBody} />
             )}
 
-            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Business Facilitation" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
+            {!isPropertyTaxModule && selectedModule !== "Building Permissions" && selectedModule !== "Meeting Management" && selectedModule !== "Business Facilitation" && selectedModule !== "Public Grievance and complaints" && selectedModule !== "All Module" && selectedModule !== "Finance Management" && selectedModule !== "Civil Registration" && (
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-[16px] bg-[#f6f9fb] rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-0">
                 {/* Left Sidebar */}
                 <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px] p-4 lg:p-[16px]">
