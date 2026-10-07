@@ -507,6 +507,7 @@ export default function App() {
                     File Status
                   </h3>
                 ) : (
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-[24px]">
                   <DashboardTabs
                     tabs={[
                       {
@@ -544,20 +545,17 @@ export default function App() {
                     ]}
                     activeTabId={activeMainTab}
                     onChange={(id) => setActiveMainTab(id as any)}
-                    className="mb-4 md:mb-[24px]"
                   />
-                )}
-
-                {/* Generate Report entry — Building Permission module */}
-                {selectedModule === "Building Permissions" && (
-                  <div className="flex justify-end mb-4 md:mb-[16px]">
+                  {/* Reports entry — Building Permission module */}
+                  {selectedModule === "Building Permissions" && (
                     <Link
                       to="/reports/building-permission"
-                      className="inline-flex items-center gap-[8px] bg-[#09327b] rounded-[8px] px-[16px] py-[10px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] hover:bg-[#0c3080] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+                      className="inline-flex items-center justify-center gap-[8px] shrink-0 h-[40px] md:h-[44px] bg-[#09327b] rounded-[8px] px-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] hover:bg-[#0c3080] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
                     >
                       <FileText className="w-4 h-4" aria-hidden="true" />
-                      Generate Report
+                      Reports
                     </Link>
+                  )}
                   </div>
                 )}
 
