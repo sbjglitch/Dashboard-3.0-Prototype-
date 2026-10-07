@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { PieChart } from "@mui/x-charts/PieChart";
+import { DashboardPieChart } from "./charts/DashboardPieChart";
+import { DashboardTabs } from "./DashboardTabs";
 import svgPaths from "../../imports/svg-4i5smnjigf";
 import {
   CHART_PALETTE,
   TEXT_MUTED,
-  pieChartBaseProps,
-  pieSeriesGeometry,
 } from "../constants/chartStyles";
 
 const SUCCESS_COLOR = CHART_PALETTE[1]; // accent sky
@@ -87,48 +86,37 @@ export function FinanceModule({
     <div className="flex flex-col gap-[24px]">
       <div className="flex items-center justify-between w-full">
         {!hideTabs && (
-          <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
-            <button
-              type="button"
-              onClick={() => setActiveSubTab("ePayment")}
-              className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                activeSubTab === "ePayment"
-                  ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                  : "text-[#232f50] opacity-50"
-              }`}
-            >
-              <div className="relative size-[20px]">
-                <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
-                  <path clipRule="evenodd" d={svgPaths.p181de000} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path d="M15.8399 14.1726V10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path d={svgPaths.pe79fe00} stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path clipRule="evenodd" d={svgPaths.pa3e1680} fillRule="evenodd" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path d="M17.5073 4.1684H10.0042" stroke={activeSubTab === "ePayment" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                </svg>
-              </div>
-              <span className="font-sans font-semibold text-[14px]">E-Payment</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSubTab("ePos")}
-              className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                activeSubTab === "ePos"
-                  ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                  : "text-[#232f50] opacity-50"
-              }`}
-            >
-              <div className="relative size-[20px]">
-                <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
-                  <path d={svgPaths.p8703000} stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path d="M5.25 15.4167H8.91667" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path clipRule="evenodd" d={svgPaths.p16eab600} fillRule="evenodd" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                  <path d="M7.5 8.33333H17.5" stroke={activeSubTab === "ePos" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                </svg>
-              </div>
-              <span className="font-sans font-semibold text-[14px]">E-POS</span>
-            </button>
-          </div>
+          <DashboardTabs
+            tabs={[
+              {
+                id: "ePayment",
+                label: "E-Payment",
+                icon: (active) => (
+                  <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
+                    <path clipRule="evenodd" d={svgPaths.p181de000} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path d="M15.8399 14.1726V10.0042" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path d={svgPaths.pe79fe00} stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path clipRule="evenodd" d={svgPaths.pa3e1680} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path d="M17.5073 4.1684H10.0042" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                )
+              },
+              {
+                id: "ePos",
+                label: "E-POS",
+                icon: (active) => (
+                  <svg className="absolute block size-full" fill="none" viewBox="0 0 20 20">
+                    <path d={svgPaths.p8703000} stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path d="M5.25 15.4167H8.91667" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path clipRule="evenodd" d={svgPaths.p16eab600} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                    <path d="M7.5 8.33333H17.5" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                )
+              }
+            ]}
+            activeTabId={activeSubTab}
+            onChange={(id) => setActiveSubTab(id as "ePayment" | "ePos")}
+          />
         )}
         {hideTabs && <div />}
 
@@ -220,16 +208,11 @@ export function FinanceModule({
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 w-full min-h-[280px] md:min-h-[320px]">
           <div className="shrink-0 flex items-center justify-center">
-            <PieChart
-              {...pieChartBaseProps}
-              width={300}
+            <DashboardPieChart
+              data={pieData.map((d) => ({ label: d.name, value: d.value, color: d.fill }))}
               height={280}
-              series={[{
-                ...pieSeriesGeometry,
-                innerRadius: 72,
-                paddingAngle: 3,
-                data: pieData.map((d, i) => ({ id: i, value: d.value, label: d.name, color: d.fill })),
-              }]}
+              innerRadius={72}
+              showLegend={false}
             />
           </div>
 

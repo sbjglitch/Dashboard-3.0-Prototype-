@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect, Fragment } from "react";
-import { ChevronRight, ChevronDown, X, Search } from "lucide-react";
+import { X, Search, ChevronRight, ChevronDown } from "lucide-react";
+import { DashboardTabs } from "./DashboardTabs";
 import { ExportButton } from "./ExportButton";
 import { SeatDetailModal } from "./SeatDetailModal";
 import { TableRow, TableItem, DISTRICTS, mockData, mockNum } from "../data/tableData";
 
-// ── Component ─────────────��───────────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────────────────────────
 
 export type KpiType = "total" | "disposed" | "inProcess" | "delayed" | "all";
 
@@ -186,6 +187,7 @@ export function DetailsModal({
   serviceName = "Select",
   isFinanceModule = false,
   contentMode = "fileKpi",
+  inlinePreview = false,
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
@@ -195,6 +197,7 @@ export function DetailsModal({
   serviceName?: string;
   isFinanceModule?: boolean;
   contentMode?: DetailsModalContentMode;
+  inlinePreview?: boolean;
 }) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set([
     "thiruvananthapuram",
@@ -480,8 +483,8 @@ export function DetailsModal({
     ];
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
-        <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
+      <div className={inlinePreview ? "relative w-full h-[700px] flex items-center justify-center bg-gray-50/50 p-4 border border-gray-200 rounded-xl overflow-hidden" : "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4"}>
+        <div className={`bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col overflow-hidden ${inlinePreview ? 'h-full border border-gray-100' : 'max-h-[100vh] md:max-h-[95vh]'}`}>
           
           {/* Header */}
           <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
@@ -499,51 +502,16 @@ export function DetailsModal({
 
           {/* Tabs - All 4 in one row */}
           <div className="px-4 md:px-8 py-4 border-b border-gray-100 shrink-0 bg-white">
-            <div className="bg-[#f2f6ff] flex gap-[4px] p-[4px] rounded-[8px] w-fit">
-              <button
-                onClick={() => setFinanceTab("ePayment")}
-                className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                  financeTab === "ePayment"
-                    ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                    : "text-[#232f50] opacity-50"
-                }`}
-              >
-                <span className="font-sans font-semibold text-[14px]">E-Payment</span>
-              </button>
-              
-              <button
-                onClick={() => setFinanceTab("ePos")}
-                className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                  financeTab === "ePos"
-                    ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                    : "text-[#232f50] opacity-50"
-                }`}
-              >
-                <span className="font-sans font-semibold text-[14px]">E-POS</span>
-              </button>
-
-              <button
-                onClick={() => setFinanceTab("district")}
-                className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                  financeTab === "district"
-                    ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                    : "text-[#232f50] opacity-50"
-                }`}
-              >
-                <span className="font-sans font-semibold text-[14px]">District</span>
-              </button>
-
-              <button
-                onClick={() => setFinanceTab("officeType")}
-                className={`flex items-center gap-[12px] px-[24px] py-[8px] rounded-[8px] transition-all ${
-                  financeTab === "officeType"
-                    ? "bg-white shadow-[0px_4.883px_42px_0px_rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)] text-[#232f50]"
-                    : "text-[#232f50] opacity-50"
-                }`}
-              >
-                <span className="font-sans font-semibold text-[14px]">Office Type</span>
-              </button>
-            </div>
+            <DashboardTabs
+              tabs={[
+                { id: "ePayment", label: "E-Payment" },
+                { id: "ePos", label: "E-POS" },
+                { id: "district", label: "District" },
+                { id: "officeType", label: "Office Type" }
+              ]}
+              activeTabId={financeTab}
+              onChange={(id) => setFinanceTab(id as any)}
+            />
           </div>
 
           {/* Content based on selected tab */}
@@ -803,8 +771,8 @@ export function DetailsModal({
       : fullPtRows;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
-        <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
+      <div className={inlinePreview ? "relative w-full h-[700px] flex items-center justify-center bg-gray-50/50 p-4 border border-gray-200 rounded-xl overflow-hidden" : "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4"}>
+        <div className={`bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col overflow-hidden ${inlinePreview ? 'h-full border border-gray-100' : 'max-h-[100vh] md:max-h-[95vh]'}`}>
           <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
             <div className="flex flex-col gap-0.5">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#009fd2]">
@@ -914,8 +882,8 @@ export function DetailsModal({
   // ── Main hierarchy table view ─────────────────────────────────────────────
   return (
     <Fragment>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4">
-      <div className="bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col max-h-[100vh] md:max-h-[95vh] overflow-hidden">
+    <div className={inlinePreview ? "relative w-full h-[700px] flex items-center justify-center bg-gray-50/50 p-4 border border-gray-200 rounded-xl overflow-hidden" : "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4"}>
+      <div className={`bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full max-w-[1440px] flex flex-col overflow-hidden ${inlinePreview ? 'h-full border border-gray-100' : 'max-h-[100vh] md:max-h-[95vh]'}`}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 shrink-0">
@@ -963,23 +931,21 @@ export function DetailsModal({
 
         {/* Filter Bar */}
         <div className="flex items-center justify-between shrink-0 bg-white px-[24px] py-[8px]">
-          <div className="flex items-center gap-1 bg-[#e8eff4] rounded-lg h-9 w-full sm:w-[300px] p-[1px]">
-            <button 
-              onClick={() => setViewMode("district")}
-              className={`flex-1 h-full rounded flex items-center justify-center text-sm font-semibold transition-all ${viewMode === "district" ? "bg-white text-[#232f50] shadow-sm border border-[#e8eff4]" : "text-[#232f50] opacity-70 hover:opacity-100"}`}
-            >
-              District
-            </button>
-            <button 
-              onClick={() => {
-                setViewMode("officeType");
+          <DashboardTabs
+            size="sm"
+            tabs={[
+              { id: "district", label: "District" },
+              { id: "officeType", label: "Office Type" }
+            ]}
+            activeTabId={viewMode}
+            onChange={(id) => {
+              setViewMode(id as "district" | "officeType");
+              if (id === "officeType") {
                 setExpandedRows(new Set(["cat-corporations", "cat-municipalities", "cat-gps"]));
-              }}
-              className={`flex-1 h-full rounded flex items-center justify-center text-sm font-semibold transition-all ${viewMode === "officeType" ? "bg-white text-[#232f50] shadow-sm border border-[#e8eff4]" : "text-[#232f50] opacity-70 hover:opacity-100"}`}
-            >
-              Office Type
-            </button>
-          </div>
+              }
+            }}
+            className="w-full sm:w-[300px]"
+          />
 
           <div className="flex items-center gap-2">
             <div className="relative h-10 w-full sm:w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">

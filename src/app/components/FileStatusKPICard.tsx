@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export interface StatCardProps {
+export interface FileStatusKPICardProps {
   label: string;
   value: string;
   subValue?: string;
@@ -13,7 +13,7 @@ export interface StatCardProps {
   onClick?: () => void;
 }
 
-export function StatCard({
+export function FileStatusKPICard({
   label,
   value,
   subValue,
@@ -24,7 +24,7 @@ export function StatCard({
   color,
   hideInfoIcon,
   onClick,
-}: StatCardProps) {
+}: FileStatusKPICardProps) {
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
   return (
