@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { BarChart } from "@mui/x-charts/BarChart";
-import { StatCard } from "./StatCard";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { FileStatusKPICard } from "./FileStatusKPICard";
+import { DashboardTabs } from "./DashboardTabs";
+import { FilterDropdown } from "./FilterDropdown";
 import { FinanceModule } from "./FinanceModule";
-import {
-  CHART_PALETTE,
-  barChartBaseProps,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { CHART_PALETTE } from "../constants/chartStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,16 +147,14 @@ function DigitalHealthCard({ label, value, color }: { label: string; value: numb
 // ─── MUI X Bar Chart wrapper ─────────────────────────────────────────────────
 function CustomChart({ data }: { data: { name: string; total: number; disposed: number }[] }) {
   return (
-    <div className="flex-[1_0_0] w-full h-[250px] sm:h-[320px]">
-      <BarChart
-        {...barChartBaseProps}
+    <div className="flex-[1_0_0] w-full h-[250px] sm:h-[320px] pt-4">
+      <DashboardBarChart
+        data={data}
+        xAxisKey="name"
         height={320}
-        dataset={data}
-        xAxis={[xAxisBand("name")]}
-        yAxis={[yAxisLinear()]}
         series={[
-          { dataKey: "total", label: "Total Files", color: CHART_PALETTE[2] },
-          { dataKey: "disposed", label: "Disposed Files", color: CHART_PALETTE[1] },
+          { dataKey: "total", name: "Total Files", color: CHART_PALETTE[2] },
+          { dataKey: "disposed", name: "Disposed Files", color: CHART_PALETTE[1] },
         ]}
       />
     </div>
@@ -217,34 +212,19 @@ export function GrievanceModule({
       <div>
 
         {/* Tab bar */}
-        <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-fit mb-[24px] h-[44px]">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => { setActiveTab(tab.id); }}
-                className={`h-full px-[24px] rounded-[8px] flex items-center gap-[16px] cursor-pointer transition-all relative ${
-                  isActive 
-                    ? "bg-white border-2 border-[#e8eff4] shadow-sm z-10" 
-                    : "hover:bg-white/50"
-                }`}
-              >
-                {tabIcons[tab.id](isActive)}
-                <span className={`font-sans font-semibold text-[14px] leading-[20px] ${isActive ? "text-[#232f50]" : "text-[#5c6e93]"}`}>
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <DashboardTabs
+          tabs={tabs.map(t => ({ ...t, icon: tabIcons[t.id] }))}
+          activeTabId={activeTab}
+          onChange={(id) => setActiveTab(id as TabId)}
+          className="mb-[24px]"
+        />
 
         {/* File Status Tab */}
         {activeTab === "fileStatus" && (
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[8px] w-full">
               {(Object.entries(FILE_STATUS_KPIS) as [string, typeof FILE_STATUS_KPIS.totalFiles][]).map(([key, kpi]) => (
-                <StatCard
+                <FileStatusKPICard
                   key={key}
                   label={kpi.label}
                   value={kpi.value.toLocaleString()}

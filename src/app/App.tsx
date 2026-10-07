@@ -12,16 +12,16 @@ import { BuildingPermissionGraphs } from "./components/BuildingPermissionGraphs"
 import { MeetingManagementGraphs } from "./components/MeetingManagementGraphs";
 import { BusinessFacilitationGraphs } from "./components/BusinessFacilitationGraphs";
 import { PropertyTaxGraphs } from "./components/PropertyTaxGraphs";
-import { StatCard } from "./components/StatCard";
+import { FileStatusKPICard } from "./components/FileStatusKPICard";
 import { MODULE_DATA } from "./data/serviceData";
-import imgGovernmentOfKeralaLogo from "../assets/828f18076f30eadbc8ffd05a9253419bb04f21ef.png";
-import imgLsgdLogo2 from "../assets/7c183a0a0c9ac3c4483c0f6d150efedb7cac5cb1.png";
 import imgHeroBackground from "../assets/hero-banner-bg.png";
 import svgPaths from "../imports/svg-hkl0il95bp";
-import { ArrowLeft, Download, ChevronDown } from "lucide-react";
+import { ArrowLeft, Download, ChevronDown, FileText } from "lucide-react";
+import { Link } from "react-router";
+import { DashboardTabs } from "./components/DashboardTabs";
+import { SiteHeader } from "./components/SiteHeader";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { ExportButton } from "./components/ExportButton";
-import { GlobalChartStyles } from "./constants/chartStyles";
 
 function FilterSelect({ label, value }: { label: string; value: string }) {
   return (
@@ -276,52 +276,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f2f6ff]">
-      <GlobalChartStyles />
       {/* Header */}
-      <header className="bg-white h-auto md:h-[80px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] sticky top-0 z-40">
-        <div className="flex flex-wrap items-center justify-between px-4 md:px-[32px] py-3 md:py-0 h-full gap-3 md:gap-0">
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="h-[28px] w-[64px] md:h-[36.871px] md:w-[84.634px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 84.6339 36.871">
-                <g id="Logo">
-                  <path clipRule="evenodd" d={svgPaths.p13e027c0} fill="#09327B" fillRule="evenodd" />
-                  <path d={svgPaths.pafeb100} fill="#E83A7A" />
-                  <path d={svgPaths.p137eb400} fill="#E83A7A" />
-                  <path d={svgPaths.p23ef9ec0} fill="#00B2EB" />
-                </g>
-              </svg>
-            </div>
-            <div className="h-[44px] w-px bg-[#D6E1F3] hidden md:block" />
-            <img alt="" className="h-[28px] w-[44px] md:h-[34.973px] md:w-[54.557px] object-cover hidden sm:block" src={imgGovernmentOfKeralaLogo} />
-            <img alt="" className="h-[26px] w-[44px] md:h-[31.475px] md:w-[53.159px] object-cover hidden sm:block" src={imgLsgdLogo2} />
-            <div className="flex flex-col gap-0.5 md:gap-2 hidden lg:flex">
-              <p className="font-sans text-[12px] text-[#5c6e93]">Government of Kerala</p>
-              <p className="font-sans font-semibold text-[14px] text-[#232f50]">
-                Local Self Government Department
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 md:gap-12">
-            <div className="flex items-center gap-2 cursor-pointer hidden md:flex">
-              <p className="font-sans font-medium text-[14px] text-[#09327b]">
-                മലയാളം
-              </p>
-              <ChevronDown className="w-4 h-4 text-[#09327b]" />
-            </div>
-            <p className="font-sans font-semibold text-[14px] text-[#09327b] cursor-pointer hidden lg:block">
-              About K-smart
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="px-4 md:px-8 py-1.5 md:py-2 border border-[#e83a7a] rounded-full font-sans font-semibold text-[12px] md:text-[14px] text-[#e83a7a] hover:bg-[#e83a7a] hover:text-white transition-colors">
-                Register
-              </button>
-              <button className="px-4 md:px-8 py-1.5 md:py-2 bg-[#e83a7a] rounded-full font-sans font-semibold text-[12px] md:text-[14px] text-white hover:bg-[#d62d69] transition-colors">
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section */}
       <div className="bg-[#09327b] px-4 md:px-[32px] pt-3 md:pt-9 pb-5 md:pb-9 relative overflow-hidden min-h-[108px] md:min-h-[128px] md:h-[140px]">
@@ -551,61 +507,57 @@ export default function App() {
                     File Status
                   </h3>
                 ) : (
-                  <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit mb-4 md:mb-[24px] h-[40px] md:h-[44px]">
-                  {/* File Status */}
-                  <div 
-                    onClick={() => setActiveMainTab("fileStatus")}
-                    className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all relative z-10 ${
-                      activeMainTab === "fileStatus" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
-                    }`}
-                  >
-                    <div className="w-[16px] h-[16px] relative">
-                      <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
-                        <path d="M2.66667 7.51245V5.33333C2.66667 4.96514 2.96514 4.66667 3.33333 4.66667H12.6667C13.0349 4.66667 13.3333 4.96514 13.3333 5.33333V8.84562" stroke={activeMainTab === "fileStatus" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        <path d="M3.33333 4.66667V2.66667C3.33333 2.29848 3.63181 2 4 2H12C12.3682 2 12.6667 2.29848 12.6667 2.66667V4.66667" stroke={activeMainTab === "fileStatus" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        <path clipRule="evenodd" d="M2 12.6667V8.66667C2 7.93029 2.59695 7.33333 3.33333 7.33333H7.44771C7.80134 7.33333 8.14048 7.47381 8.39053 7.72386L8.94281 8.27614C9.19286 8.52619 9.532 8.66667 9.88562 8.66667H12.6667C13.403 8.66667 14 10V12.6667C14 13.403 13.403 14 12.6667 14H3.33333C2.59695 14 2 13.403 2 12.6667Z" fill={activeMainTab === "fileStatus" ? "#00B2EB" : "none"} fillRule="evenodd" stroke={activeMainTab === "fileStatus" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        <path d="M4.66667 11.3333H6" stroke={activeMainTab === "fileStatus" ? "white" : "transparent"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                      </svg>
-                    </div>
-                    <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "fileStatus" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>File Status</span>
-                  </div>
+                  <DashboardTabs
+                    tabs={[
+                      {
+                        id: "fileStatus",
+                        label: "File Status",
+                        icon: (active) => (
+                          <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
+                            <path d="M2.66667 7.51245V5.33333C2.66667 4.96514 2.96514 4.66667 3.33333 4.66667H12.6667C13.0349 4.66667 13.3333 4.96514 13.3333 5.33333V8.84562" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                            <path d="M3.33333 4.66667V2.66667C3.33333 2.29848 3.63181 2 4 2H12C12.3682 2 12.6667 2.29848 12.6667 2.66667V4.66667" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                            <path clipRule="evenodd" d="M2 12.6667V8.66667C2 7.93029 2.59695 7.33333 3.33333 7.33333H7.44771C7.80134 7.33333 8.14048 7.47381 8.39053 7.72386L8.94281 8.27614C9.19286 8.52619 9.532 8.66667 9.88562 8.66667H12.6667C13.403 8.66667 14 10V12.6667C14 13.403 13.403 14 12.6667 14H3.33333C2.59695 14 2 13.403 2 12.6667Z" fill={active ? "#00B2EB" : "none"} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                            <path d="M4.66667 11.3333H6" stroke={active ? "white" : "transparent"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                          </svg>
+                        )
+                      },
+                      {
+                        id: "finance",
+                        label: isPropertyTaxModule ? "DCB" : "Finance",
+                        icon: (active) => (
+                          <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
+                            <path clipRule="evenodd" d="M13.3333 14V14C14.07 14 14.6667 13.4033 14.6667 12.6667V3.33333C14.6667 2.59667 14.07 2 13.3333 2V2C12.5967 2 12 2.59667 12 3.33333V12.6667C12 13.4033 12.5967 14 13.3333 14Z" fill={active ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                            <path clipRule="evenodd" d="M8 14V14C8.73667 14 9.33333 13.4033 9.33333 12.6667V7.12267C9.33333 6.386 8.73667 5.78933 8 5.78933V5.78933C7.26333 5.78933 6.66667 6.386 6.66667 7.12267V12.6667C6.66667 13.4033 7.26333 14 8 14Z" fill={active ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                            <path clipRule="evenodd" d="M2.66667 14V14C3.40333 14 4 13.4033 4 12.6667V10.912C4 10.1753 3.40333 9.57867 2.66667 9.57867V9.57867C1.93 9.57867 1.33333 10.1753 1.33333 10.912V12.6667C1.33333 13.4033 1.93 14 2.66667 14Z" fill={active ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                          </svg>
+                        )
+                      },
+                      ...(showDigitalHealthTab ? [{
+                        id: "digitalHealth",
+                        label: "Digital Health",
+                        icon: (active: boolean) => (
+                          <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
+                            <path d="M8 14S2.5 10 2.5 5.5C2.5 3.5 4 2.5 5.5 2.5C6.5 2.5 7.5 3 8 4C8.5 3 9.5 2.5 10.5 2.5C12 2.5 13.5 3.5 13.5 5.5C13.5 10 8 14 8 14Z" stroke={active ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                          </svg>
+                        )
+                      }] : [])
+                    ]}
+                    activeTabId={activeMainTab}
+                    onChange={(id) => setActiveMainTab(id as any)}
+                    className="mb-4 md:mb-[24px]"
+                  />
+                )}
 
-                  {/* Finance */}
-                  <div 
-                    onClick={() => setActiveMainTab("finance")}
-                    className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all ${
-                      activeMainTab === "finance" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
-                    }`}
-                  >
-                    <div className="w-[16px] h-[16px] relative">
-                      <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
-                        <path clipRule="evenodd" d="M13.3333 14V14C14.07 14 14.6667 13.4033 14.6667 12.6667V3.33333C14.6667 2.59667 14.07 2 13.3333 2V2C12.5967 2 12 2.59667 12 3.33333V12.6667C12 13.4033 12.5967 14 13.3333 14Z" fill={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        <path clipRule="evenodd" d="M8 14V14C8.73667 14 9.33333 13.4033 9.33333 12.6667V7.12267C9.33333 6.386 8.73667 5.78933 8 5.78933V5.78933C7.26333 5.78933 6.66667 6.386 6.66667 7.12267V12.6667C6.66667 13.4033 7.26333 14 8 14Z" fill={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        <path clipRule="evenodd" d="M2.66667 14V14C3.40333 14 4 13.4033 4 12.6667V10.912C4 10.1753 3.40333 9.57867 2.66667 9.57867V9.57867C1.93 9.57867 1.33333 10.1753 1.33333 10.912V12.6667C1.33333 13.4033 1.93 14 2.66667 14Z" fill={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} fillRule="evenodd" stroke={activeMainTab === "finance" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                      </svg>
-                    </div>
-                    <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "finance" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>
-                      {isPropertyTaxModule ? "DCB" : "Finance"}
-                    </span>
-                  </div>
-
-                  {/* Digital Health — only for qualifying Property Tax sub-modules */}
-                  {showDigitalHealthTab && (
-                    <div
-                      onClick={() => setActiveMainTab("digitalHealth")}
-                      className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[16px] cursor-pointer transition-all ${
-                        activeMainTab === "digitalHealth" ? "bg-white border-2 border-[#e8eff4] shadow-sm" : "hover:bg-white/50"
-                      }`}
+                {/* Generate Report entry — Building Permission module */}
+                {selectedModule === "Building Permissions" && (
+                  <div className="flex justify-end mb-4 md:mb-[16px]">
+                    <Link
+                      to="/reports/building-permission"
+                      className="inline-flex items-center gap-[8px] bg-[#09327b] rounded-[8px] px-[16px] py-[10px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] hover:bg-[#0c3080] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
                     >
-                      <div className="w-[16px] h-[16px] relative">
-                        <svg className="absolute block size-full" fill="none" viewBox="0 0 16 16">
-                          <path d="M8 14S2.5 10 2.5 5.5C2.5 3.5 4 2.5 5.5 2.5C6.5 2.5 7.5 3 8 4C8.5 3 9.5 2.5 10.5 2.5C12 2.5 13.5 3.5 13.5 5.5C13.5 10 8 14 8 14Z" stroke={activeMainTab === "digitalHealth" ? "#00B2EB" : "#A2BFD8"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                        </svg>
-                      </div>
-                      <span className={`font-sans font-semibold text-[14px] leading-[20px] ${activeMainTab === "digitalHealth" ? "text-[#232f50]" : "text-[#5c6e93]"}`}>Digital Health</span>
-                    </div>
-                  )}
-
+                      <FileText className="w-4 h-4" aria-hidden="true" />
+                      Generate Report
+                    </Link>
                   </div>
                 )}
 
@@ -613,34 +565,34 @@ export default function App() {
                 {activeMainTab === "fileStatus" && (
                   selectedModule === "Meeting Management" ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 md:gap-[24px] w-full">
-                      <StatCard
+                      <FileStatusKPICard
                         label="All meetings"
                         value="51,251"
                         color="bg-[#1ebe72]"
                         hideInfoIcon={true}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Meetings held"
                         value="21,251"
                         percentage="41.5%"
                         color="bg-[#009fd2]"
                         hideInfoIcon={true}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Meetings cancelled"
                         value="15,000"
                         percentage="25%"
                         color="bg-[#7b61ff]"
                         hideInfoIcon={true}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Minutes approved"
                         value="15,000"
                         percentage="25%"
                         color="bg-[#df3a7a]"
                         hideInfoIcon={true}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Minutes not approved"
                         value="10,000"
                         percentage="18%"
@@ -650,7 +602,7 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-[24px] w-full">
-                      <StatCard
+                      <FileStatusKPICard
                         label="Total Received"
                         value="51,251"
                         subValue="25,251"
@@ -664,7 +616,7 @@ export default function App() {
                           setIsModalOpen(true);
                         }}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Disposed"
                         value="21,251"
                         subValue="13,657"
@@ -679,7 +631,7 @@ export default function App() {
                           setIsModalOpen(true);
                         }}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Under Process"
                         value="15,000"
                         subValue="10,000"
@@ -694,7 +646,7 @@ export default function App() {
                           setIsModalOpen(true);
                         }}
                       />
-                      <StatCard
+                      <FileStatusKPICard
                         label="Delayed"
                         value="15,000"
                         subValue="10,000"

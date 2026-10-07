@@ -1,16 +1,8 @@
 import React, { useState } from "react";
-import { PieChart } from "@mui/x-charts/PieChart";
-import { BarChart } from "@mui/x-charts/BarChart";
-import {
-  CHART_PALETTE,
-  Legend,
-  TEXT_MUTED,
-  barChartBaseProps,
-  pieChartBaseProps,
-  pieSeriesGeometry,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { DashboardTabs } from "./DashboardTabs";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { DashboardPieChart } from "./charts/DashboardPieChart";
+import { CHART_PALETTE, TEXT_MUTED } from "../constants/chartStyles";
 
 const DCB_DATA = {
   arrear:  { demand: 17500, collection: 10200, balance: 13500 },
@@ -48,18 +40,13 @@ function DCBGraph() {
         </p>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <BarChart
-          {...barChartBaseProps}
-          dataset={DCB_CHART_DATA}
-          xAxis={[xAxisBand("category")]}
-          yAxis={[yAxisLinear(DCB_MAX)]}
-          series={DCB_SERIES}
+      <div className="flex-1 min-h-0 pt-4">
+        <DashboardBarChart
+          data={DCB_CHART_DATA}
+          series={DCB_SERIES.map(s => ({ dataKey: s.dataKey, name: s.label, color: s.color }))}
+          xAxisKey="category"
+          height={400}
         />
-      </div>
-
-      <div className="mt-[8px]">
-        <Legend items={DCB_SERIES.map((s) => ({ label: s.label, color: s.color }))} />
       </div>
     </div>
   );
@@ -83,22 +70,17 @@ function BuildingStatisticsGraph({ selectedLocalBody }: { selectedLocalBody: str
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-[24px] md:gap-[48px]">
-        <PieChart
-          {...pieChartBaseProps}
-          width={320}
-          height={300}
-          series={[{
-            ...pieSeriesGeometry,
-            outerRadius: 140,
-            paddingAngle: 3,
-            data: SUCCESS_FAILURE_DATA.map((item, i) => ({
-              id: i,
-              value: item.pct,
+        <div className="w-[320px]">
+          <DashboardPieChart
+            data={SUCCESS_FAILURE_DATA.map((item) => ({
               label: item.label,
+              value: item.pct,
               color: item.color,
-            })),
-          }]}
-        />
+            }))}
+            height={300}
+            showLegend={false}
+          />
+        </div>
 
         <div className="flex flex-col gap-[8px]">
           {SUCCESS_FAILURE_DATA.map((item) => (

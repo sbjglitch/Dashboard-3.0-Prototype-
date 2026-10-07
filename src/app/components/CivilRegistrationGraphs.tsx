@@ -1,12 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { BarChart } from "@mui/x-charts/BarChart";
-import {
-  CHART_PALETTE,
-  barChartBaseProps,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { CHART_PALETTE } from "../constants/chartStyles";
 
 // ─── Color tokens — mapped onto the unified CHART_PALETTE ─────────────────────
 const C_APPLICATION = CHART_PALETTE[2]; // success/teal
@@ -299,18 +294,14 @@ function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
   const { ref, width } = useContainerChartWidth();
   return (
     <div ref={ref} className="w-full min-w-0 flex flex-col justify-end h-full">
-      <BarChart
-        {...barChartBaseProps}
-        width={width}
+      <DashboardBarChart
+        data={data}
+        xAxisKey="district"
         height={400}
-        margin={{ ...barChartBaseProps.margin, bottom: 88 }}
-        dataset={data}
-        xAxis={[xAxisBand("district", { angle: -35, textAnchor: "end" })]}
-        yAxis={[yAxisLinear()]}
         series={[
-          { dataKey: "totalFiles", label: "Total Files", valueFormatter, color: C_APPLICATION },
-          { dataKey: "disposedFiles", label: "Disposed Files", valueFormatter, color: C_APPROVED },
-          { dataKey: "pendingFiles", label: "Pending Files", valueFormatter, color: C_DELAYED },
+          { dataKey: "totalFiles", name: "Total Files", color: C_APPLICATION },
+          { dataKey: "disposedFiles", name: "Disposed Files", color: C_APPROVED },
+          { dataKey: "pendingFiles", name: "Pending Files", color: C_DELAYED },
         ]}
       />
     </div>
@@ -319,26 +310,20 @@ function DistrictDatasetChart({ data }: { data: typeof DISTRICTS }) {
 
 /** One stacked segment per category so each bar uses the matching STATUS_LEGEND colour. */
 function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
-  const n = data.length;
-  const dataset = data.map((d, i) => {
-    const row: Record<string, string | number> = { category: d.label };
-    for (let j = 0; j < n; j++) {
-      row[`slot${j}`] = j === i ? d.value : 0;
-    }
-    return row;
-  });
+  const dataset = data.map((d) => ({
+    category: d.label,
+    [d.label]: d.value,
+  }));
   return (
-    <BarChart
-      {...barChartBaseProps}
+    <DashboardBarChart
       height={340}
-      dataset={dataset}
-      xAxis={[xAxisBand("category")]}
-      yAxis={[yAxisLinear(Y_MAX)]}
-      series={data.map((d, i) => ({
-        dataKey: `slot${i}`,
-        label: d.label,
+      data={dataset}
+      xAxisKey="category"
+      stacked={true}
+      series={data.map((d) => ({
+        dataKey: d.label,
+        name: d.label,
         color: d.color,
-        stack: "stateTotals",
       }))}
     />
   );
@@ -346,13 +331,11 @@ function FiveBarStateChart({ data }: { data: typeof STATE_TOTALS }) {
 
 function DistrictBarChart({ data, max, color, valueLabel = "Count" }: { data: { label: string; value: number }[]; max: number; color: string; valueLabel?: string }) {
   return (
-    <BarChart
-      {...barChartBaseProps}
+    <DashboardBarChart
       height={340}
-      dataset={data}
-      xAxis={[xAxisBand("label")]}
-      yAxis={[yAxisLinear(max)]}
-      series={[{ dataKey: "value", label: valueLabel, color }]}
+      data={data}
+      xAxisKey="label"
+      series={[{ dataKey: "value", name: valueLabel, color }]}
     />
   );
 }
@@ -364,13 +347,11 @@ function GroupedBarChart() {
     return row;
   });
   return (
-    <BarChart
-      {...barChartBaseProps}
+    <DashboardBarChart
       height={340}
-      dataset={dataset}
-      xAxis={[xAxisBand("category")]}
-      yAxis={[yAxisLinear(Y_MAX)]}
-      series={STATUS_LEGEND.map((s) => ({ dataKey: s.label, label: s.label, color: s.color }))}
+      data={dataset}
+      xAxisKey="category"
+      series={STATUS_LEGEND.map((s) => ({ dataKey: s.label, name: s.label, color: s.color }))}
     />
   );
 }
@@ -380,13 +361,11 @@ function YearWiseChart({ metric }: { metric: "births" | "stillbirths" }) {
   const color = metric === "births" ? C_BIRTH : C_REJECTED;
   const seriesLabel = metric === "births" ? "Birth Count" : "Still Birth Count";
   return (
-    <BarChart
-      {...barChartBaseProps}
+    <DashboardBarChart
       height={340}
-      dataset={YEAR_WISE_BIRTHS}
-      xAxis={[xAxisBand("label")]}
-      yAxis={[yAxisLinear(YEAR_MAX)]}
-      series={[{ dataKey, label: seriesLabel, color }]}
+      data={YEAR_WISE_BIRTHS}
+      xAxisKey="label"
+      series={[{ dataKey, name: seriesLabel, color }]}
     />
   );
 }

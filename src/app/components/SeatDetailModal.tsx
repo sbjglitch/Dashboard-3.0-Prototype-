@@ -9,6 +9,7 @@ interface SeatDetailModalProps {
   selectedSeat: TableRow | null;
   moduleName: string;
   kpiLabel?: string;
+  inlinePreview?: boolean;
 }
 
 export function SeatDetailModal({
@@ -16,7 +17,8 @@ export function SeatDetailModal({
   onClose,
   selectedSeat,
   moduleName,
-  kpiLabel = "Total Files"
+  kpiLabel = "Total Files",
+  inlinePreview = false
 }: SeatDetailModalProps) {
   const [filePage, setFilePage] = useState(1);
   const FILES_PER_PAGE = 10;
@@ -43,8 +45,8 @@ export function SeatDetailModal({
   const isMeetingManagement = moduleName === "Meeting Management";
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] w-full max-w-[1200px] flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className={inlinePreview ? "relative w-full h-[700px] flex items-center justify-center bg-gray-50/50 p-4 border border-gray-200 rounded-xl overflow-hidden" : "fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"}>
+      <div className={`bg-white rounded-2xl shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] w-full max-w-[1200px] flex flex-col overflow-hidden ${inlinePreview ? 'h-full border border-gray-100' : 'max-h-[90vh] animate-in zoom-in-95 duration-200'}`}>
         
         {/* Header */}
         <div className="flex items-center justify-between px-4 md:px-8 py-5 border-b border-gray-100 shrink-0">

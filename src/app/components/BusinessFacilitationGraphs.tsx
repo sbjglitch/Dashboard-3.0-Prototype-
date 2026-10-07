@@ -1,15 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { BarChart } from "@mui/x-charts/BarChart";
-import { PieChart } from "@mui/x-charts/PieChart";
-import {
-  CHART_PALETTE,
-  barChartBaseProps,
-  pieChartBaseProps,
-  pieSeriesGeometry,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { ChevronDown, ChevronRight, ChevronDown as ExpandIcon, ChevronRight as CollapseIcon } from "lucide-react";
+import { DashboardTabs } from "./DashboardTabs";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { DashboardPieChart } from "./charts/DashboardPieChart";
+import { CHART_PALETTE } from "../constants/chartStyles";
 
 // ─── SLI Bar chart datasets (mirrors Building Permission module) ──────────────
 
@@ -342,46 +336,24 @@ function PieBlock({
 
   return legendBelow ? (
     <div className="flex flex-col items-center gap-[12px]">
-      <PieChart
-        {...pieChartBaseProps}
-        width={size}
+      <DashboardPieChart
+        data={data.map((item) => ({ label: item.label, value: item.value, color: item.color }))}
         height={size}
-        series={[
-          {
-            ...pieSeriesGeometry,
-            innerRadius: Math.round(size / 6.5),
-            outerRadius: Math.round(size / 2.2),
-            data: data.map((item, i) => ({
-              id: i,
-              value: item.value,
-              label: item.label,
-              color: item.color,
-            })),
-          },
-        ]}
+        innerRadius={Math.round(size / 6.5)}
+        showLegend={false}
       />
       {legend}
     </div>
   ) : (
     <div className="flex flex-col items-center gap-[12px] sm:flex-row sm:items-center sm:gap-[24px]">
-      <PieChart
-        {...pieChartBaseProps}
-        width={size}
-        height={size}
-        series={[
-          {
-            ...pieSeriesGeometry,
-            innerRadius: Math.round(size / 6.5),
-            outerRadius: Math.round(size / 2.2),
-            data: data.map((item, i) => ({
-              id: i,
-              value: item.value,
-              label: item.label,
-              color: item.color,
-            })),
-          },
-        ]}
-      />
+      <div className="w-[280px]">
+        <DashboardPieChart
+          data={data.map((item) => ({ label: item.label, value: item.value, color: item.color }))}
+          height={size}
+          innerRadius={Math.round(size / 6.5)}
+          showLegend={false}
+        />
+      </div>
       {legend}
     </div>
   );
@@ -472,22 +444,15 @@ export function BusinessFacilitationGraphs({
       )}
 
       <div className="mb-[16px] flex flex-wrap items-center justify-between gap-[12px]">
-        <div className="inline-flex gap-[4px] rounded-[8px] border border-[#e8eff4] bg-white p-[4px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
-          {(["District", "Local Bodies"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveSubTab(tab)}
-              className={`rounded-[6px] px-[20px] py-[6px] text-[14px] font-sans transition-colors ${
-                activeSubTab === tab
-                  ? "bg-[#f6f9fb] font-semibold text-[#232f50]"
-                  : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <DashboardTabs
+          size="sm"
+          tabs={[
+            { id: "District", label: "District" },
+            { id: "Local Bodies", label: "Local Bodies" }
+          ]}
+          activeTabId={activeSubTab}
+          onChange={(id) => setActiveSubTab(id as "District" | "Local Bodies")}
+        />
         <div className="flex flex-wrap items-center gap-[12px]">
           {activeSubTab === "District" && (
             <button
@@ -539,13 +504,12 @@ export function BusinessFacilitationGraphs({
         </div>
       </div>
 
-      <div className="min-h-0 w-full flex-1">
-        <BarChart
-          {...barChartBaseProps}
-          dataset={sliData.map((d) => ({ label: d.label, value: d.value }))}
-          xAxis={[xAxisBand("label")]}
-          yAxis={[yAxisLinear()]}
-          series={[{ dataKey: "value", label: "Files", color: CHART_PALETTE[1] }]}
+      <div className="min-h-0 w-full flex-1 pt-4">
+        <DashboardBarChart
+          data={sliData}
+          xAxisKey="label"
+          height={400}
+          series={[{ dataKey: "value", name: "Files", color: CHART_PALETTE[1] }]}
         />
       </div>
     </div>

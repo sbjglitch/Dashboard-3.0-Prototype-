@@ -1,17 +1,9 @@
 import React, { useLayoutEffect, useRef, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
-import { PieChart } from "@mui/x-charts/PieChart";
-import { BarChart } from "@mui/x-charts/BarChart";
-import {
-  CHART_CONFIG,
-  CHART_PALETTE,
-  Legend,
-  barChartBaseProps,
-  pieChartBaseProps,
-  pieSeriesGeometry,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { DashboardPieChart } from "./charts/DashboardPieChart";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { DashboardTabs } from "./DashboardTabs";
+import { CHART_CONFIG, CHART_PALETTE } from "../constants/chartStyles";
 
 function useContainerChartWidth() {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,19 +23,18 @@ function useContainerChartWidth() {
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 // 1. Meeting Status Breakdown (Pie)
-const MEETING_STATUS_PIE = [
-  { label: "Minutes Approved", value: 42, color: "#00c49f" },
-  { label: "Meetings Held", value: 28, color: "#00b2eb" },
-  { label: "Meetings Cancelled", value: 15, color: "#e83a7a" },
-  { label: "Minutes Not Approved", value: 10, color: "#f5a623" },
-  { label: "Scheduled", value: 5, color: "#7b61ff" },
+const MEETING_STATUS = [
+  { label: "Minutes Approved", value: 42, color: CHART_PALETTE[2] },
+  { label: "Meetings Held", value: 28, color: CHART_PALETTE[1] },
+  { label: "Meetings Cancelled", value: 15, color: CHART_PALETTE[5] },
+  { label: "Minutes Not Approved", value: 10, color: CHART_PALETTE[4] },
+  { label: "Scheduled", value: 5, color: CHART_PALETTE[3] },
 ];
 
-// 2. Meeting Type Distribution (Pie)
-const MEETING_TYPE_PIE = [
-  { label: "Ordinary", value: 55, color: "#3b82f6" },
-  { label: "Urgent", value: 28, color: "#f97316" },
-  { label: "Special", value: 17, color: "#a855f7" },
+const MEETING_TYPE = [
+  { label: "Ordinary", value: 55, color: CHART_PALETTE[1] },
+  { label: "Urgent", value: 28, color: CHART_PALETTE[4] },
+  { label: "Special", value: 17, color: CHART_PALETTE[3] },
 ];
 
 // 3. District-wise meetings (Bar)
@@ -128,9 +119,9 @@ const MONTHLY_TREND = [
 ];
 
 const MONTHLY_TREND_LEGEND = [
-  { key: "held", label: "Meetings Held", color: "#00c49f" },
-  { key: "cancelled", label: "Meetings Cancelled", color: "#e83a7a" },
-  { key: "scheduled", label: "Scheduled", color: "#7b61ff" },
+  { key: "held", label: "Meetings Held", color: CHART_PALETTE[2] },
+  { key: "cancelled", label: "Meetings Cancelled", color: CHART_PALETTE[5] },
+  { key: "scheduled", label: "Scheduled", color: CHART_PALETTE[3] },
 ] as const;
 
 // 5. Minutes Approval Rate by District (Grouped bar)
@@ -211,21 +202,14 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
         </div>
       </div>
       <div className="flex-[1_0_0] flex flex-col lg:flex-row items-center justify-center gap-[24px]">
-        <PieChart
-          {...pieChartBaseProps}
-          width={300}
-          height={300}
-          series={[{
-            ...pieSeriesGeometry,
-            innerRadius: 50,
-            data: data.map((item, i) => ({
-              id: i,
-              value: item.value,
-              label: item.label,
-              color: item.color,
-            })),
-          }]}
-        />
+        <div className="w-[300px]">
+          <DashboardPieChart
+            data={data.map((item) => ({ label: item.label, value: item.value, color: item.color }))}
+            height={300}
+            innerRadius={50}
+            showLegend={false}
+          />
+        </div>
         <div className="flex flex-col gap-[12px]">
           {data.map((item, idx) => (
             <div
@@ -255,22 +239,16 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
           <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
             Comparison of total meetings conducted across districts and local bodies.
           </p>
-          <div className="inline-flex rounded-[8px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] p-[4px] gap-[4px] mt-1">
-            <button
-              type="button"
-              onClick={() => setActiveSubTab("District")}
-              className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "District" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
-            >
-              District
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab("Local Bodies")}
-              className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "Local Bodies" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
-            >
-              Local Bodies
-            </button>
-          </div>
+          <DashboardTabs
+            size="sm"
+            tabs={[
+              { id: "District", label: "District" },
+              { id: "Local Bodies", label: "Local Bodies" }
+            ]}
+            activeTabId={activeSubTab}
+            onChange={(id) => setActiveSubTab(id as "District" | "Local Bodies")}
+            className="mt-1"
+          />
         </div>
         <div className="flex flex-wrap flex-col sm:flex-row items-center gap-[16px]">
           {activeSubTab === "District" && (
@@ -320,24 +298,13 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
           )}
         </div>
       </div>
-      <div ref={barChartContainerRef} className="w-full min-w-0">
-        <BarChart
-          {...barChartBaseProps}
-          width={barChartWidth}
+      <div ref={barChartContainerRef} className="w-full min-w-0 pt-4">
+        <DashboardBarChart
+          data={activeBarData}
+          xAxisKey="label"
           height={400}
-          margin={{ ...barChartBaseProps.margin, bottom: 88 }}
-          dataset={activeBarData.map((d) => ({ label: d.label, value: d.value }))}
-          xAxis={[xAxisBand("label", { angle: -35, textAnchor: "end" })]}
-          yAxis={[yAxisLinear(6000)]}
-          series={[{
-            dataKey: "value",
-            label: "Meetings",
-            color: CHART_PALETTE[1],
-          }]}
+          series={[{ dataKey: "value", name: "Meetings", color: CHART_PALETTE[1] }]}
         />
-      </div>
-      <div className="mt-[8px]">
-        <Legend items={[{ label: "Meetings", color: CHART_PALETTE[1] }]} />
       </div>
     </div>
   );
@@ -359,24 +326,14 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
           </p>
         </div>
       </div>
-      <div ref={barChartContainerRef} className="flex-1 w-full min-h-0">
-        <BarChart
-          {...barChartBaseProps}
-          width={barChartWidth}
+      <div ref={barChartContainerRef} className="flex-1 w-full min-h-0 pt-4">
+        <DashboardBarChart
+          data={MONTHLY_TREND}
+          xAxisKey="month"
           height={400}
-          dataset={MONTHLY_TREND}
-          xAxis={[xAxisBand("month")]}
-          yAxis={[yAxisLinear(7000)]}
-          series={MONTHLY_TREND_LEGEND.map((item) => ({
-            dataKey: item.key,
-            label: item.label,
-            stack: "total",
-            color: item.color,
-          }))}
+          stacked={true}
+          series={MONTHLY_TREND_LEGEND.map(item => ({ dataKey: item.key, name: item.label, color: item.color }))}
         />
-      </div>
-      <div className="mt-[12px]">
-        <Legend items={MONTHLY_TREND_LEGEND.map((item) => ({ label: item.label, color: item.color }))} />
       </div>
     </div>
   );
@@ -393,26 +350,16 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
           </p>
         </div>
       </div>
-      <div ref={barChartContainerRef} className="w-full min-w-0">
-        <BarChart
-          {...barChartBaseProps}
-          width={barChartWidth}
+      <div ref={barChartContainerRef} className="w-full min-w-0 pt-4">
+        <DashboardBarChart
+          data={MINUTES_APPROVAL_DISTRICT}
+          xAxisKey="label"
           height={400}
-          margin={{ ...barChartBaseProps.margin, bottom: 88 }}
-          dataset={MINUTES_APPROVAL_DISTRICT}
-          xAxis={[xAxisBand("label", { angle: -35, textAnchor: "end" })]}
-          yAxis={[yAxisLinear(100)]}
           series={[
-            { dataKey: "approved", label: "Minutes Approved", color: "#00c49f" },
-            { dataKey: "notApproved", label: "Minutes Not Approved", color: "#f5a623" },
+            { dataKey: "approved", name: "Minutes Approved", color: CHART_PALETTE[2] },
+            { dataKey: "notApproved", name: "Minutes Not Approved", color: CHART_PALETTE[4] },
           ]}
         />
-      </div>
-      <div className="mt-[8px]">
-        <Legend items={[
-          { label: "Minutes Approved", color: "#00c49f" },
-          { label: "Minutes Not Approved", color: "#f5a623" },
-        ]} />
       </div>
     </div>
   );

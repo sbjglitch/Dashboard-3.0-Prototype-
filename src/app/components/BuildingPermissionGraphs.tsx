@@ -1,17 +1,10 @@
 import React, { useLayoutEffect, useRef, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
-import { PieChart } from "@mui/x-charts/PieChart";
-import { BarChart } from "@mui/x-charts/BarChart";
-import {
-  CHART_CONFIG,
-  CHART_PALETTE,
-  Legend,
-  barChartBaseProps,
-  pieChartBaseProps,
-  pieSeriesGeometry,
-  xAxisBand,
-  yAxisLinear,
-} from "../constants/chartStyles";
+import { FileStatusKPICard } from "./FileStatusKPICard";
+import { DashboardTabs } from "./DashboardTabs";
+import { DashboardPieChart } from "./charts/DashboardPieChart";
+import { DashboardBarChart } from "./charts/DashboardBarChart";
+import { CHART_CONFIG, CHART_PALETTE } from "../constants/chartStyles";
 
 function useContainerChartWidth() {
   const ref = useRef<HTMLDivElement>(null);
@@ -256,22 +249,16 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
                 {desc}
               </p>
             </div>
-            <div className="inline-flex rounded-[8px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] p-[4px] gap-[4px] mt-1">
-              <button
-                type="button"
-                onClick={() => setActiveSubTab("District")}
-                className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "District" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
-              >
-                District
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSubTab("Local Bodies")}
-                className={`px-[24px] py-[4px] rounded-[6px] text-[14px] font-sans transition-colors ${activeSubTab === "Local Bodies" ? "bg-[#f6f9fb] font-semibold text-[#232f50]" : "font-medium text-[#5c6e93] hover:bg-[#f6f9fb]/80"}`}
-              >
-                Local Bodies
-              </button>
-            </div>
+            <DashboardTabs
+              size="sm"
+              tabs={[
+                { id: "District", label: "District" },
+                { id: "Local Bodies", label: "Local Bodies" }
+              ]}
+              activeTabId={activeSubTab}
+              onChange={(id) => setActiveSubTab(id as "District" | "Local Bodies")}
+              className="mt-1"
+            />
           </div>
           <div className="flex flex-wrap flex-col sm:flex-row items-center gap-[16px]">
              {/* Filters */}
@@ -324,26 +311,13 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         </div>
 
         {/* Chart */}
-        <div ref={barChartContainerRef} className="w-full min-w-0">
-          <BarChart
-            {...barChartBaseProps}
-            width={barChartWidth}
+        <div ref={barChartContainerRef} className="w-full min-w-0 pt-4">
+          <DashboardBarChart
+            data={activeBarData}
+            xAxisKey="label"
             height={400}
-            margin={{ ...barChartBaseProps.margin, bottom: 88 }}
-            dataset={activeBarData.map((d) => ({ label: d.label, value: d.value }))}
-            xAxis={[xAxisBand("label", { angle: -35, textAnchor: "end" })]}
-            yAxis={[yAxisLinear(yAxisMax)]}
-            series={[{
-              dataKey: "value",
-              label: yAxisName,
-              color: CHART_PALETTE[1],
-            }]}
+            series={[{ dataKey: "value", name: yAxisName, color: CHART_PALETTE[1] }]}
           />
-        </div>
-
-        {/* Series legend */}
-        <div className="mt-[8px]">
-          <Legend items={[{ label: yAxisName, color: CHART_PALETTE[1] }]} />
         </div>
       </div>
     );
@@ -370,22 +344,15 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         </div>
 
         {/* Pie Content */}
-        <div className="flex-[1_0_0] flex items-center justify-center gap-[24px]">
-          <PieChart
-            {...pieChartBaseProps}
-            width={300}
-            height={300}
-            series={[{
-              ...pieSeriesGeometry,
-              innerRadius: 50,
-              data: data.map((item, i) => ({
-                id: i,
-                value: item.value,
-                label: item.label,
-                color: item.color,
-              })),
-            }]}
-          />
+        <div className="flex-[1_0_0] flex flex-col lg:flex-row items-center justify-center gap-[24px]">
+          <div className="w-[300px]">
+            <DashboardPieChart
+              data={data.map((item) => ({ label: item.label, value: item.value, color: item.color }))}
+              height={300}
+              innerRadius={50}
+              showLegend={false}
+            />
+          </div>
 
            {/* Legends */}
            <div className="flex flex-col gap-[12px]">
@@ -429,23 +396,14 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
           </div>
         </div>
 
-        <div className="flex-1 w-full min-h-0">
-          <BarChart
-            {...barChartBaseProps}
-            dataset={OCCUPANCY_AREA_SPLIT_DATA}
-            xAxis={[xAxisBand("label")]}
-            yAxis={[yAxisLinear(30000)]}
-            series={OCCUPANCY_AREA_LEGEND.map((item) => ({
-              dataKey: item.key,
-              label: item.label,
-              stack: "total",
-              color: item.color,
-            }))}
+        <div className="flex-1 w-full min-h-0 pt-4">
+          <DashboardBarChart
+            data={OCCUPANCY_AREA_SPLIT_DATA}
+            xAxisKey="label"
+            height={400}
+            stacked={true}
+            series={OCCUPANCY_AREA_LEGEND.map(item => ({ dataKey: item.key, name: item.label, color: item.color }))}
           />
-        </div>
-
-        <div className="mt-[12px]">
-          <Legend items={OCCUPANCY_AREA_LEGEND.map((item) => ({ label: item.label, color: item.color }))} />
         </div>
       </div>
     );
@@ -509,24 +467,24 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
             <p className="leading-[20px]">Select Graph</p>
           </div>
           {tabs.map((tab, idx) => (
-             <button
-               type="button"
-               key={idx}
-               onClick={() => setActiveTab(idx)}
-               className={`content-stretch flex items-start p-[16px] relative w-full text-left rounded-[8px] transition-colors cursor-pointer ${
-                 activeTab === idx
-                   ? "bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]"
-                   : "hover:bg-[#e8eff4]/50 border border-transparent"
-               }`}
-             >
-               <span
-                 className={`flex-[1_0_0] font-sans leading-[20px] min-h-px min-w-px relative text-[14px] ${
-                   activeTab === idx ? "font-semibold text-[#232f50]" : "font-medium text-[#232f50]"
-                 }`}
-               >
-                 {tab}
-               </span>
-             </button>
+            <button
+              type="button"
+              key={idx}
+              onClick={() => setActiveTab(idx)}
+              className={`content-stretch flex items-start p-[16px] relative w-full text-left rounded-[8px] transition-colors cursor-pointer ${
+                activeTab === idx
+                  ? "bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]"
+                  : "hover:bg-[#e8eff4]/50 border border-transparent"
+              }`}
+            >
+              <span
+                className={`flex-[1_0_0] font-sans leading-[20px] min-h-px min-w-px relative text-[14px] ${
+                  activeTab === idx ? "font-semibold text-[#232f50]" : "font-medium text-[#232f50]"
+                }`}
+              >
+                {tab}
+              </span>
+            </button>
           ))}
         </div>
       </div>

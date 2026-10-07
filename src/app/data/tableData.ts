@@ -1,5 +1,5 @@
 
-import { StatCard } from "../components/StatCard";
+
 
 export interface TableRow {
   id: string;

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { StatCard } from "./StatCard";
+import { FileStatusKPICard } from "./FileStatusKPICard";
+import { DashboardTabs } from "./DashboardTabs";
+import { DetailsModal } from "./DetailsModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -261,37 +263,17 @@ export function CivilRegistrationModule({
   return (
     <div className="flex flex-col gap-4 md:gap-[24px]">
       {/* Tab bar */}
-      <div className="bg-[#e8eff4] flex items-center gap-[4px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] w-full sm:w-fit h-[40px] md:h-[44px]">
-        {tabs.map(({ id, label, icon }) => {
-          const active = activeTab === id;
-          return (
-            <button
-              type="button"
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`h-full flex-1 sm:flex-none px-3 md:px-[24px] rounded-[8px] flex items-center justify-center gap-2 md:gap-[12px] cursor-pointer transition-all ${
-                active
-                  ? "bg-white border-2 border-[#e8eff4] shadow-sm"
-                  : "hover:bg-white/50"
-              }`}
-            >
-              {icon(active)}
-              <span
-                className={`font-sans font-semibold text-[14px] leading-[20px] ${
-                  active ? "text-[#232f50]" : "text-[#5c6e93]"
-                }`}
-              >
-                {label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab bar */}
+      <DashboardTabs
+        tabs={tabs}
+        activeTabId={activeTab}
+        onChange={(id) => setActiveTab(id as TabId)}
+      />
 
       {/* ── File Status ── */}
       {activeTab === "fileStatus" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-[24px] w-full">
-          <StatCard
+          <FileStatusKPICard
             label="Total Received"
             value="51,251"
             subValue="25,251"
@@ -301,7 +283,7 @@ export function CivilRegistrationModule({
             color="bg-[#1ebe72]"
             onClick={() => onViewMore("total")}
           />
-          <StatCard
+          <FileStatusKPICard
             label="Disposed"
             value="21,251"
             subValue="13,657"
@@ -312,7 +294,7 @@ export function CivilRegistrationModule({
             color="bg-[#009fd2]"
             onClick={() => onViewMore("disposed")}
           />
-          <StatCard
+          <FileStatusKPICard
             label="Under Process"
             value="15,000"
             subValue="10,000"
@@ -323,7 +305,7 @@ export function CivilRegistrationModule({
             color="bg-[#7b61ff]"
             onClick={() => onViewMore("inProcess")}
           />
-          <StatCard
+          <FileStatusKPICard
             label="Delayed"
             value="15,000"
             subValue="10,000"
