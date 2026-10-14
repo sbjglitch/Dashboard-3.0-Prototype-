@@ -241,7 +241,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
           <div className="flex flex-col gap-[8px]">
-            <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+            <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
               {toSentenceCase(title)}
             </h3>
             <div className="flex items-center gap-4">
@@ -330,7 +330,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
           <div className="flex flex-col gap-[8px]">
             <div className="flex items-center gap-[16px]">
-              <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+              <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
                 {toSentenceCase(title)}
               </h3>
               <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
@@ -367,7 +367,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
                      style={{ backgroundColor: item.color }}
                    />
                    <span className="font-sans font-semibold text-[14px] text-[#232f50] w-[200px] truncate">{item.label}</span>
-                   <span className="font-sans font-bold text-[14px] text-[#0c3080]">{item.value}%</span>
+                   <span className="font-sans font-semibold text-[14px] text-[#0c3080]">{item.value}%</span>
                  </div>
                );
              })}
@@ -383,7 +383,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
         <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[24px]">
           <div className="flex flex-col gap-[8px]">
             <div className="flex flex-wrap items-center gap-[12px]">
-              <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+              <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
                 Occupancy-wise, built-up areawise split up of application
               </h3>
               <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
@@ -459,7 +459,7 @@ export function BuildingPermissionGraphs({ selectedLocalBody }: { selectedLocalB
                 <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
              </svg>
           </div>
-          <span className="font-sans font-bold text-[16px] text-[#232f50]">Graphs</span>
+          <span className="font-sans font-semibold text-[16px] text-[#232f50]">Graphs</span>
         </div>
 
         <div className="flex flex-col gap-[8px] w-full">

@@ -67,7 +67,7 @@ export function TimePeriodSelector({ onClose, onSelect }: { onClose: () => void,
   return (
     <div 
       ref={dropdownRef}
-      className="bg-white rounded-[8px] w-[calc(100vw-2rem)] sm:w-[320px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8e8e8] overflow-hidden"
+      className="bg-white rounded-[8px] w-[calc(100vw-2rem)] sm:w-[320px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4] overflow-hidden"
     >
       {view === 'list' ? (
         <div className="flex flex-col py-2">
@@ -214,7 +214,7 @@ function CalendarFunctional({
       
       <div className="grid grid-cols-7 text-center">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-          <span key={`day-header-${i}`} className="text-[11px] font-bold text-[#232f50] py-1">{d}</span>
+          <span key={`day-header-${i}`} className="text-[11px] font-semibold text-[#232f50] py-1">{d}</span>
         ))}
         {prevMonthDays.map((d, i) => (
           <span key={`prev-${i}`} className="text-[11px] text-[#a2a7b4] py-1.5">{d}</span>

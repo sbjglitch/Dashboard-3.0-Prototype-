@@ -32,7 +32,7 @@ function FilterSelect({ label, value }: { label: string; value: string }) {
           {value}
         </p>
         <div className="shrink-0">
-          <ChevronDown className="w-4 h-4 text-[#D5D7DA]" />
+          <ChevronDown className="w-4 h-4 text-[#5c6e93]" />
         </div>
       </div>
       <div className="absolute bg-white flex font-sans font-normal gap-[4px] h-[19px] items-center leading-[normal] left-[18px] px-[5px] text-[#153171] text-[14px] top-0 -translate-y-1/2 whitespace-nowrap z-10">
@@ -78,7 +78,7 @@ function PtDigitalHealthCard({ label, value, color, total }: { label: string; va
         </div>
         <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">{pct}</span>
       </div>
-      <span className="font-sans font-bold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
+      <span className="font-sans font-semibold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
     </div>
   );
 }
@@ -102,7 +102,7 @@ function PropertyTaxKpiCard({
 }: PropertyTaxKpiCardProps) {
   return (
     <div
-      className="bg-white border border-[#e1e1e1] rounded-[12px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] min-h-[180px] sm:min-h-[207px] flex flex-col cursor-pointer"
+      className="bg-white border border-[#e8eff4] rounded-[12px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] min-h-[180px] sm:min-h-[207px] flex flex-col cursor-pointer"
       onClick={() => onClick?.()}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -120,20 +120,20 @@ function PropertyTaxKpiCard({
             <div className="w-[32px] h-[32px] rounded-[62px] bg-[rgba(255,255,255,0.32)] flex items-center justify-center">
               <div className="w-[8px] h-[8px] bg-white rounded-full" />
             </div>
-            <span className="font-sans font-bold text-[16px] text-white">{title}</span>
+            <span className="font-sans font-semibold text-[16px] text-white">{title}</span>
           </div>
           <div className="flex items-center gap-[8px] text-white py-[2px]">
-            <span className="font-sans font-bold text-[20px] sm:text-[24px] leading-[normal]">₹</span>
-            <span className="font-sans font-bold text-[26px] sm:text-[34px] leading-[normal] tracking-[1.2px]">{value}</span>
+            <span className="font-sans font-semibold text-[20px] sm:text-[24px] leading-[normal]">₹</span>
+            <span className="font-sans font-semibold text-[26px] sm:text-[34px] leading-[normal] tracking-[1.2px]">{value}</span>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch gap-[8px]">
             <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
               <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Arrear Demand</span>
-              <span className="font-sans font-bold text-[13px] sm:text-[14px] text-white">₹ {arrearDemand}</span>
+              <span className="font-sans font-semibold text-[13px] sm:text-[14px] text-white">₹ {arrearDemand}</span>
             </div>
             <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
               <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Current Demand</span>
-              <span className="font-sans font-bold text-[13px] sm:text-[14px] text-white">₹ {currentDemand}</span>
+              <span className="font-sans font-semibold text-[13px] sm:text-[14px] text-white">₹ {currentDemand}</span>
             </div>
           </div>
         </div>
@@ -296,7 +296,7 @@ export default function App() {
               <span className="font-sans font-semibold text-[14px] text-white">Back</span>
             </button>
           </div>
-          <h1 className="font-sans font-bold text-[18px] sm:text-[24px] md:text-[32px] text-white leading-[normal] text-center shrink min-w-0 px-1">
+          <h1 className="font-sans font-semibold text-[18px] sm:text-[24px] md:text-[32px] text-white leading-[normal] text-center shrink min-w-0 px-1">
             KSMART Dashboard
           </h1>
           <div className="flex min-w-0 flex-1 basis-0 justify-end">
@@ -310,7 +310,7 @@ export default function App() {
       <div
         className={`sticky top-[56px] md:top-[80px] z-30 -mt-6 md:-mt-8 mb-[24px] md:mb-[32px] ${
           filtersStuck
-            ? "bg-white border-b border-[#e8e8e8] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] py-1 md:py-2"
+            ? "bg-white border-b border-[#e8eff4] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] py-1 md:py-2"
             : ""
         }`}
       >
@@ -319,7 +319,7 @@ export default function App() {
             className={`w-full p-3 md:p-[24px] ${
               filtersStuck
                 ? "bg-transparent border-0 shadow-none rounded-none"
-                : "bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] border border-[#e8e8e8]"
+                : "bg-white rounded-[12px] md:rounded-[16px] shadow-[0px_4px_12px_0px_rgba(10,13,18,0.08)] border border-[#e8eff4]"
             }`}
           >
               <div
@@ -423,20 +423,20 @@ export default function App() {
             <div className="flex flex-wrap gap-4 md:gap-[32px] items-center w-full">
               <div className="flex flex-col gap-[2px] items-start justify-center">
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Time Period</p>
-                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedTimePeriod}</p>
+                <p className="font-sans font-semibold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedTimePeriod}</p>
               </div>
               <div className="flex flex-col gap-[2px] items-start justify-center min-w-0">
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Module</p>
-                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px] max-w-full truncate" title={displayModule}>{displayModule}</p>
+                <p className="font-sans font-semibold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px] max-w-full truncate" title={displayModule}>{displayModule}</p>
               </div>
               <div className="flex flex-col gap-[2px] items-start justify-center">
                 <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Local body/state</p>
-                <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedLocalBody}</p>
+                <p className="font-sans font-semibold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedLocalBody}</p>
               </div>
               {selectedModule === "Meeting Management" && selectedSubModule !== "Select" && (
                 <div className="flex flex-col gap-[2px] items-start justify-center">
                   <p className="font-sans font-medium leading-[20px] text-[#5c6e93] text-[12px] md:text-[14px]">Meeting Type</p>
-                  <p className="font-sans font-bold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedSubModule}</p>
+                  <p className="font-sans font-semibold leading-[24px] md:leading-[28px] text-[#0c3080] text-[16px] md:text-[20px]">{selectedSubModule}</p>
                 </div>
               )}
             </div>
@@ -480,7 +480,7 @@ export default function App() {
                 {/* Tabs / Heading */}
                 {selectedModule === "Meeting Management" ? (
                   <div className="flex items-center justify-between mb-4 md:mb-[24px]">
-                    <h3 className="font-sans font-bold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px]">
+                    <h3 className="font-sans font-semibold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px]">
                       Meeting Status
                     </h3>
                     <button
@@ -490,7 +490,7 @@ export default function App() {
                         setModalKpiType("all");
                         setIsModalOpen(true);
                       }}
-                      className="bg-white border border-[#dedede] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#dedede,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
+                      className="bg-white border border-[#e8eff4] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#e8eff4,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
                     >
                       <span className="font-sans font-semibold text-[14px] text-[#323232]">View More Details</span>
                       <div className="size-[16px]">
@@ -503,7 +503,7 @@ export default function App() {
                     </button>
                   </div>
                 ) : selectedModule === "All Module" ? (
-                  <h3 className="font-sans font-bold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px] mb-4 md:mb-[24px]">
+                  <h3 className="font-sans font-semibold text-[16px] md:text-[20px] text-[#232f50] leading-[24px] md:leading-[28px] mb-4 md:mb-[24px]">
                     File Status
                   </h3>
                 ) : (
@@ -734,6 +734,17 @@ export default function App() {
 
             {/* Public Grievance & Redressal module content */}
             {selectedModule === "Public Grievance and complaints" && (
+              <div className="flex justify-end">
+                <Link
+                  to="/reports/grievance"
+                  className="inline-flex items-center justify-center gap-[8px] shrink-0 h-[40px] md:h-[44px] bg-[#09327b] rounded-[8px] px-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] hover:bg-[#0c3080] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+                >
+                  <FileText className="w-4 h-4" aria-hidden="true" />
+                  Reports
+                </Link>
+              </div>
+            )}
+            {selectedModule === "Public Grievance and complaints" && (
               <GrievanceModule
                 selectedLocalBody={selectedLocalBody}
                 onViewMore={(type) => {
@@ -774,7 +785,7 @@ export default function App() {
                         <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
                       </svg>
                     </div>
-                    <span className="font-sans font-bold text-[16px] text-[#232f50]">Graphs</span>
+                    <span className="font-sans font-semibold text-[16px] text-[#232f50]">Graphs</span>
                   </div>
                   
                   <div className="flex flex-col gap-[8px] w-full">
@@ -806,7 +817,7 @@ export default function App() {
                 <div className="bg-white flex-[1_0_0] min-h-[400px] lg:h-full relative rounded-[12px] md:rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px]">
                   <div className="flex flex-col sm:flex-row items-start justify-between mb-4 md:mb-[32px] gap-3">
                     <div className="flex flex-col gap-[8px]">
-                      <h3 className="font-sans font-bold text-[14px] md:text-[16px] text-[#232f50] leading-[24px]">
+                      <h3 className="font-sans font-semibold text-[14px] md:text-[16px] text-[#232f50] leading-[24px]">
                         No. of files that exceed SLI Period
                       </h3>
                       <p className="font-sans font-semibold text-[12px] md:text-[14px] text-[#5c6e93] leading-[20px]">
@@ -832,13 +843,13 @@ export default function App() {
                       <div className="w-[24px] h-[24px] bg-[#f8f8f8] rounded-[4px] flex items-center justify-center shrink-0">
                         <div className="w-[8px] h-[8px] rounded-full bg-[#56ba85]" />
                       </div>
-                      <span className="font-['Inter:Medium',sans-serif] font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
+                      <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
                     </div>
                     <div className="flex items-center gap-[8px] justify-center px-[16px] py-[8px]">
                       <div className="w-[24px] h-[24px] bg-[#f8f8f8] rounded-[4px] flex items-center justify-center shrink-0">
                         <div className="w-[8px] h-[8px] rounded-full bg-[#00b2eb]" />
                       </div>
-                      <span className="font-['Inter:Medium',sans-serif] font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
+                      <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
                     </div>
                   </div>
 
@@ -872,7 +883,7 @@ export default function App() {
                         >
                           <div className="relative">
                             <div className="bg-white border border-[#e8eff4] rounded-[8px] p-[12px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)] whitespace-nowrap flex flex-col gap-[8px] min-w-[140px] relative z-10">
-                              <span className="font-sans font-bold text-[14px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">{hoveredChartItem.fullLabel}</span>
+                              <span className="font-sans font-semibold text-[14px] text-[#232f50] border-b border-[#e8eff4] pb-[8px]">{hoveredChartItem.fullLabel}</span>
                               <div className="flex flex-col gap-[4px]">
                                 <div className="flex justify-between items-center gap-[16px]">
                                   <span className="font-sans text-[12px] text-[#5c6e93] flex items-center gap-[6px]">

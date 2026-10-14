@@ -18,7 +18,7 @@ function InfoTooltip({ text }: { text: string }) {
       onMouseLeave={() => setVisible(false)}
     >
       <div className="w-[16px] h-[16px] rounded-full bg-[#e8eff4] flex items-center justify-center cursor-default shrink-0">
-        <span className="font-sans font-bold text-[9px] text-[#5c6e93] leading-none select-none">i</span>
+        <span className="font-sans font-semibold text-[9px] text-[#5c6e93] leading-none select-none">i</span>
       </div>
       {visible && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none min-w-max">
@@ -70,12 +70,12 @@ function ModuleKpiCard({
           <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center shrink-0">
             {icon}
           </div>
-          <span className="font-sans font-bold text-[16px] text-white leading-tight">{label}</span>
+          <span className="font-sans font-semibold text-[16px] text-white leading-tight">{label}</span>
         </div>
 
         {/* Big number + rate badge */}
         <div className="flex items-end justify-between">
-          <span className="font-sans font-bold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">
+          <span className="font-sans font-semibold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">
             {value}
           </span>
           <div className="bg-white flex gap-[8px] items-center p-[8px] rounded-[8px] shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
@@ -88,11 +88,11 @@ function ModuleKpiCard({
         <div className="flex items-center gap-[8px] mt-[4px]">
           <div className="bg-[rgba(255,255,255,0.24)] rounded-[8px] px-[10px] py-[5px] flex-1 flex items-center justify-between gap-2">
             <span className="font-sans text-[11px] text-white/80">Approved</span>
-            <span className="font-sans font-bold text-[13px] text-white">{approvedValue}</span>
+            <span className="font-sans font-semibold text-[13px] text-white">{approvedValue}</span>
           </div>
           <div className="bg-[rgba(255,255,255,0.24)] rounded-[8px] px-[10px] py-[5px] flex-1 flex items-center justify-between gap-2">
             <span className="font-sans text-[11px] text-white/80">Pending</span>
-            <span className="font-sans font-bold text-[13px] text-white">{pendingValue}</span>
+            <span className="font-sans font-semibold text-[13px] text-white">{pendingValue}</span>
           </div>
         </div>
       </div>
@@ -171,7 +171,7 @@ function DigitalHealthCard({
           {pct}
         </span>
       </div>
-      <span className="font-sans font-bold text-[28px] text-[#232f50]">
+      <span className="font-sans font-semibold text-[28px] text-[#232f50]">
         {value.toLocaleString()}
       </span>
     </div>
@@ -341,7 +341,7 @@ export function CivilRegistrationModule({
                       {kpi.label}
                     </span>
                   </div>
-                  <span className="font-sans font-bold text-[28px] text-[#232f50]">
+                  <span className="font-sans font-semibold text-[28px] text-[#232f50]">
                     {kpi.value.toLocaleString()}
                   </span>
                 </div>

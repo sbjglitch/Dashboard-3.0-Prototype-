@@ -40,11 +40,11 @@ function FinanceCard({ label, value, rate, rateLabel, color, icon }: FinanceCard
       <div className="relative flex flex-col h-full p-[24px] justify-between z-10">
         <div className="flex items-center gap-[8px]">
           <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center">{icon}</div>
-          <span className="font-sans font-bold text-[16px] text-white leading-tight">{label}</span>
+          <span className="font-sans font-semibold text-[16px] text-white leading-tight">{label}</span>
         </div>
 
         <div className="flex items-end justify-between mt-[16px]">
-          <span className="font-sans font-bold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">{value}</span>
+          <span className="font-sans font-semibold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">{value}</span>
 
           {rate && (
             <div className="bg-white flex gap-[8px] items-center p-[8px] rounded-[8px] shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
@@ -123,7 +123,7 @@ export function FinanceModule({
         <button
           type="button"
           onClick={onViewMore}
-          className="bg-white border border-[#dedede] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#dedede,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
+          className="bg-white border border-[#e8eff4] flex items-center gap-[10px] pl-[16px] pr-[8px] py-[10px] rounded-[8px] shadow-[0px_1px_0px_0px_#e8eff4,0px_4px_3.8px_0px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-colors"
         >
           <span className="font-sans font-semibold text-[14px] text-[#323232]">View More Details</span>
           <div className="size-[16px]">
