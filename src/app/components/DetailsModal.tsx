@@ -526,26 +526,26 @@ export function DetailsModal({
                 <ExportButton variant="dark" onClick={() => console.log("Exporting...")} className="!h-10 !py-0" />
               </div>
               <div className="min-h-0 flex-1 overflow-auto bg-white px-4 py-6 md:px-8 md:py-8">
-                <div className="overflow-hidden rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
+                <div className="overflow-hidden rounded-lg border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
                   <table className="w-full border-collapse text-sm">
                     <thead className="sticky top-0 z-10 border-y border-gray-200">
                       <tr className="border-b border-gray-200">
-                        <th className="sticky left-0 z-20 min-w-[200px] border-r border-gray-200 bg-[#f9fafb] py-3 pl-8 pr-4 text-left text-xs font-bold text-[#6a7282f7]">
+                        <th className="sticky left-0 z-20 min-w-[200px] border-r border-gray-200 bg-[#f9fafb] py-3 pl-8 pr-4 text-left text-xs font-semibold text-[#6a7282f7]">
                           Bank name
                         </th>
-                        <th className="min-w-[120px] border-l border-gray-200 bg-[#f1f5f9] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                        <th className="min-w-[120px] border-l border-gray-200 bg-[#f1f5f9] px-4 py-2 text-right text-[11px] font-semibold text-[#6a7282] whitespace-nowrap">
                           Total amount
                         </th>
-                        <th className="min-w-[110px] border-l border-gray-200 bg-[#f0fdf4] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                        <th className="min-w-[110px] border-l border-gray-200 bg-[#f0fdf4] px-4 py-2 text-right text-[11px] font-semibold text-[#6a7282] whitespace-nowrap">
                           Success count
                         </th>
-                        <th className="min-w-[110px] border-l border-gray-200 bg-[#fff1f2] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                        <th className="min-w-[110px] border-l border-gray-200 bg-[#fff1f2] px-4 py-2 text-right text-[11px] font-semibold text-[#6a7282] whitespace-nowrap">
                           Failure count
                         </th>
-                        <th className="min-w-[100px] border-l border-gray-200 bg-[#fffbeb] px-4 py-2 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                        <th className="min-w-[100px] border-l border-gray-200 bg-[#fffbeb] px-4 py-2 text-right text-[11px] font-semibold text-[#6a7282] whitespace-nowrap">
                           Success rate
                         </th>
-                        <th className="min-w-[100px] border-l border-gray-200 bg-[#f5f3ff] py-2 pl-4 pr-8 text-right text-[11px] font-bold text-[#6a7282] whitespace-nowrap">
+                        <th className="min-w-[100px] border-l border-gray-200 bg-[#f5f3ff] py-2 pl-4 pr-8 text-right text-[11px] font-semibold text-[#6a7282] whitespace-nowrap">
                           Failure rate
                         </th>
                       </tr>
@@ -608,17 +608,17 @@ export function DetailsModal({
 
               {/* Table */}
               <div className="overflow-auto flex-1 bg-white px-4 md:px-8 py-8">
-                <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
+                <div className="rounded-lg border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
                   <table className="w-full text-sm border-collapse">
                     <thead className="border-y border-gray-200 sticky top-0 z-10">
                       <tr className="border-b border-gray-200">
-                        <th className="text-left pl-8 pr-4 py-3 text-xs font-bold text-[#6a7282] bg-[#f9fafb] sticky left-0 z-20 border-r border-gray-200 min-w-[200px] align-middle">
+                        <th className="text-left pl-8 pr-4 py-3 text-xs font-semibold text-[#6a7282] bg-[#f9fafb] sticky left-0 z-20 border-r border-gray-200 min-w-[200px] align-middle">
                           Name
                         </th>
-                        <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f0fdf4] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Success Count</th>
-                        <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fff1f2] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Failure Count</th>
-                        <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#fffbeb] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Success Rate</th>
-                      <th className="text-right px-6 py-2 text-[11px] font-bold text-[#6a7282] bg-[#f1f5f9] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Total Amount</th>
+                        <th className="text-right px-6 py-2 text-[11px] font-semibold text-[#6a7282] bg-[#f0fdf4] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Success Count</th>
+                        <th className="text-right px-6 py-2 text-[11px] font-semibold text-[#6a7282] bg-[#fff1f2] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Failure Count</th>
+                        <th className="text-right px-6 py-2 text-[11px] font-semibold text-[#6a7282] bg-[#fffbeb] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Success Rate</th>
+                      <th className="text-right px-6 py-2 text-[11px] font-semibold text-[#6a7282] bg-[#f1f5f9] border-l border-gray-200 min-w-[120px] whitespace-nowrap">Total Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -785,7 +785,7 @@ export function DetailsModal({
                 {moduleName}{" "}
                 {subModuleName !== "Select" ? `/ ${subModuleName}` : ""}{" "}
                 {serviceName !== "Select" ? `/ ` : ""}
-                {serviceName !== "Select" ? <span className="font-bold">{serviceName}</span> : null}
+                {serviceName !== "Select" ? <span className="font-semibold">{serviceName}</span> : null}
               </p>
             </div>
             <button
@@ -812,7 +812,7 @@ export function DetailsModal({
           </div>
 
           <div className="flex items-center justify-between shrink-0 bg-white px-[24px] py-[8px] border-b border-gray-100">
-            <div className="relative h-10 w-full sm:w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">
+            <div className="relative h-10 w-full sm:w-[400px] border border-[#e8eff4] rounded-lg flex items-center px-4 bg-white">
               <input
                 type="text"
                 placeholder="Search district"
@@ -826,20 +826,20 @@ export function DetailsModal({
           </div>
 
           <div className="overflow-auto flex-1 bg-white p-[24px]">
-            <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
+            <div className="rounded-lg border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
               <table className="w-full text-sm border-collapse">
                 <thead className="border-y border-gray-200 sticky top-0 z-10">
                   <tr className="border-b border-gray-200">
-                    <th className="text-left pl-8 pr-4 py-3 text-xs bg-[#f9fafb] text-[#6a7282f7] font-bold">
+                    <th className="text-left pl-8 pr-4 py-3 text-xs bg-[#f9fafb] text-[#6a7282f7] font-semibold">
                       District
                     </th>
-                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f1f5f9] whitespace-nowrap">
+                    <th className="text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 bg-[#f1f5f9] whitespace-nowrap">
                       {ptMeta.tableDataLabels[0]} (₹)
                     </th>
-                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#f0fdf4] whitespace-nowrap">
+                    <th className="text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 bg-[#f0fdf4] whitespace-nowrap">
                       {ptMeta.tableDataLabels[1]} (₹)
                     </th>
-                    <th className="text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 bg-[#fffbeb] whitespace-nowrap">
+                    <th className="text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 bg-[#fffbeb] whitespace-nowrap">
                       {ptMeta.tableDataLabels[2]} (₹)
                     </th>
                   </tr>
@@ -891,7 +891,7 @@ export function DetailsModal({
             <h2 className="text-base font-semibold text-gray-900 leading-6">{moduleName} — {modalDetailTitle}</h2>
             <p className="text-sm font-medium text-gray-500 leading-5">
               {moduleName} {subModuleName !== "Select" ? `/ ${subModuleName}` : ""} {serviceName !== "Select" ? `/ ` : ""}
-              {serviceName !== "Select" ? <span className="font-bold">{serviceName}</span> : null}
+              {serviceName !== "Select" ? <span className="font-semibold">{serviceName}</span> : null}
             </p>
           </div>
           <button
@@ -948,7 +948,7 @@ export function DetailsModal({
           />
 
           <div className="flex items-center gap-2">
-            <div className="relative h-10 w-full sm:w-[400px] border border-[#e7e7e7] rounded-lg flex items-center px-4 bg-white">
+            <div className="relative h-10 w-full sm:w-[400px] border border-[#e8eff4] rounded-lg flex items-center px-4 bg-white">
               <input
                 type="text"
                 placeholder="Search"
@@ -964,7 +964,7 @@ export function DetailsModal({
 
         {/* Hierarchy table */}
         <div className="overflow-auto flex-1 bg-white p-[24px]">
-          <div className="rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
+          <div className="rounded-lg border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] overflow-hidden">
             <table className="w-full text-sm border-collapse">
               <thead className="border-y border-gray-200 sticky top-0 z-10">
                 <tr className="border-b border-gray-200">
@@ -975,7 +975,7 @@ export function DetailsModal({
                     ? BUILDING_FINANCE_COLS.map((col) => (
                         <th
                           key={col.id}
-                          className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                          className={`text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
                         >
                           {col.label}
                         </th>
@@ -984,7 +984,7 @@ export function DetailsModal({
                       ? MEETING_MANAGEMENT_COLS.map((col) => (
                           <th
                             key={col.id}
-                            className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                            className={`text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
                           >
                             {col.label}
                           </th>
@@ -992,7 +992,7 @@ export function DetailsModal({
                       : fileStatusColumns.map((col) => (
                           <th
                             key={col.key}
-                            className={`text-right px-4 py-2 text-[11px] font-bold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
+                            className={`text-right px-4 py-2 text-[11px] font-semibold text-[#6a7282] border-l border-gray-200 min-w-[120px] whitespace-nowrap ${col.headerClass}`}
                           >
                             {col.label}
                           </th>

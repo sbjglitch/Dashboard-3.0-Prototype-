@@ -45,7 +45,7 @@ export function FileStatusKPICard({
       </div>
       
       <div className="flex items-center gap-[16px] py-[4px]">
-        <span className="font-sans font-bold text-[30px] text-[#232f50] leading-[38px]">{value}</span>
+        <span className="font-sans font-semibold text-[30px] text-[#232f50] leading-[38px]">{value}</span>
         {percentage && (
           <div className="relative flex items-center">
             <div
@@ -57,7 +57,7 @@ export function FileStatusKPICard({
               <span className="font-sans font-semibold text-[14px] text-[#09327b] leading-[20px]">{percentage}</span>
               {!hideInfoIcon && (
                 <div className="w-[14px] h-[14px] rounded-full bg-[#09327b] flex items-center justify-center shrink-0">
-                  <span className="font-sans font-bold text-[9px] text-white leading-none">!</span>
+                  <span className="font-sans font-semibold text-[9px] text-white leading-none">!</span>
                 </div>
               )}
             </div>

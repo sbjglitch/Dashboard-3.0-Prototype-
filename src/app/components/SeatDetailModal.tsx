@@ -58,7 +58,7 @@ export function SeatDetailModal({
               <ArrowLeft size={18} strokeWidth={2.5} />
             </button>
             <div>
-              <h2 className="font-sans text-[14px] font-bold text-gray-900 leading-tight">
+              <h2 className="font-sans text-[14px] font-semibold text-gray-900 leading-tight">
                 {moduleName} {kpiLabel}
               </h2>
               {/* Breadcrumb */}
@@ -108,7 +108,7 @@ export function SeatDetailModal({
                 className={`flex-1 border border-gray-100 rounded-2xl p-4 flex flex-col gap-1.5 ${stat.bgColor} transition-all hover:shadow-sm`}
               >
                 <p className="font-sans text-[14px] font-medium text-gray-500">{stat.label}</p>
-                <p className={`font-sans text-[14px] font-bold leading-tight ${stat.color}`}>{stat.value}</p>
+                <p className={`font-sans text-[14px] font-semibold leading-tight ${stat.color}`}>{stat.value}</p>
               </div>
             ))}
           </div>
@@ -133,7 +133,7 @@ export function SeatDetailModal({
 
         {/* File table */}
         <div className="custom-scrollbar flex-1 overflow-auto px-4 pb-2 md:px-8">
-          <div className="overflow-hidden rounded-lg border border-[#E8EFF4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
+          <div className="overflow-hidden rounded-lg border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10 border-y border-gray-200">
                 {isMeetingManagement && (

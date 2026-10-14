@@ -328,7 +328,7 @@ function PieBlock({
           <span className="font-sans text-[14px] font-semibold text-[#232f50]">
             {item.label}
           </span>
-          <span className="font-sans text-[14px] font-bold text-[#0c3080]">{item.value}%</span>
+          <span className="font-sans text-[14px] font-semibold text-[#0c3080]">{item.value}%</span>
         </div>
       ))}
     </div>
@@ -363,7 +363,7 @@ function CombinedEnterprisePie() {
   return (
     <div className="flex flex-row flex-wrap gap-[16px]">
       <div className="flex-1 min-w-[220px] rounded-[12px] border border-[#e8eff4] bg-[#f6f9fb]/60 p-[16px]">
-        <h4 className="mb-[12px] font-sans text-[14px] font-bold uppercase tracking-wide text-[#5c6e93]">
+        <h4 className="mb-[12px] font-sans text-[14px] font-semibold uppercase tracking-wide text-[#5c6e93]">
           Overall license status
         </h4>
         <PieBlock data={ENTERPRISE_OVERALL} size={240} legendBelow />
@@ -409,7 +409,7 @@ export function BusinessFacilitationGraphs({
 
   const renderHeader = (title: string, desc: string) => (
     <div className="mb-[16px] flex flex-col gap-[6px]">
-      <div className="flex flex-wrap items-center gap-[8px] text-[16px] font-bold leading-[24px] text-[#232f50]">
+      <div className="flex flex-wrap items-center gap-[8px] text-[16px] font-semibold leading-[24px] text-[#232f50]">
         {GRAPH_BREADCRUMB[active].map((part, idx, arr) => (
           <React.Fragment key={`${part}-${idx}`}>
             <span
@@ -594,7 +594,7 @@ export function BusinessFacilitationGraphs({
               />
             </svg>
           </div>
-          <span className="font-sans text-[16px] font-bold text-[#232f50]">Graphs</span>
+          <span className="font-sans text-[16px] font-semibold text-[#232f50]">Graphs</span>
         </div>
 
         <div className="flex flex-col gap-[6px] overflow-y-auto pr-[2px]">

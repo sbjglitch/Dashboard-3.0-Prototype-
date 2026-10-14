@@ -48,7 +48,7 @@ export function ExportButton({ className = "", variant = "light", onClick }: Exp
           </g>
         </svg>
       </div>
-      <p className={`font-sans font-bold leading-[normal] relative shrink-0 text-[16px] ${textColor} whitespace-nowrap`}>
+      <p className={`font-sans font-semibold leading-[normal] relative shrink-0 text-[16px] ${textColor} whitespace-nowrap`}>
         Export
       </p>
     </button>

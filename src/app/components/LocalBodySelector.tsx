@@ -163,7 +163,7 @@ export function LocalBodySelector({
 
         {/* Global Search Results Dropdown */}
         {isSearching && searchQuery && (
-           <div className="absolute top-[56px] left-4 right-4 bg-white border border-[#e7eff5] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-50">
+           <div className="absolute top-[56px] left-4 right-4 bg-white border border-[#e8eff4] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-50">
               {searchResults.length > 0 ? searchResults.map((lsg, idx) => (
                  <div 
                    key={idx} 
@@ -199,18 +199,18 @@ export function LocalBodySelector({
               </p>
               <div className="h-[6px] w-[12px] flex items-center justify-center">
                 <svg className="block w-[12px] h-[6px]" fill="none" viewBox="0 0 12 6">
-                  <path d={svgPaths.p2b080f00} stroke="#D5D7DA" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+                  <path d={svgPaths.p2b080f00} stroke="#5c6e93" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
                 </svg>
               </div>
             </div>
             {/* Label */}
             <div className="absolute top-0 left-[18px] -translate-y-1/2 bg-white px-[5px] flex items-center gap-[4px] z-10 pointer-events-none h-[24px]">
               <span className="text-[14px] text-[#153171] font-sans">State/District</span>
-              <span className="text-[#e83a7a] font-medium font-['Inter',sans-serif] text-[16px]">*</span>
+              <span className="text-[#e83a7a] font-medium font-sans text-[16px]">*</span>
             </div>
             
             {districtOpen && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-[#e7eff5] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-40">
+              <div className="absolute top-full mt-1 w-full bg-white border border-[#e8eff4] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-40">
                 <div 
                   className="px-[16px] py-[10px] hover:bg-[#f6f9fb] cursor-pointer text-[#232f50] font-sans text-[14px]"
                   onClick={() => { setSelectedDistrict("Kerala"); setSelectedLsg(""); setDistrictOpen(false); }}
@@ -242,18 +242,18 @@ export function LocalBodySelector({
               </p>
               <div className="h-[6px] w-[12px] flex items-center justify-center">
                 <svg className="block w-[12px] h-[6px]" fill="none" viewBox="0 0 12 6">
-                  <path d={svgPaths.p2b080f00} stroke="#D5D7DA" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+                  <path d={svgPaths.p2b080f00} stroke="#5c6e93" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
                 </svg>
               </div>
             </div>
             {/* Label */}
             <div className="absolute top-0 left-[18px] -translate-y-1/2 bg-white px-[5px] flex items-center gap-[4px] z-10 pointer-events-none h-[24px]">
               <span className="text-[14px] text-[#153171] font-sans">LSG Type</span>
-              <span className="text-[#e83a7a] font-medium font-['Inter',sans-serif] text-[16px]">*</span>
+              <span className="text-[#e83a7a] font-medium font-sans text-[16px]">*</span>
             </div>
 
             {typeOpen && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-[#e7eff5] rounded-[8px] shadow-lg max-h-[300px] z-50 flex flex-col overflow-hidden">
+              <div className="absolute top-full mt-1 w-full bg-white border border-[#e8eff4] rounded-[8px] shadow-lg max-h-[300px] z-50 flex flex-col overflow-hidden">
                 <div className="overflow-y-auto py-2">
                   {currentLsgTypes.map(type => (
                     <label key={type} className="flex items-center gap-[16px] px-[16px] py-[8px] hover:bg-[#f6f9fb] cursor-pointer">
@@ -267,7 +267,7 @@ export function LocalBodySelector({
                     </label>
                   ))}
                 </div>
-                <div className="p-[12px] border-t border-[#e7eff5] flex justify-end bg-gray-50 rounded-b-[8px]">
+                <div className="p-[12px] border-t border-[#e8eff4] flex justify-end bg-gray-50 rounded-b-[8px]">
                   <button 
                     onClick={(e) => { e.stopPropagation(); setTypeOpen(false); }}
                     className="px-[20px] py-[8px] bg-[#e83a7a] rounded-full font-sans font-semibold text-[13px] text-white hover:bg-[#d62d69] transition-colors shadow-sm"
@@ -291,18 +291,18 @@ export function LocalBodySelector({
               </p>
               <div className="h-[6px] w-[12px] flex items-center justify-center">
                 <svg className="block w-[12px] h-[6px]" fill="none" viewBox="0 0 12 6">
-                  <path d={svgPaths.p2b080f00} stroke="#D5D7DA" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+                  <path d={svgPaths.p2b080f00} stroke="#5c6e93" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
                 </svg>
               </div>
             </div>
             {/* Label */}
             <div className="absolute top-0 left-[18px] -translate-y-1/2 bg-white px-[5px] flex items-center gap-[4px] z-10 pointer-events-none h-[24px]">
               <span className="text-[14px] text-[#153171] font-sans">LSG Name</span>
-              <span className="text-[#e83a7a] font-medium font-['Inter',sans-serif] text-[16px]">*</span>
+              <span className="text-[#e83a7a] font-medium font-sans text-[16px]">*</span>
             </div>
             
             {lsgOpen && filteredLSGs.length > 0 && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-[#e7eff5] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-20">
+              <div className="absolute top-full mt-1 w-full bg-white border border-[#e8eff4] rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto z-20">
                 {filteredLSGs.map(lsg => (
                   <div 
                     key={lsg.name} 
@@ -318,7 +318,7 @@ export function LocalBodySelector({
         </div>
 
         {/* Divider */}
-        <div className="w-full h-px bg-[#e7eff5]" />
+        <div className="w-full h-px bg-[#e8eff4]" />
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between w-full">

@@ -45,7 +45,7 @@ export function FilterDropdown({ label, value, options, onSelect, disabled, mute
             {value}
           </p>
           <div className="shrink-0">
-            <ChevronDown className={`w-4 h-4 text-[#D5D7DA] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#5c6e93] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </div>
         </div>
 

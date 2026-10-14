@@ -31,7 +31,7 @@ export function BuildingFinanceOverview({ onViewMore }: { onViewMore: () => void
     <div className="flex flex-col w-full">
       {/* Header Area */}
       <div className="flex justify-between items-center mb-[16px]">
-        <h3 className="text-base font-bold text-[#111827] font-sans">Financial Overview</h3>
+        <h3 className="text-base font-semibold text-[#111827] font-sans">Financial Overview</h3>
         <button 
           onClick={onViewMore}
           className="text-sm text-[#2563EB] font-medium hover:underline bg-transparent px-2 py-1 rounded transition-all"

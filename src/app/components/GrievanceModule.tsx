@@ -139,7 +139,7 @@ function DigitalHealthCard({ label, value, color }: { label: string; value: numb
           <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full">{pct}</span>
         )}
       </div>
-      <span className="font-sans font-bold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
+      <span className="font-sans font-semibold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
     </div>
   );
 }
@@ -271,7 +271,7 @@ export function GrievanceModule({
                 <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
               </svg>
             </div>
-            <span className="font-sans font-bold text-[16px] text-[#232f50]">Graphs</span>
+            <span className="font-sans font-semibold text-[16px] text-[#232f50]">Graphs</span>
           </div>
 
           <div className="flex flex-col gap-[8px] w-full">
@@ -301,7 +301,7 @@ export function GrievanceModule({
           {/* Header row */}
           <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
             <div className="flex flex-col gap-[8px]">
-              <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+              <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
                 {activeGraph === "disposal"
                   ? "Performance based on the disposal of file"
                   : "Number of files based on mode of submission"}

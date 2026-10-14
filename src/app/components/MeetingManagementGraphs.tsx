@@ -189,7 +189,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
       <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
         <div className="flex flex-col gap-[8px]">
           <div className="flex items-center gap-[16px]">
-            <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+            <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
               {title}
             </h3>
             <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
@@ -221,7 +221,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
                 style={{ backgroundColor: item.color }}
               />
               <span className="font-sans font-semibold text-[14px] text-[#232f50] w-[200px] truncate">{item.label}</span>
-              <span className="font-sans font-bold text-[14px] text-[#0c3080]">{item.value}%</span>
+              <span className="font-sans font-semibold text-[14px] text-[#0c3080]">{item.value}%</span>
             </div>
           ))}
         </div>
@@ -233,7 +233,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
     <div className="flex flex-col w-full">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
         <div className="flex flex-col gap-[8px]">
-          <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+          <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
             District / local body wise total meetings
           </h3>
           <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
@@ -314,7 +314,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
       <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[24px]">
         <div className="flex flex-col gap-[8px]">
           <div className="flex flex-wrap items-center gap-[12px]">
-            <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+            <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
               Monthly meeting trend
             </h3>
             <div className="border border-[#c0c7cd] bg-[#f2f6ff] text-[#323232] font-semibold text-[14px] px-[12px] py-[4px] rounded-[4px]">
@@ -342,7 +342,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
     <div className="flex flex-col w-full">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
         <div className="flex flex-col gap-[8px]">
-          <h3 className="font-sans font-bold text-[16px] text-[#232f50] leading-[24px]">
+          <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
             Minutes approval rate by district
           </h3>
           <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
@@ -370,13 +370,13 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
         return renderPieChart(
           "Meeting status breakdown",
           "Overall distribution of meeting statuses — approved, held, cancelled, and pending.",
-          MEETING_STATUS_PIE
+          MEETING_STATUS
         );
       case 1:
         return renderPieChart(
           "Meeting type distribution",
           "Split of meetings by type — ordinary, urgent, and special across all local bodies.",
-          MEETING_TYPE_PIE
+          MEETING_TYPE
         );
       case 2:
         return renderDistrictBar();
@@ -400,7 +400,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
               <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
             </svg>
           </div>
-          <span className="font-sans font-bold text-[16px] text-[#232f50]">Meeting Statistics</span>
+          <span className="font-sans font-semibold text-[16px] text-[#232f50]">Meeting Statistics</span>
         </div>
 
         <div className="flex flex-col gap-[8px] w-full">

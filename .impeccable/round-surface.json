@@ -1,0 +1,89 @@
+{
+  "title": "Choose the V2 structure",
+  "question": "The K-SMART visual world is settled and pinned, so this choice is composition only: how the dashboard organises itself. The roll dealt three structures. Lock one, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "scope-canvas",
+      "label": "Scope Bar + Canvas",
+      "kicker": "THE ROLL",
+      "lineage": "the scope line officials already speak: Kollam, building permission, delayed",
+      "thesis": "The five cascading dropdowns collapse into one scope line, and everything below the line is the answer to it.",
+      "palette": ["#09327b", "#232f50", "#e83a7a", "#00b2eb", "#f2f6ff"],
+      "materials": ["token chips", "hairline cards", "tabular figures"],
+      "viewport": "A single scope bar carries the current question as removable tokens (Kerala · All modules · Upto today). The navy hero and the context strip are both gone; the four file-status figures sit immediately under the bar at full scale, with the SLI breach chart below them. Adding a filter adds a token; removing one removes a token.",
+      "risk": "Officials used to five labelled dropdowns may not realise the bar is where filtering now lives.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "K-SMART header", "x": 0, "y": 0, "w": 12, "h": 1 },
+          { "label": "scope bar — removable tokens", "x": 0, "y": 1, "w": 12, "h": 1, "accent": true },
+          { "label": "Total", "x": 0, "y": 2, "w": 3, "h": 2 },
+          { "label": "Disposed", "x": 3, "y": 2, "w": 3, "h": 2 },
+          { "label": "Under process", "x": 6, "y": 2, "w": 3, "h": 2 },
+          { "label": "Delayed", "x": 9, "y": 2, "w": 3, "h": 2 },
+          { "label": "SLI breach by local body", "x": 0, "y": 4, "w": 8, "h": 6 },
+          { "label": "worst performers", "x": 8, "y": 4, "w": 4, "h": 6 }
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/scope-canvas.png"
+    },
+    {
+      "id": "module-board",
+      "label": "Module Board",
+      "lineage": "the departmental wall board a secretary scans each morning",
+      "thesis": "Every module gets an equal tile, so the whole local body's health reads in one screen before anyone filters anything.",
+      "palette": ["#09327b", "#232f50", "#e83a7a", "#00b2eb", "#f2f6ff"],
+      "materials": ["equal tiles", "sparklines", "breach badges"],
+      "viewport": "A compact context row, then a grid of module tiles — Civil Registration, Building Permission, Property Tax, Finance, Meeting Management, Grievance, Business Facilitation — each showing its delayed count, its disposal rate and a short trend. Selecting a tile expands it in place into the full KPI and chart set, rather than navigating away.",
+      "risk": "Equal weighting treats a healthy module and a burning one the same until you read the numbers.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "K-SMART header", "x": 0, "y": 0, "w": 12, "h": 1 },
+          { "label": "context row", "x": 0, "y": 1, "w": 12, "h": 1 },
+          { "label": "Civil Reg.", "x": 0, "y": 2, "w": 3, "h": 2 },
+          { "label": "Building Permission", "x": 3, "y": 2, "w": 3, "h": 2, "accent": true },
+          { "label": "Property Tax", "x": 6, "y": 2, "w": 3, "h": 2 },
+          { "label": "Finance", "x": 9, "y": 2, "w": 3, "h": 2 },
+          { "label": "Meetings", "x": 0, "y": 4, "w": 3, "h": 2 },
+          { "label": "Grievance", "x": 3, "y": 4, "w": 3, "h": 2 },
+          { "label": "Business Fac.", "x": 6, "y": 4, "w": 3, "h": 2 },
+          { "label": "All modules", "x": 9, "y": 4, "w": 3, "h": 2 },
+          { "label": "selected tile expands in place", "x": 0, "y": 6, "w": 12, "h": 4, "accent": true }
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/module-board.png"
+    },
+    {
+      "id": "status-ledger",
+      "label": "Status Ledger",
+      "lineage": "the file register every local body office already keeps",
+      "thesis": "One ledger where every local body is a row and its file status is a proportional bar, so comparison needs no chart at all.",
+      "palette": ["#09327b", "#232f50", "#e83a7a", "#00b2eb", "#f2f6ff"],
+      "materials": ["proportional status bars", "ruled rows", "tabular figures"],
+      "viewport": "The four state figures sit in the ledger's own header as the Kerala-wide total, then every local body follows as a row carrying a single proportional bar split into disposed, under process and delayed. Rows sort by breach rate by default, so the worst performer is the first thing read. Sorting is the navigation; there is no separate chart.",
+      "risk": "A dense ledger is powerful on a desk monitor and demands real work to hold up on a phone.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "K-SMART header", "x": 0, "y": 0, "w": 12, "h": 1 },
+          { "label": "scope + sort", "x": 0, "y": 1, "w": 12, "h": 1 },
+          { "label": "Kerala total — proportional status bar", "x": 0, "y": 2, "w": 12, "h": 2, "accent": true },
+          { "label": "Thiruvananthapuram", "x": 0, "y": 4, "w": 12, "h": 1 },
+          { "label": "Ernakulam", "x": 0, "y": 5, "w": 12, "h": 1 },
+          { "label": "Kollam", "x": 0, "y": 6, "w": 12, "h": 1 },
+          { "label": "Thrissur", "x": 0, "y": 7, "w": 12, "h": 1 },
+          { "label": "Kozhikode", "x": 0, "y": 8, "w": 12, "h": 1 },
+          { "label": "Alappuzha", "x": 0, "y": 9, "w": 12, "h": 1 }
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/status-ledger.png"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": true },
+  "steer": true
+}

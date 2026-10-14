@@ -1,0 +1,45 @@
+/* Browser-drawn surfaces themed from the K-SMART palette.
+   Selection, caret, scrollbars and the focus-ring fallback otherwise ship as
+   OS defaults that belong to no design system. */
+
+::selection {
+  background: #09327b;
+  color: #ffffff;
+}
+
+html {
+  caret-color: #09327b;
+}
+
+/* Zero-specificity safety net: any component that declares its own
+   focus-visible treatment still wins. */
+:where(a, button, [role="button"], [role="tab"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #09327b;
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #adbfd9 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #adbfd9;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #7e9ac4;
+  background-clip: content-box;
+}
