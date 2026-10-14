@@ -12,6 +12,46 @@
 :root {
   --resize-dur: 300ms;
   --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Stronger than the built-in easings, which are too weak to read as intentional. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/*
+  Press feedback. Deliberately NOT gated behind `hover: hover` — press response
+  matters most on touch, where there is no hover to confirm the tap landed.
+*/
+/*
+  Longhand, not the `transition` shorthand: the shorthand resets
+  transition-property and would silently kill the colour transitions these
+  elements also carry, leaving hover states snapping.
+*/
+.press,
+.press-subtle {
+  transition-property: transform, color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+}
+
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Wide, short controls look detached from their container when scaled. */
+.press-subtle:active {
+  transform: scale(0.995);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press,
+  .press-subtle {
+    transition-property: color, background-color, border-color, opacity;
+  }
+  .press:active,
+  .press-subtle:active {
+    transform: none;
+  }
 }
 
 .t-resize {

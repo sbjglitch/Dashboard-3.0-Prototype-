@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { DashboardPieChart } from "./charts/DashboardPieChart";
-import { DashboardTabs } from "./DashboardTabs";
+import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import svgPaths from "../../imports/svg-4i5smnjigf";
 import {
   CHART_PALETTE,
@@ -19,6 +19,8 @@ function formatCount(n: number) {
   return n.toLocaleString("en-IN");
 }
 
+import { KpiCardV3 } from "../v3/KpiCardV3";
+
 interface FinanceCardProps {
   label: string;
   value: string;
@@ -30,31 +32,15 @@ interface FinanceCardProps {
 
 function FinanceCard({ label, value, rate, rateLabel, color, icon }: FinanceCardProps) {
   return (
-    <div className={`flex-[1_0_0] min-h-[160px] min-w-0 sm:min-w-[300px] relative rounded-[12px] overflow-hidden ${color} shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]`}>
-      <div className="-translate-x-1/2 absolute flex h-[476.999px] items-center justify-center left-[calc(50%+68.64px)] top-[-18.34px] w-[554.721px] pointer-events-none">
-        <div className="flex-none rotate-[-32.81deg]">
-          <div className="bg-white h-[243.037px] opacity-5 w-[503.326px]" />
-        </div>
-      </div>
-
-      <div className="relative flex flex-col h-full p-[24px] justify-between z-10">
-        <div className="flex items-center gap-[8px]">
-          <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center">{icon}</div>
-          <span className="font-sans font-semibold text-[16px] text-white leading-tight">{label}</span>
-        </div>
-
-        <div className="flex items-end justify-between mt-[16px]">
-          <span className="font-sans font-semibold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">{value}</span>
-
-          {rate && (
-            <div className="bg-white flex gap-[8px] items-center p-[8px] rounded-[8px] shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
-              <span className="font-sans text-[12px] text-[#5c6e93] leading-none">{rateLabel}</span>
-              <span className={`font-sans font-extrabold text-[16px] leading-none ${color.replace("bg-", "text-")}`}>{rate}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <KpiCardV3
+      label={label}
+      value={value}
+      prefix={label === "Total Amount" ? "₹" : undefined}
+      badge={rate ? `${rateLabel ? `${rateLabel}: ` : ""}${rate}` : undefined}
+      color={color}
+      icon={icon}
+      className="flex-1 min-w-0 sm:min-w-[260px]"
+    />
   );
 }
 
@@ -86,7 +72,7 @@ export function FinanceModule({
     <div className="flex flex-col gap-[24px]">
       <div className="flex items-center justify-between w-full">
         {!hideTabs && (
-          <DashboardTabs
+          <KpiTabsV3
             tabs={[
               {
                 id: "ePayment",

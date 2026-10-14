@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FileStatusKPICard } from "./FileStatusKPICard";
-import { DashboardTabs } from "./DashboardTabs";
+import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import { DetailsModal } from "./DetailsModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
-// ─── Module KPI Card (Birth / Death / Marriage) ───────────────────────────────
+import { KpiCardV3 } from "../v3/KpiCardV3";
 
 interface ModuleKpiCardProps {
   label: string;
@@ -41,7 +41,7 @@ interface ModuleKpiCardProps {
   pendingValue: string;
   rate: string;
   bgClass: string;
-  dotColor: string;
+  dotColor?: string;
   icon: React.ReactNode;
 }
 
@@ -52,51 +52,20 @@ function ModuleKpiCard({
   pendingValue,
   rate,
   bgClass,
-  dotColor,
   icon,
 }: ModuleKpiCardProps) {
   return (
-    <div className={`flex-[1_0_0] min-h-[160px] min-w-0 sm:min-w-[240px] relative rounded-[12px] overflow-hidden ${bgClass} shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]`}>
-      {/* Diagonal shimmer */}
-      <div className="-translate-x-1/2 absolute flex h-[476.999px] items-center justify-center left-[calc(50%+68.64px)] top-[-18.34px] w-[554.721px] pointer-events-none">
-        <div className="flex-none rotate-[-32.81deg]">
-          <div className="bg-white h-[243.037px] opacity-5 w-[503.326px]" />
-        </div>
-      </div>
-
-      <div className="relative flex flex-col h-full p-[24px] gap-[12px] z-10">
-        {/* Header */}
-        <div className="flex items-center gap-[8px]">
-          <div className="bg-[rgba(255,255,255,0.32)] p-[8px] rounded-full flex items-center justify-center shrink-0">
-            {icon}
-          </div>
-          <span className="font-sans font-semibold text-[16px] text-white leading-tight">{label}</span>
-        </div>
-
-        {/* Big number + rate badge */}
-        <div className="flex items-end justify-between">
-          <span className="font-sans font-semibold text-[32px] text-white tracking-[1.28px] drop-shadow-[0px_4px_6px_rgba(0,0,0,0.08)] leading-tight">
-            {value}
-          </span>
-          <div className="bg-white flex gap-[8px] items-center p-[8px] rounded-[8px] shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
-            <span className="font-sans text-[12px] text-[#5c6e93] leading-none">Rate</span>
-            <span className={`font-sans font-extrabold text-[14px] leading-none ${dotColor}`}>{rate}</span>
-          </div>
-        </div>
-
-        {/* Sub stats */}
-        <div className="flex items-center gap-[8px] mt-[4px]">
-          <div className="bg-[rgba(255,255,255,0.24)] rounded-[8px] px-[10px] py-[5px] flex-1 flex items-center justify-between gap-2">
-            <span className="font-sans text-[11px] text-white/80">Approved</span>
-            <span className="font-sans font-semibold text-[13px] text-white">{approvedValue}</span>
-          </div>
-          <div className="bg-[rgba(255,255,255,0.24)] rounded-[8px] px-[10px] py-[5px] flex-1 flex items-center justify-between gap-2">
-            <span className="font-sans text-[11px] text-white/80">Pending</span>
-            <span className="font-sans font-semibold text-[13px] text-white">{pendingValue}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <KpiCardV3
+      label={label}
+      value={value}
+      icon={icon}
+      color={bgClass}
+      badge={`Rate: ${rate}`}
+      metrics={[
+        { label: "Approved", value: approvedValue },
+        { label: "Pending", value: pendingValue },
+      ]}
+    />
   );
 }
 
@@ -155,26 +124,16 @@ function DigitalHealthCard({
   label,
   value,
   color,
-  tooltip,
   total,
 }: DigitalHealthKpi & { total: number }) {
   const pct = ((value / total) * 100).toFixed(1) + "%";
   return (
-    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-[8px] min-w-0">
-          <div className={`${color} w-[10px] h-[10px] rounded-sm shrink-0`} />
-          <span className="font-sans font-semibold text-[13px] text-[#5c6e93] truncate">{label}</span>
-          {tooltip && <InfoTooltip text={tooltip} />}
-        </div>
-        <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">
-          {pct}
-        </span>
-      </div>
-      <span className="font-sans font-semibold text-[28px] text-[#232f50]">
-        {value.toLocaleString()}
-      </span>
-    </div>
+    <KpiCardV3
+      label={label}
+      value={value}
+      color={color}
+      badge={pct}
+    />
   );
 }
 
@@ -263,8 +222,7 @@ export function CivilRegistrationModule({
   return (
     <div className="flex flex-col gap-4 md:gap-[24px]">
       {/* Tab bar */}
-      {/* Tab bar */}
-      <DashboardTabs
+      <KpiTabsV3
         tabs={tabs}
         activeTabId={activeTab}
         onChange={(id) => setActiveTab(id as TabId)}
@@ -331,20 +289,12 @@ export function CivilRegistrationModule({
                 { label: "Transgender Birth", value: 120, color: "bg-[#df3a7a]" },
                 { label: "Unidentified Births", value: 60, color: "bg-[#f59e0b]" },
               ].map((kpi) => (
-                <div
+                <KpiCardV3
                   key={kpi.label}
-                  className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]"
-                >
-                  <div className="flex items-center gap-[10px] min-w-0">
-                    <div className={`${kpi.color} w-[10px] h-[10px] rounded-sm shrink-0`} />
-                    <span className="font-sans font-semibold text-[13px] text-[#5c6e93] truncate">
-                      {kpi.label}
-                    </span>
-                  </div>
-                  <span className="font-sans font-semibold text-[28px] text-[#232f50]">
-                    {kpi.value.toLocaleString()}
-                  </span>
-                </div>
+                  label={kpi.label}
+                  value={kpi.value}
+                  color={kpi.color}
+                />
               ))}
             </div>
           ) : (

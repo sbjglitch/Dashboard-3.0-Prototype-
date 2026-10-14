@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
+import { GraphPanelV3 } from "../v3/GraphPanelV3";
 import { ChevronDown, ChevronRight, ChevronDown as ExpandIcon, ChevronRight as CollapseIcon } from "lucide-react";
-import { DashboardTabs } from "./DashboardTabs";
+import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import { DashboardBarChart } from "./charts/DashboardBarChart";
 import { DashboardPieChart } from "./charts/DashboardPieChart";
 import { CHART_PALETTE } from "../constants/chartStyles";
@@ -444,7 +445,7 @@ export function BusinessFacilitationGraphs({
       )}
 
       <div className="mb-[16px] flex flex-wrap items-center justify-between gap-[12px]">
-        <DashboardTabs
+        <KpiTabsV3
           size="sm"
           tabs={[
             { id: "District", label: "District" },
@@ -578,44 +579,27 @@ export function BusinessFacilitationGraphs({
   };
 
   return (
-    <div className="flex w-full shrink-0 flex-col gap-[16px] rounded-[16px] border border-[#e8eff4] bg-[#f6f9fb] p-[16px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] lg:flex-row">
-      {/* Tree view sidebar */}
-      <div className="flex w-full shrink-0 flex-col gap-[16px] lg:w-[280px]">
-        <div className="flex items-center gap-[12px]">
-          <div className="size-[32px] shrink-0">
-            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-              <path
-                d="M28 16.8678C28 19.9915 24.5796 21.9098 21.9142 20.2809L21.1235 19.7977C19.8234 19.0032 18.1848 19.0163 16.8975 19.8316L10.1402 24.1112C7.47694 25.7979 4 23.8844 4 20.7319V19.5V8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8L28 16.8678Z"
-                fill="#83DAF6"
-              />
-              <path
-                d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z"
-                fill="#00B2EB"
-              />
-            </svg>
+    <GraphPanelV3
+      sidebarWidth="lg:w-[280px]"
+      customSidebar={
+        <>
+          <div className="flex flex-col gap-[6px] overflow-y-auto pr-[2px]">
+            <div className="px-[4px] py-[6px] font-sans text-[12px] font-medium uppercase tracking-wide text-[#5c6e93] opacity-70">
+              Select Graph
+            </div>
+            <TreeView active={active} onSelect={setActive} />
           </div>
-          <span className="font-sans text-[16px] font-semibold text-[#232f50]">Graphs</span>
-        </div>
 
-        <div className="flex flex-col gap-[6px] overflow-y-auto pr-[2px]">
-          <div className="px-[4px] py-[6px] font-sans text-[12px] font-medium uppercase tracking-wide text-[#5c6e93] opacity-70">
-            Select Graph
+          <div className="mt-auto rounded-[10px] border border-dashed border-[#c8d8e8] bg-white/60 p-[12px]">
+            <p className="font-sans text-[12px] font-semibold text-[#5c6e93]">
+              <ChevronRight className="mr-1 inline h-3 w-3 -translate-y-px text-[#5c6e93]" />
+              Tip: click a category to expand its sub-graphs.
+            </p>
           </div>
-          <TreeView active={active} onSelect={setActive} />
-        </div>
-
-        <div className="mt-auto rounded-[10px] border border-dashed border-[#c8d8e8] bg-white/60 p-[12px]">
-          <p className="font-sans text-[12px] font-semibold text-[#5c6e93]">
-            <ChevronRight className="mr-1 inline h-3 w-3 -translate-y-px text-[#5c6e93]" />
-            Tip: click a category to expand its sub-graphs.
-          </p>
-        </div>
-      </div>
-
-      {/* Content panel */}
-      <div className="relative flex flex-1 flex-col overflow-auto rounded-[16px] border border-[#e8eff4] bg-white p-4 shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] md:p-[32px]">
-        {renderContent()}
-      </div>
-    </div>
+        </>
+      }
+    >
+      {renderContent()}
+    </GraphPanelV3>
   );
 }

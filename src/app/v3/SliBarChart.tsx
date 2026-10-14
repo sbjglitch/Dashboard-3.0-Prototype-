@@ -78,7 +78,7 @@ export function SliBarChart({
                       <button
                         type="button"
                         aria-label={d.name}
-                        className="absolute inset-0 flex items-end justify-center gap-[6px] rounded-[2px] opacity-100 transition-opacity group-hover:opacity-45 hover:!opacity-100 focus-visible:!opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+                        className="absolute inset-0 flex items-end justify-center gap-[6px] rounded-[2px] opacity-100 transition-opacity duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)]:group-hover:opacity-45 [@media(hover:hover)]:hover:!opacity-100 focus-visible:!opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
                       >
                         <span className="w-[16px] rounded-t-[2px]" style={{ height: `${(d.total / MAX) * 100}%`, backgroundColor: TOTAL_COLOR }} />
                         <span className="w-[16px] rounded-t-[2px]" style={{ height: `${(d.disposed / MAX) * 100}%`, backgroundColor: DISPOSED_COLOR }} />

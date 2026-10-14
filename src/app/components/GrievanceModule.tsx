@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { GraphPanelV3 } from "../v3/GraphPanelV3";
 import { ChevronDown } from "lucide-react";
 import { DashboardBarChart } from "./charts/DashboardBarChart";
 import { FileStatusKPICard } from "./FileStatusKPICard";
-import { DashboardTabs } from "./DashboardTabs";
+import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import { FilterDropdown } from "./FilterDropdown";
 import { FinanceModule } from "./FinanceModule";
 import { CHART_PALETTE } from "../constants/chartStyles";
@@ -123,24 +124,18 @@ const DIGITAL_HEALTH_KPIS = [
   { label: "CW Centre",   value: 6200,  color: "bg-[#f59e0b]" },
 ];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+import { KpiCardV3 } from "../v3/KpiCardV3";
 
 function DigitalHealthCard({ label, value, color }: { label: string; value: number; color: string }) {
   const total = DIGITAL_HEALTH_KPIS[0].value;
   const pct = label === "Total" ? null : ((value / total) * 100).toFixed(1) + "%";
   return (
-    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-[8px]">
-          <div className={`${color} w-[10px] h-[10px] rounded-sm`} />
-          <span className="font-sans font-semibold text-[15px] text-[#5c6e93]">{label}</span>
-        </div>
-        {pct && (
-          <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full">{pct}</span>
-        )}
-      </div>
-      <span className="font-sans font-semibold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
-    </div>
+    <KpiCardV3
+      label={label}
+      value={value}
+      color={color}
+      badge={pct || undefined}
+    />
   );
 }
 
@@ -212,7 +207,7 @@ export function GrievanceModule({
       <div>
 
         {/* Tab bar */}
-        <DashboardTabs
+        <KpiTabsV3
           tabs={tabs.map(t => ({ ...t, icon: tabIcons[t.id] }))}
           activeTabId={activeTab}
           onChange={(id) => setActiveTab(id as TabId)}
@@ -260,100 +255,69 @@ export function GrievanceModule({
       </div>
 
       {/* ── Graph Panel ── */}
-      <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:h-[606px] w-full shrink-0 p-[16px]">
-
-        {/* Left sidebar */}
-        <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
-          <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
-            <div className="relative shrink-0 size-[32px]">
-              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-                <path d="M28 16.8678C28 19.9915 24.5796 21.9098 21.9142 20.2809L21.1235 19.7977C19.8234 19.0032 18.1848 19.0163 16.8975 19.8316L10.1402 24.1112C7.47694 25.7979 4 23.8844 4 20.7319V19.5V8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8L28 16.8678Z" fill="#83DAF6" />
-                <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
-              </svg>
-            </div>
-            <span className="font-sans font-semibold text-[16px] text-[#232f50]">Graphs</span>
+      <GraphPanelV3
+        tabs={[
+          { id: "disposal", label: "Performance on disposal" },
+          { id: "modeOfSubmission", label: "Mode of Submission" },
+        ]}
+        activeTab={activeGraph}
+        onTabChange={(id) => setActiveGraph(id as GraphId)}
+      >
+        {/* Header row */}
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
+          <div className="flex flex-col gap-[8px]">
+            <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
+              {activeGraph === "disposal"
+                ? "Performance based on the disposal of file"
+                : "Number of files based on mode of submission"}
+            </h3>
+            <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
+              {activeGraph === "disposal"
+                ? "District-wise grievance file disposal performance"
+                : "Grievance submission channels breakdown"}
+            </p>
           </div>
-
-          <div className="flex flex-col gap-[8px] w-full">
-            <div className="flex flex-col font-sans font-medium justify-center leading-[0] opacity-70 relative shrink-0 text-[#5c6e93] text-[14px] whitespace-nowrap px-[4px] py-[8px]">
-              <p className="leading-[20px]">Select Graph</p>
+          <div className="flex flex-wrap items-center gap-[16px]">
+            <div 
+              onClick={() => setSortOrder((s) => (s === "desc" ? "asc" : "desc"))}
+              className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
+              <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortOrder === "desc" ? "Descending" : "Ascending"}</span>
+              <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
             </div>
-            {(["disposal", "modeOfSubmission"] as GraphId[]).map((gid) => (
-              <button
-                key={gid}
-                onClick={() => setActiveGraph(gid)}
-                className={`content-stretch flex items-start p-[16px] relative w-full text-left rounded-[8px] transition-colors cursor-pointer ${
-                  activeGraph === gid
-                    ? "bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]"
-                    : "hover:bg-[#e8eff4]/50 border border-transparent"
-                }`}
-              >
-                <span className={`flex-[1_0_0] font-sans font-semibold leading-[20px] min-h-px min-w-px relative text-[14px] whitespace-nowrap ${activeGraph === gid ? "text-[#232f50]" : "text-[#232f50] font-sans font-medium"}`}>
-                  {gid === "disposal" ? "Performance on disposal" : "Mode of Submission"}
-                </span>
-              </button>
-            ))}
+            <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
+              <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Show:</span>
+              <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">Top 20</span>
+              <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
+            </div>
           </div>
         </div>
 
-        {/* Graph content */}
-        <div className="bg-white flex-[1_0_0] h-full relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px]">
-          {/* Header row */}
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-[32px]">
-            <div className="flex flex-col gap-[8px]">
-              <h3 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">
-                {activeGraph === "disposal"
-                  ? "Performance based on the disposal of file"
-                  : "Number of files based on mode of submission"}
-              </h3>
-              <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
-                {activeGraph === "disposal"
-                  ? "District-wise grievance file disposal performance"
-                  : "Grievance submission channels breakdown"}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-[16px]">
-              <div 
-                onClick={() => setSortOrder((s) => (s === "desc" ? "asc" : "desc"))}
-                className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Sort By:</span>
-                <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">{sortOrder === "desc" ? "Descending" : "Ascending"}</span>
-                <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
-              </div>
-              <div className="flex items-center gap-[16px] border border-[#e8eff4] rounded-[8px] px-[16px] py-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] cursor-pointer hover:bg-gray-50 transition-colors">
-                <span className="font-sans font-medium text-[14px] text-[#5c6e93] leading-[20px]">Show:</span>
-                <span className="font-sans font-semibold text-[14px] text-[#232f50] leading-[20px]">Top 20</span>
-                <ChevronDown className="w-[16px] h-[16px] text-[#5c6e93]" />
-              </div>
-            </div>
+        {/* Legend */}
+        <div className="flex items-center gap-[24px] mb-[24px]">
+          <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
+            <span
+              className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+              style={{ backgroundColor: CHART_PALETTE[2] }}
+            />
+            <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
           </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-[24px] mb-[24px]">
-            <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
-              <span
-                className="w-[14px] h-[14px] rounded-[4px] shrink-0"
-                style={{ backgroundColor: CHART_PALETTE[2] }}
-              />
-              <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Total Files</span>
-            </div>
-            <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
-              <span
-                className="w-[14px] h-[14px] rounded-[4px] shrink-0"
-                style={{ backgroundColor: CHART_PALETTE[1] }}
-              />
-              <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
-            </div>
+          <div className="flex items-center gap-[8px] justify-center px-[12px] py-[6px]">
+            <span
+              className="w-[14px] h-[14px] rounded-[4px] shrink-0"
+              style={{ backgroundColor: CHART_PALETTE[1] }}
+            />
+            <span className="font-sans font-medium text-[14px] text-[#383c51] whitespace-nowrap">Disposed Files</span>
           </div>
-
-          {/* Chart */}
-          {activeGraph === "disposal"
-            ? <CustomChart key="disposal" data={sortedDisposalData} />
-            : <CustomChart key="submission" data={sortedSubmissionData} />
-          }
         </div>
-      </div>
+
+        {/* Chart */}
+        {activeGraph === "disposal"
+          ? <CustomChart key="disposal" data={sortedDisposalData} />
+          : <CustomChart key="submission" data={sortedSubmissionData} />
+        }
+      </GraphPanelV3>
     </div>
   );
 }
