@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import {
   Calendar, CalendarX, ChartColumn, Check, CircleAlert, CircleCheck, Database,
@@ -18,7 +18,9 @@ import { MODULE_DATA } from "./data/serviceData";
 import { HeaderV3 } from "./v3/HeaderV3";
 import { FilterRailV3, RAIL_MODULES, CUSTOM_PERIOD, type RailScope } from "./v3/FilterRailV3";
 import { KpiCardV3 } from "./v3/KpiCardV3";
+import { KpiTabsV3 } from "./v3/KpiTabsV3";
 import { SliBarChart } from "./v3/SliBarChart";
+import { DashboardSkeletonV3 } from "./v3/DashboardSkeletonV3";
 
 const PT_DIGITAL_HEALTH_KPI_MAP: Record<string, { label: string; value: number; color: string }[]> = {
   "Tax Payments": [
@@ -45,84 +47,8 @@ const PT_DIGITAL_HEALTH_KPI_MAP: Record<string, { label: string; value: number; 
 
 const PT_DIGITAL_HEALTH_SUBMODULES = Object.keys(PT_DIGITAL_HEALTH_KPI_MAP);
 
-function PtDigitalHealthCard({ label, value, color, total }: { label: string; value: number; color: string; total: number }) {
-  const pct = ((value / total) * 100).toFixed(1) + "%";
-  return (
-    <div className="bg-white border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] rounded-[12px] flex flex-col p-[20px] justify-between min-h-[100px] sm:h-[130px]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-[8px]">
-          <div className={`${color} w-[10px] h-[10px] rounded-sm shrink-0`} />
-          <span className="font-sans font-semibold text-[14px] text-[#5c6e93]">{label}</span>
-        </div>
-        <span className="bg-[#f0f4fb] text-[#09327b] text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">{pct}</span>
-      </div>
-      <span className="font-sans font-semibold text-[28px] text-[#232f50]">{value.toLocaleString()}</span>
-    </div>
-  );
-}
 
-interface PropertyTaxKpiCardProps {
-  title: string;
-  value: string;
-  arrearDemand: string;
-  currentDemand: string;
-  bgClass: string;
-  onClick?: () => void;
-}
 
-function PropertyTaxKpiCard({
-  title,
-  value,
-  arrearDemand,
-  currentDemand,
-  bgClass,
-  onClick,
-}: PropertyTaxKpiCardProps) {
-  return (
-    <div
-      className="bg-white border border-[#e8eff4] rounded-[12px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] min-h-[180px] sm:min-h-[207px] flex flex-col cursor-pointer"
-      onClick={() => onClick?.()}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick?.();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-    >
-      <div className={`${bgClass} px-[16px] py-[14px] relative flex-1 min-h-0`}>
-        <div className="pointer-events-none absolute top-[-20px] left-[54%] w-[505px] h-[243px] rotate-[-32.81deg] bg-white opacity-5" />
-        <div className="relative z-10 flex flex-col gap-[14px]">
-          <div className="flex items-center gap-[8px]">
-            <div className="w-[32px] h-[32px] rounded-[62px] bg-[rgba(255,255,255,0.32)] flex items-center justify-center">
-              <div className="w-[8px] h-[8px] bg-white rounded-full" />
-            </div>
-            <span className="font-sans font-semibold text-[16px] text-white">{title}</span>
-          </div>
-          <div className="flex items-center gap-[8px] text-white py-[2px]">
-            <span className="font-sans font-semibold text-[20px] sm:text-[24px] leading-[normal]">₹</span>
-            <span className="font-sans font-semibold text-[26px] sm:text-[34px] leading-[normal] tracking-[1.2px]">{value}</span>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch gap-[8px]">
-            <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
-              <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Arrear Demand</span>
-              <span className="font-sans font-semibold text-[13px] sm:text-[14px] text-white">₹ {arrearDemand}</span>
-            </div>
-            <div className="bg-[rgba(255,255,255,0.36)] rounded-[8px] px-[8px] py-[5px] flex-1 flex items-center justify-between gap-2">
-              <span className="font-sans text-[11px] sm:text-[12px] text-white/90">Current Demand</span>
-              <span className="font-sans font-semibold text-[13px] sm:text-[14px] text-white">₹ {currentDemand}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="w-full h-[31px] shrink-0 text-[14px] font-sans font-semibold text-[#5c6e93] hover:bg-[#f6f9fb] transition-colors border-t border-[#e8eff4] flex items-center justify-center gap-[8px]">
-        View More Details
-        <span className="text-[14px] leading-none">›</span>
-      </div>
-    </div>
-  );
-}
 
 type MainTab = "fileStatus" | "finance" | "digitalHealth";
 type KpiType = "total" | "disposed" | "inProcess" | "delayed" | "all";
@@ -177,6 +103,21 @@ export default function AppV3() {
     from: "",
     to: "",
   });
+
+  // Simulated fetch on any scope change. The timer is cleared on each change, so
+  // stepping through several filters fires one load at the end rather than one each.
+  const [isLoading, setIsLoading] = useState(false);
+  const isFirstRun = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 550);
+    return () => clearTimeout(timer);
+  }, [selectedModule, selectedSubModule, selectedService, scope]);
 
   const isPropertyTaxModule = selectedModule === "Property Tax";
   const isMeeting = selectedModule === "Meeting Management";
@@ -296,7 +237,11 @@ export default function AppV3() {
           onScopeChange={setScope}
         />
 
-        <main id="v3-main" className="flex-1 min-w-0 w-full flex flex-col gap-[16px]">
+        <main id="v3-main" aria-busy={isLoading} className="flex-1 min-w-0 w-full flex flex-col gap-[16px]">
+          <p role="status" aria-live="polite" className="sr-only">
+            {isLoading ? "Loading dashboard" : `${moduleLabel} dashboard updated`}
+          </p>
+          {isLoading ? <DashboardSkeletonV3 /> : <>
           <CardShell className="flex flex-wrap items-center justify-between gap-[12px]">
             <h1 className="font-sans font-semibold text-[24px] text-[#232f50] leading-[28px]">{moduleLabel}</h1>
             <div className="flex flex-wrap items-center gap-[16px]">
@@ -308,7 +253,7 @@ export default function AppV3() {
               {reportRoute && (
                 <Link
                   to={reportRoute}
-                  className="inline-flex items-center justify-center gap-[8px] w-[128px] h-[36px] bg-[#e83a7a] border border-[#e83a7a] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] hover:bg-[#d62d69] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+                  className="press inline-flex items-center justify-center gap-[8px] w-[128px] h-[36px] bg-[#e83a7a] border border-[#e83a7a] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white leading-[20px] [@media(hover:hover)]:hover:bg-[#d62d69] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
                 >
                   <FileText className="size-[16px]" aria-hidden="true" />
                   Report
@@ -350,35 +295,18 @@ export default function AppV3() {
                       <button
                         type="button"
                         onClick={() => openDetail("meetingManagement", "all")}
-                        className="h-[36px] px-[14px] bg-white border border-[#e8eff4] rounded-[8px] font-sans font-semibold text-[14px] text-[#232f50] hover:border-[#09327b] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+                        className="press h-[36px] px-[14px] bg-white border border-[#e8eff4] rounded-[8px] font-sans font-semibold text-[14px] text-[#232f50] [@media(hover:hover)]:hover:border-[#09327b] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
                       >
                         View More Details
                       </button>
                     )}
                   </div>
                 ) : (
-                  <div role="tablist" aria-label="Dashboard view" className="self-start flex gap-[4px] p-[4px] bg-[#f1f5f8] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]">
-                    {tabs.map((t) => {
-                      const active = activeMainTab === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          role="tab"
-                          aria-selected={active}
-                          onClick={() => setActiveMainTab(t.id)}
-                          className={`flex items-center gap-[8px] px-[16px] py-[8px] rounded-[6px] font-sans text-[14px] leading-[20px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#09327b] ${
-                            active
-                              ? "bg-white border-[0.5px] border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-semibold text-[#232f50]"
-                              : "border-[0.5px] border-transparent font-medium text-[#5c6e93] hover:text-[#232f50]"
-                          }`}
-                        >
-                          <t.Icon className={`size-[16px] ${active ? "text-[#00b2eb]" : "text-[#8292b0]"}`} aria-hidden="true" />
-                          {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <KpiTabsV3
+                    tabs={tabs}
+                    activeTabId={activeMainTab}
+                    onChange={setActiveMainTab}
+                  />
                 )}
 
                 {activeMainTab === "fileStatus" &&
@@ -407,9 +335,45 @@ export default function AppV3() {
                 {activeMainTab === "finance" &&
                   (isPropertyTaxModule ? (
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-[16px]">
-                      <PropertyTaxKpiCard title="Demand" value="51,251" arrearDemand="25,251" currentDemand="25,251" bgClass="bg-[#00a78e]" onClick={() => openDetail("propertyTaxFinance", "total")} />
-                      <PropertyTaxKpiCard title="Collection" value="25,251" arrearDemand="15,251" currentDemand="10,000" bgClass="bg-[#00b2eb]" onClick={() => openDetail("propertyTaxFinance", "disposed")} />
-                      <PropertyTaxKpiCard title="Balance" value="26,000" arrearDemand="12,000" currentDemand="14,000" bgClass="bg-[#7b61ff]" onClick={() => openDetail("propertyTaxFinance", "inProcess")} />
+                      <KpiCardV3
+                        label="Demand"
+                        value="51,251"
+                        prefix="₹"
+                        tone="#00a78e"
+                        Icon={Landmark}
+                        metrics={[
+                          { label: "Arrear Demand", value: "₹ 25,251" },
+                          { label: "Current Demand", value: "₹ 25,251" },
+                        ]}
+                        actionLabel="View More Details"
+                        onDetail={() => openDetail("propertyTaxFinance", "total")}
+                      />
+                      <KpiCardV3
+                        label="Collection"
+                        value="25,251"
+                        prefix="₹"
+                        tone="#00b2eb"
+                        Icon={Check}
+                        metrics={[
+                          { label: "Arrear Demand", value: "₹ 15,251" },
+                          { label: "Current Demand", value: "₹ 10,000" },
+                        ]}
+                        actionLabel="View More Details"
+                        onDetail={() => openDetail("propertyTaxFinance", "disposed")}
+                      />
+                      <KpiCardV3
+                        label="Balance"
+                        value="26,000"
+                        prefix="₹"
+                        tone="#7b61ff"
+                        Icon={Hourglass}
+                        metrics={[
+                          { label: "Arrear Demand", value: "₹ 12,000" },
+                          { label: "Current Demand", value: "₹ 14,000" },
+                        ]}
+                        actionLabel="View More Details"
+                        onDetail={() => openDetail("propertyTaxFinance", "inProcess")}
+                      />
                     </div>
                   ) : selectedModule === "Building Permissions" ? (
                     <BuildingFinanceOverview onViewMore={() => openDetail("buildingFinance", "all")} />
@@ -420,7 +384,13 @@ export default function AppV3() {
                 {activeMainTab === "digitalHealth" && showDigitalHealthTab && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-[16px]">
                     {digitalHealthKpis.map((kpi) => (
-                      <PtDigitalHealthCard key={kpi.label} {...kpi} total={digitalHealthTotal} />
+                      <KpiCardV3
+                        key={kpi.label}
+                        label={kpi.label}
+                        value={kpi.value}
+                        color={kpi.color}
+                        badge={((kpi.value / digitalHealthTotal) * 100).toFixed(1) + "%"}
+                      />
                     ))}
                   </div>
                 )}
@@ -438,6 +408,7 @@ export default function AppV3() {
               {isPropertyTaxModule && <CardShell><PropertyTaxGraphs selectedLocalBody={placePill} /></CardShell>}
             </>
           )}
+          </>}
         </main>
       </div>
 

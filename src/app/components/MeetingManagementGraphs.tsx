@@ -1,8 +1,9 @@
 import React, { useLayoutEffect, useRef, useState, useMemo } from "react";
+import { GraphPanelV3 } from "../v3/GraphPanelV3";
 import { ChevronDown } from "lucide-react";
 import { DashboardPieChart } from "./charts/DashboardPieChart";
 import { DashboardBarChart } from "./charts/DashboardBarChart";
-import { DashboardTabs } from "./DashboardTabs";
+import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import { CHART_CONFIG, CHART_PALETTE } from "../constants/chartStyles";
 
 function useContainerChartWidth() {
@@ -239,7 +240,7 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
           <p className="font-sans font-semibold text-[14px] text-[#5c6e93] leading-[20px]">
             Comparison of total meetings conducted across districts and local bodies.
           </p>
-          <DashboardTabs
+          <KpiTabsV3
             size="sm"
             tabs={[
               { id: "District", label: "District" },
@@ -390,50 +391,13 @@ export function MeetingManagementGraphs({ selectedLocalBody }: { selectedLocalBo
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-[16px] bg-[#f6f9fb] rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] lg:min-h-[606px] w-full shrink-0 p-[16px]">
-      {/* Left sidebar */}
-      <div className="w-full lg:w-[270px] shrink-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[16px] items-center relative shrink-0">
-          <div className="relative shrink-0 size-[32px]">
-            <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-              <path d="M28 16.8678C28 19.9915 24.5796 21.9098 21.9142 20.2809L21.1235 19.7977C19.8234 19.0032 18.1848 19.0163 16.8975 19.8316L10.1402 24.1112C7.47694 25.7979 4 23.8844 4 20.7319V19.5V8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8L28 16.8678Z" fill="#83DAF6" />
-              <path d="M4 19.5L10.5382 15.1412C12.001 14.166 13.9292 14.2603 15.2899 15.3736L16.358 16.2475C17.6468 17.3019 19.454 17.4477 20.8951 16.6134L28 12.5V24C28 26.2091 26.2091 28 24 28H8C5.79086 28 4 26.2091 4 24L4 19.5Z" fill="#00B2EB" />
-            </svg>
-          </div>
-          <span className="font-sans font-semibold text-[16px] text-[#232f50]">Meeting Statistics</span>
-        </div>
-
-        <div className="flex flex-col gap-[8px] w-full">
-          <div className="flex flex-col font-sans font-medium justify-center leading-[0] opacity-70 relative shrink-0 text-[#5c6e93] text-[14px] whitespace-nowrap px-[4px] py-[8px]">
-            <p className="leading-[20px]">Select Graph</p>
-          </div>
-          {tabs.map((tab, idx) => (
-            <button
-              type="button"
-              key={idx}
-              onClick={() => setActiveTab(idx)}
-              className={`content-stretch flex items-start p-[16px] relative w-full text-left rounded-[8px] transition-colors cursor-pointer ${
-                activeTab === idx
-                  ? "bg-white shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] border border-[#e8eff4]"
-                  : "hover:bg-[#e8eff4]/50 border border-transparent"
-              }`}
-            >
-              <span
-                className={`flex-[1_0_0] font-sans leading-[20px] min-h-px min-w-px relative text-[14px] ${
-                  activeTab === idx ? "font-semibold text-[#232f50]" : "font-medium text-[#232f50]"
-                }`}
-              >
-                {tab}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Graph content */}
-      <div className="bg-white flex-[1_0_0] relative rounded-[16px] border border-[#e8eff4] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] flex flex-col p-4 md:p-[32px] min-h-[400px] overflow-auto">
-        {renderContent()}
-      </div>
-    </div>
+    <GraphPanelV3
+      title="Meeting Statistics"
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
+      {renderContent()}
+    </GraphPanelV3>
   );
 }

@@ -132,9 +132,9 @@ export function FilterRailV3({
   return (
     <aside
       aria-label="Filters"
-      className="t-resize lg:sticky lg:top-[92px] shrink-0 flex items-start gap-[8px] p-[8px] bg-[#fafcfe] border border-[#e8eff4] rounded-[12px] shadow-[0px_4px_8px_-2px_rgba(10,13,18,0.1),0px_2px_4px_-2px_rgba(10,13,18,0.06)] self-start"
+      className="relative lg:sticky lg:top-[92px] shrink-0 flex items-stretch gap-[8px] p-[8px] bg-[#fafcfe] border border-[#e8eff4] rounded-[12px] shadow-[0px_4px_8px_-2px_rgba(10,13,18,0.1),0px_2px_4px_-2px_rgba(10,13,18,0.06)] self-start h-[calc(100vh-104px)] lg:h-[calc(100dvh-104px)] max-h-[calc(100dvh-104px)]"
     >
-      <div role="tablist" aria-label="Module" aria-orientation="vertical" className="flex flex-col w-[72px] shrink-0">
+      <div role="tablist" aria-label="Module" aria-orientation="vertical" className="flex flex-col w-[76px] shrink-0 gap-[4px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {RAIL_MODULES.map((m) => {
           const active = module === m.key;
           return (
@@ -145,14 +145,16 @@ export function FilterRailV3({
                   role="tab"
                   aria-selected={active}
                   onClick={() => onModuleChange(m.key)}
-                  className={`size-[72px] flex items-center justify-center rounded-[12px] border transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#09327b] ${
+                  className={`press w-full min-h-[72px] py-[8px] px-[4px] flex flex-col items-center justify-center gap-[4px] rounded-[12px] border transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#09327b] ${
                     active
                       ? "bg-white border-[#e8eff4] text-[#e83a7a] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]"
-                      : "border-transparent text-[#5c6e93] hover:bg-white/70"
+                      : "border-transparent text-[#5c6e93] [@media(hover:hover)]:hover:bg-white/70 [@media(hover:hover)]:hover:text-[#232f50]"
                   }`}
                 >
-                  <m.Icon className="size-[24px]" strokeWidth={1.75} aria-hidden="true" />
-                  <span className="sr-only">{m.label}</span>
+                  <m.Icon className="size-[22px] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                  <span className={`font-sans text-[10px] leading-[12px] text-center tracking-tight ${active ? "font-semibold" : "font-medium"}`}>
+                    {m.label}
+                  </span>
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8} className={TOOLTIP_CONTENT}>
@@ -163,20 +165,32 @@ export function FilterRailV3({
         })}
       </div>
 
-      {panelOpen ? (
-        <div className="w-[244px] shrink-0 bg-white border border-[#e8eff4] rounded-[12px]">
-          <div className="flex items-center justify-between h-[56px] pl-[16px] pr-[8px] border-b border-[#e8eff4]">
+      {/* Animated filter panel wrapper */}
+      <div
+        className="shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col h-full"
+        style={{
+          width: panelOpen ? 244 : 0,
+          marginLeft: panelOpen ? 0 : -8,
+          opacity: panelOpen ? 1 : 0,
+        }}
+        aria-hidden={!panelOpen}
+      >
+        <div className="w-[244px] h-full flex flex-col shrink-0 bg-white border border-[#e8eff4] rounded-[12px] min-h-0 overflow-hidden">
+          <div className="flex items-center justify-between h-[56px] shrink-0 pl-[16px] pr-[8px] border-b border-[#e8eff4]">
             <h2 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">Filter</h2>
             <button
               type="button"
               onClick={() => setPanelOpen(false)}
               aria-label="Collapse filters"
               aria-expanded={true}
-              className="size-[40px] flex items-center justify-center rounded-[8px] text-[#5c6e93] hover:bg-[#f6f9fb] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
+              tabIndex={panelOpen ? 0 : -1}
+              className="press size-[40px] flex items-center justify-center rounded-[8px] text-[#5c6e93] [@media(hover:hover)]:hover:bg-[#f6f9fb] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
             >
               <ChevronsLeft className="size-[20px]" aria-hidden="true" />
             </button>
           </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto">
 
           <div className="p-[16px] flex flex-col gap-[16px] border-b border-[#e8eff4]">
             <button
@@ -184,10 +198,11 @@ export function FilterRailV3({
               onClick={() => setModuleOpen((o) => !o)}
               aria-expanded={moduleOpen}
               aria-controls={moduleSectionId}
+              tabIndex={panelOpen ? 0 : -1}
               className={`flex items-center justify-between w-full ${sectionLabel} hover:text-[#232f50] transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]`}
             >
               MODULE
-              <ChevronDown className={`size-[16px] transition-transform ${moduleOpen ? "" : "-rotate-90"}`} aria-hidden="true" />
+              <ChevronDown className={`size-[16px] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${moduleOpen ? "" : "-rotate-90"}`} aria-hidden="true" />
             </button>
             {moduleOpen && (
               <div id={moduleSectionId} className="flex flex-col gap-[16px]">
@@ -228,8 +243,9 @@ export function FilterRailV3({
                     type="button"
                     aria-pressed={active}
                     onClick={() => set("period", p)}
-                    className={`px-[16px] py-[10px] rounded-[12px] border font-sans font-semibold text-[14px] text-[#232f50] leading-[20px] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b] ${
-                      active ? "bg-[#e5f7fd] border-[#b2e8f9]" : "bg-white border-[#e8eff4] hover:border-[#09327b]"
+                    tabIndex={panelOpen ? 0 : -1}
+                    className={`press px-[16px] py-[10px] rounded-[12px] border font-sans font-semibold text-[14px] text-[#232f50] leading-[20px] whitespace-nowrap transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b] ${
+                      active ? "bg-[#e5f7fd] border-[#b2e8f9]" : "bg-white border-[#e8eff4] [@media(hover:hover)]:hover:border-[#09327b]"
                     }`}
                   >
                     {p}
@@ -244,18 +260,23 @@ export function FilterRailV3({
               </div>
             )}
           </fieldset>
+          </div>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setPanelOpen(true)}
-          aria-label="Expand filters"
-          aria-expanded={false}
-          className="size-[40px] mt-[16px] flex items-center justify-center bg-white border border-[#e8eff4] rounded-[8px] text-[#09327b] hover:border-[#09327b] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
-        >
-          <ChevronsRight className="size-[20px]" aria-hidden="true" />
-        </button>
-      )}
+      </div>
+
+      {/* Expand button — always rendered, fades in/out opposite to panel */}
+      <button
+        type="button"
+        onClick={() => setPanelOpen(true)}
+        aria-label="Expand filters"
+        aria-expanded={false}
+        tabIndex={panelOpen ? -1 : 0}
+        className={`press absolute top-[12px] -right-[14px] z-10 size-[28px] flex items-center justify-center bg-white border border-[#e8eff4] rounded-[8px] text-[#232f50] shadow-[0px_2px_4px_-1px_rgba(10,13,18,0.12),0px_1px_2px_0px_rgba(10,13,18,0.06)] hover:border-[#09327b] hover:text-[#09327b] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b] ${
+          panelOpen ? "opacity-0 pointer-events-none scale-75" : "opacity-100 pointer-events-auto scale-100"
+        }`}
+      >
+        <ChevronsRight className="size-[16px]" aria-hidden="true" />
+      </button>
     </aside>
   );
 }

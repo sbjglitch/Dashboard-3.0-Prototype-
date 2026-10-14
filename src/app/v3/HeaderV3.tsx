@@ -28,14 +28,14 @@ export function HeaderV3() {
         <div className="flex items-center gap-[8px]">
           <button
             type="button"
-            className="inline-flex items-center gap-[10px] h-[36px] px-[16px] bg-white border border-[#e8eff4] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-[#232f50] hover:border-[#09327b] transition-colors"
+            className="press inline-flex items-center gap-[10px] h-[36px] px-[16px] bg-white border border-[#e8eff4] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-[#232f50] [@media(hover:hover)]:hover:border-[#09327b] transition-colors duration-150"
           >
             മലയാളം
             <ChevronDown className="size-[16px] text-[#232f50]" aria-hidden="true" />
           </button>
           <button
             type="button"
-            className="h-[36px] px-[32px] bg-[#e83a7a] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white hover:bg-[#d62d69] transition-colors"
+            className="press h-[36px] px-[32px] bg-[#e83a7a] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] font-sans font-semibold text-[14px] text-white [@media(hover:hover)]:hover:bg-[#d62d69] transition-colors duration-150"
           >
             Login
           </button>

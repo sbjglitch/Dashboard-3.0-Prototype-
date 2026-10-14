@@ -1,2 +1,7 @@
 node_modules
 .vercel
+.DS_Store
+.claude
+Dashboard-3.0-Prototype-
+*.md.tmp
+Tremor_Tailwind_Dashboard_Skill.md
