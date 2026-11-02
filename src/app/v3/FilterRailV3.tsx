@@ -1,7 +1,7 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   Baby, Building2, ChevronDown, ChevronsLeft, ChevronsRight, Coins,
-  Handshake, Landmark, MessageSquareWarning, PanelsTopLeft, Users,
+  Handshake, Landmark, MessageSquareWarning, PanelsTopLeft, Pin, Users,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { TOOLTIP_CONTENT } from "./tooltipStyles";
@@ -112,6 +112,8 @@ export function FilterRailV3({
   onServiceChange,
   scope,
   onScopeChange,
+  panelOpen: controlledPanelOpen,
+  onPanelOpenChange,
 }: {
   module: string;
   onModuleChange: (m: string) => void;
@@ -123,16 +125,47 @@ export function FilterRailV3({
   onServiceChange: (v: string) => void;
   scope: RailScope;
   onScopeChange: (next: RailScope) => void;
+  /** Controlled when provided, so the command palette can toggle the panel too. */
+  panelOpen?: boolean;
+  onPanelOpenChange?: (open: boolean) => void;
 }) {
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [uncontrolledPanelOpen, setUncontrolledPanelOpen] = useState(true);
+  const panelOpen = controlledPanelOpen ?? uncontrolledPanelOpen;
+  const setPanelOpen = (v: boolean) => {
+    onPanelOpenChange?.(v);
+    if (controlledPanelOpen === undefined) setUncontrolledPanelOpen(v);
+  };
   const [moduleOpen, setModuleOpen] = useState(true);
+
+  // Hover-peek: while collapsed, hovering the expand arrow floats the panel over
+  // the content instead of pushing it. Closing is delayed so the pointer can
+  // cross the gap between the arrow and the panel without the panel vanishing.
+  const [peek, setPeek] = useState(false);
+  const peekTimer = useRef<number | undefined>(undefined);
+  const canHover = () =>
+    typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
+  const openPeek = () => {
+    window.clearTimeout(peekTimer.current);
+    if (canHover() && !panelOpen) setPeek(true);
+  };
+  const closePeek = () => {
+    window.clearTimeout(peekTimer.current);
+    peekTimer.current = window.setTimeout(() => setPeek(false), 140);
+  };
+  useEffect(() => () => window.clearTimeout(peekTimer.current), []);
+  useEffect(() => {
+    if (panelOpen) setPeek(false);
+  }, [panelOpen]);
+
+  const peeking = peek && !panelOpen;
+  const panelVisible = panelOpen || peeking;
   const moduleSectionId = useId();
   const set = <K extends keyof RailScope>(k: K, v: RailScope[K]) => onScopeChange({ ...scope, [k]: v });
 
   return (
     <aside
       aria-label="Filters"
-      className="relative lg:sticky lg:top-[92px] shrink-0 flex items-stretch gap-[8px] p-[8px] bg-[#fafcfe] border border-[#e8eff4] rounded-[12px] shadow-[0px_4px_8px_-2px_rgba(10,13,18,0.1),0px_2px_4px_-2px_rgba(10,13,18,0.06)] self-start h-[calc(100vh-104px)] lg:h-[calc(100dvh-104px)] max-h-[calc(100dvh-104px)]"
+      className="relative lg:sticky lg:top-[92px] z-30 shrink-0 flex items-stretch gap-[8px] p-[8px] bg-[#fafcfe] border border-[#e8eff4] rounded-[12px] shadow-[0px_4px_8px_-2px_rgba(10,13,18,0.1),0px_2px_4px_-2px_rgba(10,13,18,0.06)] self-start h-[calc(100vh-104px)] lg:h-[calc(100dvh-104px)] max-h-[calc(100dvh-104px)]"
     >
       <div role="tablist" aria-label="Module" aria-orientation="vertical" className="flex flex-col w-[76px] shrink-0 gap-[4px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {RAIL_MODULES.map((m) => {
@@ -167,26 +200,36 @@ export function FilterRailV3({
 
       {/* Animated filter panel wrapper */}
       <div
-        className="shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col h-full"
+        onMouseEnter={peeking ? openPeek : undefined}
+        onMouseLeave={peeking ? closePeek : undefined}
+        className={`shrink-0 overflow-hidden ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col ${
+          peeking
+            ? "absolute left-[92px] top-[8px] bottom-[8px] z-20 transition-all duration-200"
+            : "h-full transition-all duration-300"
+        }`}
         style={{
-          width: panelOpen ? 244 : 0,
-          marginLeft: panelOpen ? 0 : -8,
-          opacity: panelOpen ? 1 : 0,
+          width: panelVisible ? 244 : 0,
+          marginLeft: panelVisible ? 0 : -8,
+          opacity: panelVisible ? 1 : 0,
         }}
-        aria-hidden={!panelOpen}
+        aria-hidden={!panelVisible}
       >
-        <div className="w-[244px] h-full flex flex-col shrink-0 bg-white border border-[#e8eff4] rounded-[12px] min-h-0 overflow-hidden">
+        <div className={`w-[244px] h-full flex flex-col shrink-0 bg-white border border-[#e8eff4] rounded-[12px] min-h-0 overflow-hidden ${
+          peeking ? "shadow-[0px_12px_24px_-6px_rgba(10,13,18,0.18),0px_4px_8px_-2px_rgba(10,13,18,0.08)]" : ""
+        }`}>
           <div className="flex items-center justify-between h-[56px] shrink-0 pl-[16px] pr-[8px] border-b border-[#e8eff4]">
             <h2 className="font-sans font-semibold text-[16px] text-[#232f50] leading-[24px]">Filter</h2>
             <button
               type="button"
-              onClick={() => setPanelOpen(false)}
-              aria-label="Collapse filters"
-              aria-expanded={true}
-              tabIndex={panelOpen ? 0 : -1}
+              onClick={() => (peeking ? (setPeek(false), setPanelOpen(true)) : setPanelOpen(false))}
+              aria-label={peeking ? "Keep filters open" : "Collapse filters"}
+              aria-expanded={!peeking}
+              tabIndex={panelVisible ? 0 : -1}
               className="press size-[40px] flex items-center justify-center rounded-[8px] text-[#5c6e93] [@media(hover:hover)]:hover:bg-[#f6f9fb] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]"
             >
-              <ChevronsLeft className="size-[20px]" aria-hidden="true" />
+              {peeking
+                ? <Pin className="size-[18px]" aria-hidden="true" />
+                : <ChevronsLeft className="size-[20px]" aria-hidden="true" />}
             </button>
           </div>
 
@@ -198,7 +241,7 @@ export function FilterRailV3({
               onClick={() => setModuleOpen((o) => !o)}
               aria-expanded={moduleOpen}
               aria-controls={moduleSectionId}
-              tabIndex={panelOpen ? 0 : -1}
+              tabIndex={panelVisible ? 0 : -1}
               className={`flex items-center justify-between w-full ${sectionLabel} hover:text-[#232f50] transition-colors rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b]`}
             >
               MODULE
@@ -243,7 +286,7 @@ export function FilterRailV3({
                     type="button"
                     aria-pressed={active}
                     onClick={() => set("period", p)}
-                    tabIndex={panelOpen ? 0 : -1}
+                    tabIndex={panelVisible ? 0 : -1}
                     className={`press px-[16px] py-[10px] rounded-[12px] border font-sans font-semibold text-[14px] text-[#232f50] leading-[20px] whitespace-nowrap transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#09327b] ${
                       active ? "bg-[#e5f7fd] border-[#b2e8f9]" : "bg-white border-[#e8eff4] [@media(hover:hover)]:hover:border-[#09327b]"
                     }`}
@@ -268,6 +311,8 @@ export function FilterRailV3({
       <button
         type="button"
         onClick={() => setPanelOpen(true)}
+        onMouseEnter={openPeek}
+        onMouseLeave={closePeek}
         aria-label="Expand filters"
         aria-expanded={false}
         tabIndex={panelOpen ? -1 : 0}

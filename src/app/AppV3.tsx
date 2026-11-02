@@ -21,6 +21,7 @@ import { KpiCardV3 } from "./v3/KpiCardV3";
 import { KpiTabsV3 } from "./v3/KpiTabsV3";
 import { SliBarChart } from "./v3/SliBarChart";
 import { DashboardSkeletonV3 } from "./v3/DashboardSkeletonV3";
+import { CommandPaletteV3, CommandPaletteTrigger, useCommandPalette } from "./v3/CommandPaletteV3";
 
 const PT_DIGITAL_HEALTH_KPI_MAP: Record<string, { label: string; value: number; color: string }[]> = {
   "Tax Payments": [
@@ -103,6 +104,9 @@ export default function AppV3() {
     from: "",
     to: "",
   });
+
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   // Simulated fetch on any scope change. The timer is cleared on each change, so
   // stepping through several filters fires one load at the end rather than one each.
@@ -235,6 +239,8 @@ export default function AppV3() {
           onServiceChange={setSelectedService}
           scope={scope}
           onScopeChange={setScope}
+          panelOpen={filtersOpen}
+          onPanelOpenChange={setFiltersOpen}
         />
 
         <main id="v3-main" aria-busy={isLoading} className="flex-1 min-w-0 w-full flex flex-col gap-[16px]">
@@ -245,6 +251,7 @@ export default function AppV3() {
           <CardShell className="flex flex-wrap items-center justify-between gap-[12px]">
             <h1 className="font-sans font-semibold text-[24px] text-[#232f50] leading-[28px]">{moduleLabel}</h1>
             <div className="flex flex-wrap items-center gap-[16px]">
+              <CommandPaletteTrigger onClick={() => setPaletteOpen(true)} />
               <div className="flex flex-wrap items-center gap-[8px]" aria-label="Current scope">
                 <ContextPill Icon={Calendar}>{periodPill}</ContextPill>
                 <ContextPill Icon={MapPin}>{placePill}</ContextPill>
@@ -411,6 +418,29 @@ export default function AppV3() {
           </>}
         </main>
       </div>
+
+      <CommandPaletteV3
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        actions={{
+          onModule: handleModuleChange,
+          onSubModule: (m, sub) => {
+            if (m !== selectedModule) handleModuleChange(m);
+            handleSubModuleChange(sub);
+          },
+          onService: (m, sub, svc) => {
+            setSelectedModule(m);
+            setSelectedSubModule(sub);
+            setSelectedService(svc);
+            setActiveMainTab("fileStatus");
+          },
+          onScope: (patch) => setScope((prev) => ({ ...prev, ...patch })),
+          onTab: setActiveMainTab,
+          onToggleFilters: setFiltersOpen,
+          filtersOpen,
+          availableTabs: tabs.map((t) => ({ id: t.id, label: t.label })),
+        }}
+      />
 
       <DetailsModal
         key={`${detailsModalContentMode}-${modalKpiType}`}
