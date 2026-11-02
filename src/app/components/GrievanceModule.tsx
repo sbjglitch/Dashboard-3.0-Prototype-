@@ -5,7 +5,7 @@ import { DashboardBarChart } from "./charts/DashboardBarChart";
 import { FileStatusKPICard } from "./FileStatusKPICard";
 import { KpiTabsV3 } from "../v3/KpiTabsV3";
 import { FilterDropdown } from "./FilterDropdown";
-import { FinanceModule } from "./FinanceModule";
+import { GrievanceFinanceCards } from "./GrievanceFinanceCards";
 import { CHART_PALETTE } from "../constants/chartStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -243,7 +243,7 @@ export function GrievanceModule({
 
         {/* Finance Tab */}
         {activeTab === "finance" && (
-          <FinanceModule selectedLocalBody={selectedLocalBody} onViewMore={() => onViewMore("all")} hideTabs />
+          <GrievanceFinanceCards />
         )}
 
         {/* Digital Health Tab */}
